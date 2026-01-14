@@ -171,6 +171,7 @@ if (BOT_TOKEN && WEBAPP_URL) {
     } catch (err) {
       console.error('Webhook error:', err)
       res.sendStatus(500)
+          }
         })
 } else {
     console.log('Bot not started (missing BOT_TOKEN or WEBAPP_URL). Web server only.')
