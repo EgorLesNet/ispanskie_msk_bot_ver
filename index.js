@@ -164,13 +164,17 @@ if (BOT_TOKEN && WEBAPP_URL) {
   })
 
     // Webhook endpoint for Vercel
-  app.post('/api/telegram', (req, res) => {
-    bot.handleUpdate(req.body, res)
-  })
+  app.post('/api/telegram', async (req, res) => {
+    try {
+      await bot.handleUpdate(req.body)
+      res.sendStatus(200)
+    } catch (err) {
+      console.error('Webhook error:', err)
+      res.sendStatus(500)
+        })
 } else {
-  console.log('Bot not started (missing BOT_TOKEN or WEBAPP_URL). Web server only.')
-  }
-
+    console.log('Bot not started (missing BOT_TOKEN or WEBAPP_URL). Web server only.')
+}
 // API endpoints
 app.get('/api/news', (req, res) => {
   const db = readNewsDB()
