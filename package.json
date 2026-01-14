@@ -5,7 +5,10 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "dotenv": "^16.0.3",    "express": "^4.18.2",
-    "telegraf": "^3.27.0",    "node-fetch": "^2.6.9"  
-      }
+    "@vercel/analytics": "^1.6.1",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.9",
+    "telegraf": "^3.27.0"
+  }
 }
