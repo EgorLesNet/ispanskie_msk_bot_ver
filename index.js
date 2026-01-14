@@ -163,13 +163,14 @@ if (BOT_TOKEN && WEBAPP_URL) {
     await ctx.answerCbQuery('Неизвестное действие')
   })
 
-} else {
-  console.log('Bot not started (missing BOT_TOKEN or WEBAPP_URL). Web server only.')
-  // Webhook endpoint for Vercel
+    // Webhook endpoint for Vercel
   app.post('/api/telegram', (req, res) => {
     bot.handleUpdate(req.body, res)
-    res.sendStatus(200)
   })
+} else {
+  console.log('Bot not started (missing BOT_TOKEN or WEBAPP_URL). Web server only.')
+  }
+
 // API endpoints
 app.get('/api/news', (req, res) => {
   const db = readNewsDB()
