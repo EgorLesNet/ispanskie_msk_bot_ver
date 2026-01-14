@@ -14,6 +14,26 @@ const app = express()
 app.use(express.json())
 app.use(express.static('public'))
 
+// Vercel Web Analytics middleware
+app.use('/_vercel/insights/script.js', (req, res) => {
+  // Serve a placeholder script for local development
+  // On Vercel, this route is automatically provided
+  res.type('application/javascript').send(`
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    (function() {
+      if (typeof window.vaq !== 'undefined') {
+        console.log('[Vercel Analytics] Tracking enabled');
+      }
+    })();
+  `)
+})
+
+app.use('/_vercel/insights/view', (req, res) => {
+  // This endpoint is called by the analytics script to report page views
+  // On Vercel, this is handled automatically
+  res.status(200).json({ ok: true })
+})
+
 const DB_PATH = path.join(process.cwd(), 'db_news.json')
 const BUSINESS_PATH = path.join(process.cwd(), 'business.json')
 const SERVICES_PATH = path.join(process.cwd(), 'services.json')
