@@ -30,6 +30,7 @@ function writeNewsDB(db) {
   } catch (err) {
     console.error('Error writing DB:', err)
   }
+  }
 
 function isAdminUser(from) {
   if (!from || !from.username) return false
