@@ -2,8 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Path to database file
-const dbPath = path.join(process.cwd(), 'api', '_db.json');
-
+const dbPath = '/tmp/_db.json';
 // Read database
 function readDB() {
   try {
