@@ -1,30 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+// Global in-memory storage (shared with telegram.js)
+if (!global.newsDB) {
+  global.newsDB = { posts: [] }
+}
 
-// Path to database file
-const dbPath = '/tmp/_db.json';
 // Read database
 function readDB() {
-  try {
-    if (fs.existsSync(dbPath)) {
-      const data = fs.readFileSync(dbPath, 'utf8');
-      return JSON.parse(data);
-    }
-  } catch (err) {
-    console.error('Error reading DB:', err);
-  }
-  return { posts: [] };
+  return global.newsDB
 }
 
 // Write database
 function writeDB(data) {
-  try {
-    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Error writing DB:', err);
-  }
+  global.newsDB = data
 }
-
 module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
