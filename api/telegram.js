@@ -1,15 +1,35 @@
 require('dotenv/config')
 const { Telegraf, Markup } = require('telegraf')
+const fs = require('fs')
+const path = require('path')
 
 const BOT_TOKEN = process.env.BOT_TOKEN
 const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'fusuges').toLowerCase()
 const WEBAPP_URL = process.env.WEBAPP_URL
 
-// In-memory хранилище для Vercel serverless
-let newsDB = { posts: [], seq: 1 }
+// Path to database file
+const dbPath = path.join(process.cwd(), 'api', '_db.json')
 
-function readNewsDB() { return newsDB }
-function writeNewsDB(db) { newsDB = db }
+// Read database
+function readNewsDB() {
+  try {
+    if (fs.existsSync(dbPath)) {
+      const data = fs.readFileSync(dbPath, 'utf8')
+      return JSON.parse(data)
+    }
+  } catch (err) {
+    console.error('Error reading DB:', err)
+  }
+  return { posts: [] }
+}
+
+// Write database
+function writeNewsDB(db) {
+  try {
+    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2), 'utf8')
+  } catch (err) {
+    console.error('Error writing DB:', err)
+  }
 
 function isAdminUser(from) {
   if (!from || !from.username) return false
@@ -19,8 +39,7 @@ function isAdminUser(from) {
 function addNews({ text, author, isAdmin, photoFileId }) {
   const db = readNewsDB()
   const post = {
-    id: db.seq++,
-    text,
+    id: db.posts.length > 0 ? Math.max(...db.posts.map(p => p.id)) + 1 : 1,    text,
     authorId: author.id,
     authorName: [author.first_name, author.last_name].filter(Boolean).join(' '),
     authorUsername: author.username || null,
