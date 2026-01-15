@@ -23,8 +23,7 @@
         const adminUsername = prompt('Введите ваш username (если вы админ):') || ''
         async function load() {
             try {
-                const res = await fetch('/api/news')
-                const data = await res.json()
+            const res = await fetch('https://raw.githubusercontent.com/EgorLesNet/ispanskie_msk_bot_ver/main/db.json?t=' + Date.now())                const data = await res.json()
                 const el = document.getElementById('list')
                 el.innerHTML = ''
 
