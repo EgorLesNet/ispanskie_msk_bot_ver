@@ -1,36 +1,25 @@
 require('dotenv/config')
 const { Telegraf, Markup } = require('telegraf')
-const fs = require('fs')
-const path = require('path')
 
 const BOT_TOKEN = process.env.BOT_TOKEN
 const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'fusuges').toLowerCase()
 const WEBAPP_URL = process.env.WEBAPP_URL
 
 // Path to database file
-const dbPath = '/tmp/_db.json'
-// Read database
-function readNewsDB() {
-  try {
-    if (fs.existsSync(dbPath)) {
-      const data = fs.readFileSync(dbPath, 'utf8')
-      return JSON.parse(data)
-    }
-  } catch (err) {
-    console.error('Error reading DB:', err)
-  }
-  return { posts: [] }
+// Global in-memory storage (shared across warm starts)
+if (!global.newsDB) {
+  global.newsDB = { posts: [] }
 }
 
-// Write database
-function writeNewsDB(db) {
-  try {
-    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2), 'utf8')
-  } catch (err) {
-    console.error('Error writing DB:', err)
-  }
-  }
+// Read database
+function readNewsDB() {
+  return global.newsDB
+}
 
+// Write database  
+function writeNewsDB(db) {
+  global.newsDB = db
+}
 function isAdminUser(from) {
   if (!from || !from.username) return false
   return from.username.toLowerCase() === ADMIN_USERNAME
