@@ -116,7 +116,7 @@ bot.on('photo', async ctx => {
   const photoFileId = ctx.message.photo[ctx.message.photo.length - 1].file_id
 
   if (caption.trim()) {
-    const post = addNews({ text: caption, author: ctx.from, isAdmin, photoFileId })
+    const post = await addNews({ text: caption, author: ctx.from, isAdmin, photoFileId })
     if (isAdmin) {
       await ctx.reply('✅ Новость опубликована!')
     } else {
@@ -147,7 +147,7 @@ bot.on('text', async ctx => {
   const photoFileId = (state && state.photoFileId) || null
   userStates.delete(userId)
 
-  const post = addNews({ text, author: ctx.from, isAdmin, photoFileId })
+  const post = await addNews({ text, author: ctx.from, isAdmin, photoFileId })
 
   if (isAdmin) {
     await ctx.reply('✅ Новость опубликована!')
