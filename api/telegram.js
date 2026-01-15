@@ -6,21 +6,61 @@ const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'fusuges').toLowerCase()
 const WEBAPP_URL = process.env.WEBAPP_URL
 
 // Path to database file
-// Global in-memory storage (shared across warm starts)
-if (!global.newsDB) {
-  global.newsDB = { posts: [] }
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN
+const GITHUB_REPO = 'EgorLesNet/ispanskie_msk_bot_ver'
+const DB_FILE_PATH = 'db.json'
+
+// Read database from GitHub
+async function readNewsDB() {
+  try {
+    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/${DB_FILE_PATH}`
+    const response = await fetch(url)
+    if (response.ok) {
+      return await response.json()
+    }
+  } catch (err) {
+    console.error('Error reading DB:', err)
+  }
+  return { posts: [] }
 }
 
-// Read database
-function readNewsDB() {
-  return global.newsDB
-}
-
-// Write database  
-function writeNewsDB(db) {
-  global.newsDB = db
-}
-function isAdminUser(from) {
+// Write database to GitHub
+async function writeNewsDB(db) {
+  try {
+    // Get current file SHA
+    const getUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}`
+    const getResponse = await fetch(getUrl, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    })
+    
+    const fileData = await getResponse.json()
+    const sha = fileData.sha
+    
+    // Update file
+    const content = Buffer.from(JSON.stringify(db, null, 2)).toString('base64')
+    const updateResponse = await fetch(getUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Update news via bot',
+        content: content,
+        sha: sha
+      })
+    })
+    
+    return updateResponse.ok
+  } catch (err) {
+    console.error('Error writing DB:', err)
+    return false
+  }
+}function isAdminUser(from) {
   if (!from || !from.username) return false
   return from.username.toLowerCase() === ADMIN_USERNAME
 }
