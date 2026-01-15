@@ -8,8 +8,7 @@ const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'fusuges').toLowerCase()
 const WEBAPP_URL = process.env.WEBAPP_URL
 
 // Path to database file
-const dbPath = path.join(process.cwd(), 'api', '_db.json')
-
+const dbPath = '/tmp/_db.json'
 // Read database
 function readNewsDB() {
   try {
