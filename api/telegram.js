@@ -65,9 +65,7 @@ async function writeNewsDB(db) {
   return from.username.toLowerCase() === ADMIN_USERNAME
 }
 
-function addNews({ text, author, isAdmin, photoFileId }) {
-  const db = readNewsDB()
-  const post = {
+async function addNews({ text, author, isAdmin, photoFileId }) {  const db = await readNewsDB()  const post = {
     id: db.posts.length > 0 ? Math.max(...db.posts.map(p => p.id)) + 1 : 1,    text,
     authorId: author.id,
     authorName: [author.first_name, author.last_name].filter(Boolean).join(' '),
@@ -122,8 +120,7 @@ bot.on('photo', async ctx => {
     if (isAdmin) {
       await ctx.reply('✅ Новость опубликована!')
     } else {
-      await ctx.reply('📩 Новость отправлена на проверку.')
-      try {
+      const post = await addNews({ text: caption, author: ctx.from, isAdmin, photoFileId })      try {
         await ctx.telegram.sendPhoto(ctx.botInfo.id, photoFileId, {
           caption: `📬 Новая новость #${post.id} от ${post.authorName}${post.authorUsername ? ' (@' + post.authorUsername + ')' : ''}:\n\n${post.text}`,
           reply_markup: { inline_keyboard: [[
