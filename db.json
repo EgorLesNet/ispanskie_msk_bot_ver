@@ -1,6 +1,22 @@
 {
   "posts": [
     {
+      "id": 11,
+      "text": "test test",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-16T18:23:06.590Z",
+      "category": "all",
+      "photoFileId": "AgACAgIAAxkBAAIBDWlqgIPI5UuI92O38Rcsn4x2rpJXAAJiEmsbIH5QS80SWFx78X-RAQADAgADeAADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIBDWlqgIPI5UuI92O38Rcsn4x2rpJXAAJiEmsbIH5QS80SWFx78X-RAQADAgADeAADOAQ"
+      ],
+      "moderationMessage": null,
+      "status": "approved",
+      "source": "admin"
+    },
+    {
       "id": 10,
       "text": "Ну, сколько можно?!\nДай отдохнуть рабочему классу!",
       "authorId": 164794874,
