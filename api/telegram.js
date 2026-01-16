@@ -16,12 +16,13 @@ if (!BOT_TOKEN) throw new Error('BOT_TOKEN is required')
 
 const bot = new Telegraf(BOT_TOKEN)
 
-// Состояние для "одно фото -> потом текст"
+// если юзер отправил одиночное фото без подписи — ждём текст
 const userStates = new Map()
-// Состояние для альбомов (несколько фото, media_group_id)
-const mediaGroups = new Map()
-// userId -> { photoFileIds: [] } (альбом без подписи, ждём текст)
-const pendingAlbumByUser = new Map()
+
+// media_group_id -> сборка альбома "на лету" без таймеров
+// key = `${fromId}:${mediaGroupId}`
+// value = { postId: number|null, photoFileIds: string[], admin: bool, author: from, caption: string|null, createdAt: ISO }
+const albums = new Map()
 
 function isAdmin(ctx) {
   const u = ctx?.from
@@ -34,22 +35,23 @@ function isAdmin(ctx) {
   return byUsername || byId
 }
 
+// ---------- GitHub DB (через Contents API, чтобы меньше было проблем с кешем) ----------
+
 function normalizeDb(raw) {
   const db = raw && typeof raw === 'object' ? raw : {}
   const postsRaw = Array.isArray(db.posts) ? db.posts : []
-  let pending = Array.isArray(db.pending) ? db.pending : []
-  let rejected = Array.isArray(db.rejected) ? db.rejected : []
+  const pendingRaw = Array.isArray(db.pending) ? db.pending : []
+  const rejectedRaw = Array.isArray(db.rejected) ? db.rejected : []
 
-  // Миграция: если раньше pending лежали в posts
+  // миграция старого формата: pending мог лежать в posts
   const posts = []
-  const migratedPending = []
+  const pending = [...pendingRaw]
   for (const p of postsRaw) {
-    if (p && p.status === 'pending') migratedPending.push(p)
+    if (p && p.status === 'pending') pending.push(p)
     else posts.push(p)
   }
-  pending = [...migratedPending, ...pending]
 
-  return { posts, pending, rejected }
+  return { posts, pending, rejected: rejectedRaw }
 }
 
 function nextPostId(db) {
@@ -62,11 +64,24 @@ function nextPostId(db) {
 
 async function readNewsDB() {
   try {
-    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${DB_BRANCH}/${DB_FILE_PATH}`
-    const response = await fetch(url, { cache: 'no-store' })
-    if (!response.ok) return { posts: [], pending: [], rejected: [] }
-    const json = await response.json()
-    return normalizeDb(json)
+    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}?ref=${encodeURIComponent(DB_BRANCH)}`
+    const resp = await fetch(apiUrl, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        ...(GITHUB_TOKEN ? { Authorization: `token ${GITHUB_TOKEN}` } : {})
+      },
+      cache: 'no-store'
+    })
+
+    if (!resp.ok) return { posts: [], pending: [], rejected: [] }
+
+    const json = await resp.json()
+    const contentB64 = json?.content || ''
+    const buf = Buffer.from(contentB64, 'base64')
+    const text = buf.toString('utf8')
+    const data = JSON.parse(text)
+
+    return normalizeDb(data)
   } catch (err) {
     console.error('Error reading DB:', err)
     return { posts: [], pending: [], rejected: [] }
@@ -79,8 +94,8 @@ async function writeNewsDB(db) {
   const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}`
 
   try {
+    // SHA текущего файла
     let sha = null
-
     const getResponse = await fetch(`${apiUrl}?ref=${encodeURIComponent(DB_BRANCH)}`, {
       headers: {
         Authorization: `token ${GITHUB_TOKEN}`,
@@ -125,6 +140,8 @@ async function writeNewsDB(db) {
   }
 }
 
+// ---------- Посты ----------
+
 async function submitNews({ text, author, admin, photoFileId, photoFileIds }) {
   const db = await readNewsDB()
   const id = nextPostId(db)
@@ -136,9 +153,8 @@ async function submitNews({ text, author, admin, photoFileId, photoFileIds }) {
     authorName: [author?.first_name, author?.last_name].filter(Boolean).join(' ').trim(),
     authorUsername: author?.username || null,
     createdAt: new Date().toISOString(),
-    // Сайт сейчас показывает только одно фото, поэтому сохраняем первое как photoFileId
+    category: 'all',
     photoFileId: photoFileId || null,
-    // На будущее: можно использовать для галереи
     photoFileIds: Array.isArray(photoFileIds) ? photoFileIds : undefined,
     moderationMessage: null
   }
@@ -154,6 +170,33 @@ async function submitNews({ text, author, admin, photoFileId, photoFileIds }) {
 
   await writeNewsDB(db)
   return saved
+}
+
+async function appendPhotosToPost(postId, newPhotoFileIds) {
+  if (!Array.isArray(newPhotoFileIds) || !newPhotoFileIds.length) return false
+
+  const db = await readNewsDB()
+  const allBuckets = [db.posts, db.pending, db.rejected]
+
+  for (const bucket of allBuckets) {
+    const p = bucket.find(x => x && x.id === postId)
+    if (!p) continue
+
+    const existing = Array.isArray(p.photoFileIds) ? p.photoFileIds : (p.photoFileId ? [p.photoFileId] : [])
+    const merged = [...existing]
+
+    for (const id of newPhotoFileIds) {
+      if (id && !merged.includes(id)) merged.push(id)
+    }
+
+    p.photoFileIds = merged
+    if (!p.photoFileId && merged[0]) p.photoFileId = merged[0]
+
+    await writeNewsDB(db)
+    return true
+  }
+
+  return false
 }
 
 async function moderateNews(postId, action) {
@@ -280,49 +323,10 @@ async function deleteNews(postId) {
   return null
 }
 
-// ---- Команды (ВАЖНО: ставим ДО bot.on('text')) ----
-
-bot.command('delete', async ctx => {
-  if (!isAdmin(ctx)) {
-    await ctx.reply('Нет доступа!')
-    return
-  }
-
-  const full = String(ctx.message?.text || '').trim()
-  const parts = full.split(/\s+/)
-  let postId = parts[1] ? Number(parts[1]) : null
-
-  // Если id не дали — попробуем взять из reply
-  if (!postId) {
-    const reply = ctx.message?.reply_to_message || null
-    postId = await findPostIdByReplyMessage(reply)
-  }
-
-  if (!postId) {
-    await ctx.reply('Использование:\n/delete <id>\nили ответьте на сообщение модерации и напишите /delete')
-    return
-  }
-
-  const result = await deleteNews(postId)
-  if (!result) {
-    await ctx.reply(`Пост #${postId} не найден (или уже удалён).`)
-    return
-  }
-
-  // Попробуем удалить модерационное сообщение у админа (если сохранили message_id)
-  try {
-    const mm = result.post?.moderationMessage
-    if (mm?.chatId != null && mm?.messageId != null) {
-      await ctx.telegram.deleteMessage(mm.chatId, mm.messageId)
-    }
-  } catch (_) {}
-
-  await ctx.reply(`🗑 Удалено: #${postId} (раздел: ${result.place}).`)
-})
+// ---------- Команды (должны быть ДО on('text')) ----------
 
 bot.command('start', async ctx => {
   userStates.delete(ctx.from.id)
-  pendingAlbumByUser.delete(ctx.from.id)
 
   await ctx.reply(
     'Добро пожаловать!\n\nИспользуйте кнопку ниже, чтобы открыть приложение:',
@@ -339,7 +343,43 @@ bot.command('start', async ctx => {
   })
 })
 
-// ---- Фото (включая альбомы) ----
+bot.command('delete', async ctx => {
+  if (!isAdmin(ctx)) {
+    await ctx.reply('Нет доступа!')
+    return
+  }
+
+  const full = String(ctx.message?.text || '').trim()
+  const parts = full.split(/\s+/)
+  let postId = parts[1] ? Number(parts[1]) : null
+
+  if (!postId) {
+    const reply = ctx.message?.reply_to_message || null
+    postId = await findPostIdByReplyMessage(reply)
+  }
+
+  if (!postId) {
+    await ctx.reply('Использование:\n/delete <id>\nили ответьте на сообщение модерации и напишите /delete')
+    return
+  }
+
+  const result = await deleteNews(postId)
+  if (!result) {
+    await ctx.reply(`Пост #${postId} не найден (или уже удалён).`)
+    return
+  }
+
+  try {
+    const mm = result.post?.moderationMessage
+    if (mm?.chatId != null && mm?.messageId != null) {
+      await ctx.telegram.deleteMessage(mm.chatId, mm.messageId)
+    }
+  } catch (_) {}
+
+  await ctx.reply(`🗑 Удалено: #${postId} (раздел: ${result.place}).`)
+})
+
+// ---------- Фото ----------
 
 bot.on('photo', async ctx => {
   const admin = isAdmin(ctx)
@@ -347,59 +387,68 @@ bot.on('photo', async ctx => {
   const photos = ctx.message.photo || []
   const best = photos.length ? photos[photos.length - 1] : null
   const photoFileId = best?.file_id || null
-
   const caption = (ctx.message.caption || '').trim()
   const mediaGroupId = ctx.message.media_group_id || null
 
   if (!photoFileId) {
-    await ctx.reply('Не удалось прочитать фото, попробуйте отправить ещё раз.')
+    await ctx.reply('Не удалось прочитать фото, попробуйте ещё раз.')
     return
   }
 
-  // Альбом (несколько фото)
+  // Альбом (несколько фото) — без таймеров
   if (mediaGroupId) {
     const key = `${ctx.from.id}:${mediaGroupId}`
-    const cur = mediaGroups.get(key) || { photoFileIds: [], caption: '', timer: null }
+    const cur = albums.get(key) || {
+      postId: null,
+      photoFileIds: [],
+      admin,
+      author: ctx.from,
+      caption: null
+    }
 
     cur.photoFileIds.push(photoFileId)
+
+    // если caption пришёл на одном из фото — фиксируем
     if (caption) cur.caption = caption
 
-    if (cur.timer) clearTimeout(cur.timer)
+    // если пост ещё не создан и caption уже есть — создаём сразу и отвечаем сразу
+    if (!cur.postId && cur.caption) {
+      const post = await submitNews({
+        text: cur.caption,
+        author: ctx.from,
+        admin,
+        photoFileId: cur.photoFileIds[0] || null,
+        photoFileIds: cur.photoFileIds
+      })
 
-    cur.timer = setTimeout(async () => {
-      mediaGroups.delete(key)
+      cur.postId = post.id
+      albums.set(key, cur)
 
-      // Если подпись (текст) была в альбоме — публикуем одним постом
-      if (cur.caption && cur.caption.trim()) {
-        const post = await submitNews({
-          text: cur.caption.trim(),
-          author: ctx.from,
-          admin,
-          photoFileId: cur.photoFileIds[0] || null,
-          photoFileIds: cur.photoFileIds
-        })
-
-        if (admin) {
-          await ctx.reply('✅ Новость опубликована!')
-        } else {
-          await ctx.reply('📩 Новость отправлена на проверку.')
-          await notifyAdmin(ctx, post)
-        }
+      if (admin) {
+        await ctx.reply('✅ Новость опубликована!')
       } else {
-        // Текста нет — ждём отдельным сообщением
-        pendingAlbumByUser.set(ctx.from.id, { photoFileIds: cur.photoFileIds })
-        await ctx.reply('🖼 Фото(альбом) получены! Теперь отправьте текст новости:')
+        await ctx.reply('📩 Новость отправлена на проверку.')
+        await notifyAdmin(ctx, post)
       }
-    }, 900)
+      return
+    }
 
-    mediaGroups.set(key, cur)
+    // если пост уже создан (caption был раньше) — просто дополняем фото
+    if (cur.postId) {
+      albums.set(key, cur)
+      await appendPhotosToPost(cur.postId, [photoFileId])
+      // НЕ отвечаем каждый раз, чтобы не спамить
+      return
+    }
+
+    // caption ещё нет — ждём (но ничего не отвечаем, потому что нет текста новости)
+    albums.set(key, cur)
     return
   }
 
-  // Обычное одиночное фото (не альбом)
+  // Одиночное фото
   if (caption) {
     const post = await submitNews({ text: caption, author: ctx.from, admin, photoFileId })
-
     if (admin) {
       await ctx.reply('✅ Новость опубликована!')
     } else {
@@ -413,13 +462,13 @@ bot.on('photo', async ctx => {
   await ctx.reply('🖼 Фото получено! Теперь отправьте текст новости:')
 })
 
-// ---- Текст ----
-// ВАЖНО: используем next(), чтобы команды (/delete, /start, etc) не “съедались”
+// ---------- Текст ----------
+
 bot.on('text', async (ctx, next) => {
   const text = (ctx.message.text || '').trim()
   if (!text) return
 
-  // Команды отдаём дальше, чтобы их обработал bot.command(...)
+  // команды не съедаем
   if (text.startsWith('/')) {
     if (typeof next === 'function') return next()
     return
@@ -427,29 +476,6 @@ bot.on('text', async (ctx, next) => {
 
   const admin = isAdmin(ctx)
 
-  // 1) Если ждём текст после альбома
-  const album = pendingAlbumByUser.get(ctx.from.id)
-  if (album?.photoFileIds?.length) {
-    pendingAlbumByUser.delete(ctx.from.id)
-
-    const post = await submitNews({
-      text,
-      author: ctx.from,
-      admin,
-      photoFileId: album.photoFileIds[0] || null,
-      photoFileIds: album.photoFileIds
-    })
-
-    if (admin) {
-      await ctx.reply('✅ Новость опубликована!')
-    } else {
-      await ctx.reply('📩 Новость отправлена на проверку.')
-      await notifyAdmin(ctx, post)
-    }
-    return
-  }
-
-  // 2) Если ждём текст после одиночного фото
   const state = userStates.get(ctx.from.id)
   const photoFileId = state?.photoFileId || null
   userStates.delete(ctx.from.id)
@@ -463,6 +489,8 @@ bot.on('text', async (ctx, next) => {
     await notifyAdmin(ctx, post)
   }
 })
+
+// ---------- Модерация ----------
 
 bot.on('callback_query', async ctx => {
   if (!isAdmin(ctx)) {
@@ -508,7 +536,7 @@ bot.on('callback_query', async ctx => {
   } catch (_) {}
 })
 
-// Vercel serverless handler
+// ---------- Vercel handler ----------
 module.exports = async (req, res) => {
   try {
     let update = req.body
