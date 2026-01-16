@@ -13,9 +13,6 @@ const DB_FILE_PATH = process.env.DB_FILE_PATH || 'db.json'
 const DB_BRANCH = process.env.DB_BRANCH || 'main'
 
 if (!BOT_TOKEN) throw new Error('BOT_TOKEN is required')
-if (!WEBAPP_URL) console.warn('[WARN] WEBAPP_URL is not set')
-if (!GITHUB_TOKEN) console.warn('[WARN] GITHUB_TOKEN is not set (DB write will fail)')
-if (!ADMIN_CHAT_ID) console.warn('[WARN] ADMIN_CHAT_ID is not set (admin moderation notifications will fail)')
 
 const bot = new Telegraf(BOT_TOKEN)
 
@@ -32,6 +29,8 @@ function isAdmin(ctx) {
 
   return byUsername || byId
 }
+
+// ---- DB helpers ----
 
 function normalizeDb(raw) {
   const db = raw && typeof raw === 'object' ? raw : {}
@@ -128,6 +127,8 @@ async function writeNewsDB(db) {
   }
 }
 
+// ---- News logic ----
+
 async function submitNews({ text, author, admin, photoFileId }) {
   const db = await readNewsDB()
   const id = nextPostId(db)
@@ -139,7 +140,8 @@ async function submitNews({ text, author, admin, photoFileId }) {
     authorName: [author?.first_name, author?.last_name].filter(Boolean).join(' ').trim(),
     authorUsername: author?.username || null,
     createdAt: new Date().toISOString(),
-    photoFileId: photoFileId || null
+    photoFileId: photoFileId || null,
+    moderationMessage: null // will be filled after notifyAdmin
   }
 
   let saved
@@ -181,6 +183,21 @@ async function moderateNews(postId, action) {
   return null
 }
 
+async function attachModerationMessage(postId, msg) {
+  // msg is Telegram "Message" object that includes message_id
+  const db = await readNewsDB()
+  const p = db.pending.find(x => x && x.id === postId)
+  if (!p) return false
+
+  p.moderationMessage = {
+    chatId: msg?.chat?.id ?? null,
+    messageId: msg?.message_id ?? null
+  }
+
+  await writeNewsDB(db)
+  return true
+}
+
 function adminKeyboard(postId) {
   return {
     inline_keyboard: [[
@@ -199,19 +216,53 @@ async function notifyAdmin(ctx, post) {
     }:\n\n${post.text}`
 
   try {
+    let sent
     if (post.photoFileId) {
-      await ctx.telegram.sendPhoto(ADMIN_CHAT_ID, post.photoFileId, {
+      sent = await ctx.telegram.sendPhoto(ADMIN_CHAT_ID, post.photoFileId, {
         caption: header,
         reply_markup: adminKeyboard(post.id)
       })
     } else {
-      await ctx.telegram.sendMessage(ADMIN_CHAT_ID, header, {
+      sent = await ctx.telegram.sendMessage(ADMIN_CHAT_ID, header, {
         reply_markup: adminKeyboard(post.id)
       })
+    }
+
+    // Persist admin message_id -> postId mapping for reply-based delete
+    if (sent?.message_id) {
+      await attachModerationMessage(post.id, sent)
     }
   } catch (err) {
     console.error('Failed to notify admin:', err)
   }
+}
+
+function extractPostIdFromText(text) {
+  if (!text) return null
+  const m = String(text).match(/#(\d+)/)
+  return m ? Number(m[1]) : null
+}
+
+async function findPostIdByReplyMessage(replyMsg) {
+  if (!replyMsg) return null
+  const replyChatId = replyMsg.chat?.id ?? null
+  const replyMessageId = replyMsg.message_id ?? null
+  if (replyChatId == null || replyMessageId == null) return null
+
+  const db = await readNewsDB()
+
+  // Best: match by stored moderationMessage (usually only pending has it)
+  const all = [...db.pending, ...db.posts, ...db.rejected]
+  for (const p of all) {
+    const mm = p?.moderationMessage
+    if (mm && mm.chatId === replyChatId && mm.messageId === replyMessageId) {
+      return p.id
+    }
+  }
+
+  // Fallback: parse from caption/text of the replied-to message
+  const fallbackId = extractPostIdFromText(replyMsg.text || replyMsg.caption || '')
+  return fallbackId || null
 }
 
 async function deleteNews(postId) {
@@ -235,6 +286,8 @@ async function deleteNews(postId) {
 
   return null
 }
+
+// ---- Bot handlers ----
 
 bot.start(async ctx => {
   userStates.delete(ctx.from.id)
@@ -285,7 +338,10 @@ bot.on('photo', async ctx => {
 bot.on('text', async ctx => {
   const admin = isAdmin(ctx)
   const text = (ctx.message.text || '').trim()
-  if (!text || text.startsWith('/')) return
+  if (!text) return
+
+  // commands
+  if (text.startsWith('/')) return
 
   const state = userStates.get(ctx.from.id)
   const photoFileId = state?.photoFileId || null
@@ -301,23 +357,24 @@ bot.on('text', async ctx => {
   }
 })
 
-bot.on('callback_query', async ctx => {
-  if (!isAdmin(ctx)) {
-    await ctx.answerCbQuery('Нет доступа!', { show_alert: true })
-    return
-  }
-
 bot.command('delete', async ctx => {
   if (!isAdmin(ctx)) {
     await ctx.reply('Нет доступа!')
     return
   }
 
-  const parts = String(ctx.message?.text || '').trim().split(/\s+/)
-  const postId = Number(parts[1])
+  const full = String(ctx.message?.text || '').trim()
+  const parts = full.split(/\s+/)
+  let postId = parts[1] ? Number(parts[1]) : null
+
+  // If no ID, try resolve from reply
+  if (!postId) {
+    const reply = ctx.message?.reply_to_message || null
+    postId = await findPostIdByReplyMessage(reply)
+  }
 
   if (!postId) {
-    await ctx.reply('Использование: /delete <id>\nНапример: /delete 12')
+    await ctx.reply('Использование:\n/delete <id>\nили ответьте на сообщение модерации и напишите /delete')
     return
   }
 
@@ -327,8 +384,22 @@ bot.command('delete', async ctx => {
     return
   }
 
+  // If we know moderation message, try deleting it from admin chat too
+  try {
+    const mm = result.post?.moderationMessage
+    if (mm?.chatId != null && mm?.messageId != null) {
+      await ctx.telegram.deleteMessage(mm.chatId, mm.messageId)
+    }
+  } catch (_) {}
+
   await ctx.reply(`🗑 Удалено: #${postId} (раздел: ${result.place}).`)
 })
+
+bot.on('callback_query', async ctx => {
+  if (!isAdmin(ctx)) {
+    await ctx.answerCbQuery('Нет доступа!', { show_alert: true })
+    return
+  }
 
   const data = String(ctx.callbackQuery.data || '')
   const [action, idStr] = data.split(':')
@@ -345,7 +416,7 @@ bot.command('delete', async ctx => {
     return
   }
 
-  // убрать кнопки у сообщения, чтобы не жали повторно
+  // remove buttons from the moderation message
   try {
     await ctx.editMessageReplyMarkup()
   } catch (_) {}
@@ -358,7 +429,7 @@ bot.command('delete', async ctx => {
     await ctx.reply(`Новость #${result.post.id} отклонена.`)
   }
 
-  // (опционально) уведомить автора, если он писал боту в личку
+  // optional: notify author (works if author has chat open with bot)
   try {
     if (result.post.authorId) {
       const msg =
@@ -375,12 +446,8 @@ module.exports = async (req, res) => {
   try {
     let update = req.body
 
-    // Safety: sometimes body may arrive as string/buffer
-    if (typeof update === 'string') {
-      update = JSON.parse(update)
-    } else if (Buffer.isBuffer(update)) {
-      update = JSON.parse(update.toString('utf8'))
-    }
+    if (typeof update === 'string') update = JSON.parse(update)
+    else if (Buffer.isBuffer(update)) update = JSON.parse(update.toString('utf8'))
 
     await bot.handleUpdate(update)
     res.status(200).json({ ok: true })
