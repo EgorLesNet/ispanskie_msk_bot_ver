@@ -6,71 +6,54 @@
 <title>Агрегатор для района</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
---glass-bg:rgba(255,255,255,0.1);--glass-border:rgba(255,255,255,0.2);--text:#1a1a1a;--text-gray:#666;--active:#0088cc;--shadow:rgba(0,0,0,0.1);
-}
-[data-theme="dark"]{
---glass-bg:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1);--text:#fff;--text-gray:#aaa;--active:#64b5f6;--shadow:rgba(0,0,0,0.3);
-}
 body{
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-margin:0;padding:0 0 80px 0;
+margin:0;padding:0 0 80px 0;min-height:100vh;
 background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-color:var(--text);min-height:100vh;
+color:#1a1a1a;
 }
 body[data-theme="dark"]{
 background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
+color:#fff;
 }
 .header{
 display:flex;justify-content:space-between;align-items:center;padding:16px 20px;
-background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-border-bottom:1px solid var(--glass-border);position:sticky;top:0;z-index:100;
-box-shadow:0 8px 32px 0 var(--shadow);
+position:sticky;top:0;z-index:100;
 }
 .logo{font-size:28px;text-decoration:none;line-height:1;transition:transform 0.3s}
-.logo:hover{transform:scale(1.1) rotate(-5deg)}
-h3{font-size:18px;font-weight:600;color:var(--text)}
+.logo:hover{transform:scale(1.1)}
+h3{font-size:18px;font-weight:600}
 .theme-btn{
-background:var(--glass-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-border:1px solid var(--glass-border);border-radius:50%;width:40px;height:40px;
-cursor:pointer;font-size:20px;transition:all 0.3s;display:flex;align-items:center;justify-content:center;
+background:none;border:none;width:40px;height:40px;
+cursor:pointer;font-size:24px;transition:transform 0.3s;
 }
-.theme-btn:hover{transform:scale(1.1);box-shadow:0 8px 16px var(--shadow)}
+.theme-btn:hover{transform:scale(1.1)}
 .subtitle{
-color:var(--text-gray);font-size:13px;padding:8px 20px;text-align:center;
-background:var(--glass-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-margin:12px 8px;border-radius:12px;border:1px solid var(--glass-border);
+color:inherit;font-size:13px;padding:12px 20px;text-align:center;opacity:0.9;
 }
 .card{
-background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-border:1px solid var(--glass-border);border-radius:20px;margin:12px 8px;padding:0;
-box-shadow:0 8px 32px 0 var(--shadow);overflow:hidden;transition:all 0.3s;
+margin:12px 8px;overflow:hidden;transition:transform 0.3s;
 }
-.card:hover{transform:translateY(-4px);box-shadow:0 12px 48px 0 var(--shadow)}
-.meta{color:var(--text-gray);font-size:12px;padding:12px 16px 8px 16px}
+.card:hover{transform:translateY(-2px)}
+.meta{font-size:12px;padding:12px 16px 8px 16px;opacity:0.8}
 .text{
-line-height:1.5;padding:0 16px 16px 16px;font-size:15px;word-wrap:break-word;color:var(--text);
+line-height:1.5;padding:0 16px 16px 16px;font-size:15px;word-wrap:break-word;
 }
-.text a{color:var(--active);text-decoration:none;font-weight:500}
+.text a{color:#0088cc;text-decoration:none;font-weight:500}
 .text a:hover{text-decoration:underline}
+body[data-theme="dark"] .text a{color:#64b5f6}
 img{max-width:100%;width:100%;display:block;margin:0}
 .nav{
 position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:600px;width:calc(100% - 16px);
-background:var(--glass-bg);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
-border:1px solid var(--glass-border);border-radius:24px 24px 0 0;
-display:flex;justify-content:space-around;padding:12px 0 8px 0;
-box-shadow:0 -8px 32px 0 var(--shadow);z-index:1000;
+display:flex;justify-content:space-around;padding:12px 0 8px 0;z-index:1000;
 }
 .nav-item{
-flex:1;text-align:center;padding:10px 8px;cursor:pointer;color:var(--text-gray);
+flex:1;text-align:center;padding:10px 8px;cursor:pointer;
 font-size:14px;font-weight:500;transition:all 0.3s;border:none;background:transparent;
-border-radius:12px;margin:0 4px;
+border-radius:12px;margin:0 4px;opacity:0.7;
 }
-.nav-item.active{
-color:var(--active);background:var(--glass-bg);font-weight:600;
-box-shadow:0 4px 12px var(--shadow);
-}
-.nav-item:hover{color:var(--active);transform:scale(1.05)}
+.nav-item.active{opacity:1;font-weight:600}
+.nav-item:hover{opacity:1;transform:scale(1.05)}
 .hidden{display:none}
 @media(min-width:768px){
 body{max-width:600px;margin:0 auto;padding:0 0 80px 0}
@@ -96,11 +79,41 @@ img{border-radius:16px}
 <script>
 var allNews=[];
 var currentCategory='all';
+function applyGlass(){
+var elements=document.querySelectorAll('.header,.subtitle,.card,.nav');
+elements.forEach(function(el){
+el.style.background='rgba(255,255,255,0.15)';
+el.style.backdropFilter='blur(10px)';
+el.style.webkitBackdropFilter='blur(10px)';
+el.style.border='1px solid rgba(255,255,255,0.2)';
+el.style.borderRadius='16px';
+el.style.boxShadow='0 8px 32px 0 rgba(0,0,0,0.1)';
+});
+document.querySelector('.header').style.borderRadius='0';
+document.querySelector('.nav').style.borderRadius='24px 24px 0 0';
+if(window.innerWidth>=768){
+document.querySelector('.nav').style.borderRadius='24px';
+}
+var cards=document.querySelectorAll('.card');
+cards.forEach(function(card){
+card.style.borderRadius='20px';
+});
+}
 function setTheme(t){
 document.documentElement.setAttribute('data-theme',t);
 var btn=document.querySelector('.theme-btn');
 btn.textContent=t==='dark'?'☀️':'🌙';
 localStorage.setItem('theme',t);
+if(t==='dark'){
+var elements=document.querySelectorAll('.header,.subtitle,.card,.nav');
+elements.forEach(function(el){
+el.style.background='rgba(0,0,0,0.3)';
+el.style.border='1px solid rgba(255,255,255,0.1)';
+el.style.boxShadow='0 8px 32px 0 rgba(0,0,0,0.3)';
+});
+}else{
+applyGlass();
+}
 }
 function toggleTheme(){
 var current=document.documentElement.getAttribute('data-theme')||'light';
@@ -125,6 +138,7 @@ var el=document.getElementById('list');
 var filtered=currentCategory==='all'?allNews:allNews.filter(function(p){return p.category===currentCategory});
 if(filtered.length===0){
 el.innerHTML='<div class="card"><div class="text">Нет новостей в этой категории.</div></div>';
+applyGlass();
 return;
 }
 el.innerHTML='';
@@ -148,19 +162,28 @@ text.innerHTML=linkify(p.text);
 card.appendChild(text);
 el.appendChild(card);
 });
+applyGlass();
 }
 var saved=localStorage.getItem('theme');
-if(saved){setTheme(saved);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){setTheme('dark');}
+if(saved){setTheme(saved);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){setTheme('dark');}else{applyGlass();}
 fetch('/api/news').then(function(r){return r.json()}).then(function(data){
 if(data.posts && data.posts.length){
 el=document.getElementById('list');
 el.innerHTML='<div class="card"><div class="text">Загрузка новостей...</div></div>';
+applyGlass();
 }
 allNews=data.posts.map(function(p){return Object.assign({},p,{category:p.category||'all'})});
 renderNews();
 }).catch(function(err){
 console.error('Error loading news:',err);
 document.getElementById('list').innerHTML='<div class="card"><div class="text">Ошибка загрузки. Попробуйте обновить страницу.</div></div>';
+applyGlass();
+});
+window.addEventListener('resize',function(){
+if(window.innerWidth>=768){
+var nav=document.querySelector('.nav');
+if(nav)nav.style.borderRadius='24px';
+}
 });
 </script>
 </body>
