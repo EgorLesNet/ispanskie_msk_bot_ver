@@ -2,11 +2,11 @@
   "posts": [
     {
       "id": 1,
-      "text": "test",
+      "text": "тест",
       "authorId": 273473755,
       "authorName": "fusuges",
       "authorUsername": "fusuges",
-      "createdAt": "2026-01-16T12:34:37.752Z",
+      "createdAt": "2026-01-16T12:34:38.321Z",
       "status": "approved",
       "source": "admin",
       "photoFileId": null
