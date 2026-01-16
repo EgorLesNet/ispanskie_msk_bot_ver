@@ -266,7 +266,7 @@ function filterNews(cat) {
 
 async function loadNews() {
   try {
-    const res = await fetch('/api/news');
+    const res = await fetch('/api/news', { cache: 'no-store' });
     const data = await res.json();
     allNews = Array.isArray(data.posts) ? data.posts : [];
     renderNews();
