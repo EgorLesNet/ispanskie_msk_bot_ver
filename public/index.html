@@ -86,9 +86,9 @@ filtered.forEach(function(p){
 var card=document.createElement('div');
 card.className='card';
 
-if(p.photoId){
+if(p.photoFileId){
 var img=document.createElement('img');
-img.src='/api/photo/'+p.photoId;
+img.src='/api/photo/'+p.photoFileId;
 img.alt='фото';
 card.appendChild(img);
 }
