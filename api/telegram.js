@@ -307,6 +307,29 @@ bot.on('callback_query', async ctx => {
     return
   }
 
+bot.command('delete', async ctx => {
+  if (!isAdmin(ctx)) {
+    await ctx.reply('Нет доступа!')
+    return
+  }
+
+  const parts = String(ctx.message?.text || '').trim().split(/\s+/)
+  const postId = Number(parts[1])
+
+  if (!postId) {
+    await ctx.reply('Использование: /delete <id>\nНапример: /delete 12')
+    return
+  }
+
+  const result = await deleteNews(postId)
+  if (!result) {
+    await ctx.reply(`Пост #${postId} не найден (или уже удалён).`)
+    return
+  }
+
+  await ctx.reply(`🗑 Удалено: #${postId} (раздел: ${result.place}).`)
+})
+
   const data = String(ctx.callbackQuery.data || '')
   const [action, idStr] = data.split(':')
   const postId = Number(idStr)
