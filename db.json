@@ -1,6 +1,17 @@
 {
   "posts": [
     {
+      "id": 2,
+      "text": "test",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-16T12:51:02.535Z",
+      "status": "approved",
+      "source": "admin",
+      "photoFileId": null
+    },
+    {
       "id": 1,
       "text": "test",
       "authorId": 273473755,
