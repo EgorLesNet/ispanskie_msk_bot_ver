@@ -1,26 +1,6 @@
 {
   "posts": [
     {
-      "id": 11,
-      "text": "🌎 🏗️ \nА101 начинает строить новые ЖК у метро Прокшино. \n\nА101 начинает застройку леса и поля у метро “Прокшино”. Будет 2 ЖК и\nСпортивно-событийный комплекс. \n\n🌎 Ссылка на чат будущих ЖК\n\nА больше информации в карточках!\n\n🙂😀😀😀😀😀😀😀😀",
-      "authorId": 273473755,
-      "authorName": "fusuges",
-      "authorUsername": "fusuges",
-      "createdAt": "2026-01-16T18:09:42.358Z",
-      "category": "all",
-      "photoFileId": "AgACAgIAAxkBAAO0aWp0uUMjX5KWdVO-YIB4IuOnvXMAAmbqMRu8z4hJnP-pbFELQrUBAAMCAAN5AAM4BA",
-      "photoFileIds": [
-        "AgACAgIAAxkBAAO0aWp0uUMjX5KWdVO-YIB4IuOnvXMAAmbqMRu8z4hJnP-pbFELQrUBAAMCAAN5AAM4BA",
-        "AgACAgIAAxkBAAO1aWp0uYiHQdwRHYwmdesSLAABP2ngAAJn6jEbvM-ISV5zh4EWjmMfAQADAgADeQADOAQ",
-        "AgACAgIAAxkBAAO2aWp0ufqZNzo4bX5wxVf_q-sIMlcAAmjqMRu8z4hJcNTYhwXt__QBAAMCAAN5AAM4BA",
-        "AgACAgIAAxkBAAO3aWp0uWFT9-aYqhp6pRkC4Els3X8AAmnqMRu8z4hJIOzzN2C697MBAAMCAAN5AAM4BA",
-        "AgACAgIAAxkBAAO4aWp0uaxYd9e5lPaPpRlhVWVBweUAAmrqMRu8z4hJiGTU_jhkr-wBAAMCAAN5AAM4BA"
-      ],
-      "moderationMessage": null,
-      "status": "approved",
-      "source": "admin"
-    },
-    {
       "id": 10,
       "text": "Ну, сколько можно?!\nДай отдохнуть рабочему классу!",
       "authorId": 164794874,
