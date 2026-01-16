@@ -38,7 +38,21 @@
       "photoFileId": null
     }
   ],
-  "pending": [],
+  "pending": [
+    {
+      "id": 10,
+      "text": "Почему отклонена??!!",
+      "authorId": 164794874,
+      "authorName": "Bella",
+      "authorUsername": "io_spero",
+      "createdAt": "2026-01-16T17:59:23.846Z",
+      "category": "all",
+      "photoFileId": null,
+      "moderationMessage": null,
+      "status": "pending",
+      "source": "user"
+    }
+  ],
   "rejected": [
     {
       "id": 9,
