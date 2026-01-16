@@ -74,6 +74,10 @@
     body[data-theme="dark"] .card-text a{color:#0a84ff}
 
     /* Галерея */
+    .gallery-wrap{
+      position:relative;
+      margin:10px 0 6px;
+    }
     .gallery{
       display:flex;
       overflow-x:auto;
@@ -81,7 +85,6 @@
       scroll-snap-type:x mandatory;
       -webkit-overflow-scrolling:touch;
       padding:6px 0 10px;
-      margin:10px 0 6px;
     }
     .gallery::-webkit-scrollbar{ height:6px; }
     .gallery::-webkit-scrollbar-thumb{ background:rgba(0,0,0,0.2); border-radius:6px; }
@@ -100,6 +103,58 @@
       border-radius:14px;
       display:block;
     }
+
+    .gallery-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:38px;height:38px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
+      box-shadow:0 8px 18px rgba(0,0,0,0.12);
+      user-select:none;
+    }
+    body[data-theme="dark"] .gallery-arrow{
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(30,30,30,0.6);
+      box-shadow:0 10px 24px rgba(0,0,0,0.45);
+    }
+    .gallery-arrow:hover{ transform:translateY(-50%) scale(1.05); }
+    .gallery-arrow:disabled{ opacity:0.35; cursor:default; }
+    .gallery-arrow:disabled:hover{ transform:translateY(-50%); }
+
+    .gallery-arrow.prev{ left:8px; }
+    .gallery-arrow.next{ right:8px; }
+
+    .gallery-dots{
+      display:flex;
+      gap:6px;
+      justify-content:center;
+      padding:6px 0 0;
+    }
+    .dot{
+      width:7px;height:7px;
+      border-radius:999px;
+      background:rgba(0,0,0,0.22);
+      border:none;
+      padding:0;
+      cursor:pointer;
+      transition:transform 0.15s ease, background 0.15s ease;
+    }
+    body[data-theme="dark"] .dot{ background:rgba(255,255,255,0.22); }
+    .dot.active{
+      background:rgba(0,122,255,0.95);
+      transform:scale(1.25);
+    }
+    body[data-theme="dark"] .dot.active{ background:rgba(10,132,255,0.95); }
 
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
 
@@ -212,10 +267,12 @@
     let allNews = [];
     let currentFilter = 'all';
 
-    // чтобы "обновлять только когда не смотрит":
     // пока вкладка скрыта -> подгружаем в фоне, но не перерисовываем
     // когда вкладка снова видима -> просто renderNews() без fetch
     let hasBackgroundUpdates = false;
+
+    // один обработчик resize на всю страницу
+    let resizeHandlerInstalled = false;
 
     function toggleTheme() {
       const body = document.body;
@@ -273,7 +330,7 @@
       return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
     }
 
-    function renderGallery(photoIds) {
+    function renderGallery(photoIds, postId) {
       const ids = Array.isArray(photoIds) ? photoIds.filter(Boolean) : [];
       if (!ids.length) return '';
 
@@ -282,7 +339,95 @@
         return `<div class="gallery-item"><img src="${src}" alt="photo"></div>`;
       }).join('');
 
-      return `<div class="gallery" aria-label="Галерея фото">${items}</div>`;
+      const dots = ids.map((_, i) => {
+        const cls = i === 0 ? 'dot active' : 'dot';
+        return `<button class="${cls}" type="button" aria-label="Фото ${i + 1}" data-dot="${i}"></button>`;
+      }).join('');
+
+      const arrowsAndDots = (ids.length > 1)
+        ? `
+          <button class="gallery-arrow prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="gallery-arrow next" type="button" aria-label="Следующее фото">›</button>
+          <div class="gallery-dots">${dots}</div>
+        `
+        : '';
+
+      return `
+        <div class="gallery-wrap" data-post-id="${escapeHtml(postId)}">
+          <div class="gallery" aria-label="Галерея фото">
+            ${items}
+          </div>
+          ${arrowsAndDots}
+        </div>
+      `;
+    }
+
+    function initGalleries() {
+      const wraps = document.querySelectorAll('.gallery-wrap');
+
+      wraps.forEach(wrap => {
+        const gallery = wrap.querySelector('.gallery');
+        const prev = wrap.querySelector('.gallery-arrow.prev');
+        const next = wrap.querySelector('.gallery-arrow.next');
+        const dots = Array.from(wrap.querySelectorAll('.dot'));
+
+        // если 0/1 фото — нечего инициализировать
+        if (!gallery || dots.length <= 1 || !prev || !next) return;
+
+        const state = { idx: 0, raf: 0 };
+
+        function scrollToIndex(i) {
+          const max = dots.length - 1;
+          const idx = Math.max(0, Math.min(max, i));
+          const pageWidth = gallery.clientWidth || 1;
+          gallery.scrollTo({ left: idx * pageWidth, behavior: 'smooth' });
+        }
+
+        function setActive(idx) {
+          state.idx = idx;
+          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+          prev.disabled = idx <= 0;
+          next.disabled = idx >= dots.length - 1;
+        }
+
+        function updateFromScroll() {
+          const pageWidth = gallery.clientWidth || 1;
+          const idx = Math.round(gallery.scrollLeft / pageWidth);
+          setActive(Math.max(0, Math.min(dots.length - 1, idx)));
+        }
+
+        prev.addEventListener('click', () => scrollToIndex(state.idx - 1));
+        next.addEventListener('click', () => scrollToIndex(state.idx + 1));
+        dots.forEach((d, i) => d.addEventListener('click', () => scrollToIndex(i)));
+
+        gallery.addEventListener('scroll', () => {
+          if (state.raf) cancelAnimationFrame(state.raf);
+          state.raf = requestAnimationFrame(updateFromScroll);
+        });
+
+        // initial
+        setActive(0);
+      });
+
+      if (!resizeHandlerInstalled) {
+        resizeHandlerInstalled = true;
+        window.addEventListener('resize', () => {
+          document.querySelectorAll('.gallery-wrap').forEach(wrap => {
+            const gallery = wrap.querySelector('.gallery');
+            const dots = Array.from(wrap.querySelectorAll('.dot'));
+            const prev = wrap.querySelector('.gallery-arrow.prev');
+            const next = wrap.querySelector('.gallery-arrow.next');
+            if (!gallery || dots.length <= 1 || !prev || !next) return;
+
+            const pageWidth = gallery.clientWidth || 1;
+            const idx = Math.round(gallery.scrollLeft / pageWidth);
+
+            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+            prev.disabled = idx <= 0;
+            next.disabled = idx >= dots.length - 1;
+          });
+        });
+      }
     }
 
     function renderNews() {
@@ -298,16 +443,20 @@
 
       feed.innerHTML = filtered.map(n => {
         const ts = n.timestamp || n.createdAt || null;
-        const photoIds = Array.isArray(n.photoFileIds) ? n.photoFileIds
+
+        const photoIds = Array.isArray(n.photoFileIds)
+          ? n.photoFileIds
           : (n.photoFileId ? [n.photoFileId] : []);
 
         let html = '<div class="card">';
         html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
-        html += renderGallery(photoIds);
+        html += renderGallery(photoIds, n.id);
         html += `<div class="card-text">${linkify(n.text || '')}</div>`;
         html += '</div>';
         return html;
       }).join('');
+
+      initGalleries();
     }
 
     function filterNews(cat) {
@@ -319,7 +468,6 @@
     }
 
     function sameTop(a, b) {
-      // лёгкая проверка "изменилось ли"
       const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
       const b0 = (Array.isArray(b) && b.length) ? b[0] : null;
       return a0 && b0 && a0.id === b0.id && a.length === b.length;
