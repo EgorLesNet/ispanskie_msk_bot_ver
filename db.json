@@ -1,4 +1,16 @@
 {
-  "posts": [],
+  "posts": [
+    {
+      "id": 1,
+      "text": "test",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-16T12:34:37.752Z",
+      "status": "approved",
+      "source": "admin",
+      "photoFileId": null
+    }
+  ],
   "seq": 1
 }
