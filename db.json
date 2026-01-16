@@ -14,17 +14,6 @@
       "source": "admin"
     },
     {
-      "id": 4,
-      "text": "test photo",
-      "authorId": 273473755,
-      "authorName": "fusuges",
-      "authorUsername": "fusuges",
-      "createdAt": "2026-01-16T13:40:09.439Z",
-      "status": "approved",
-      "source": "admin",
-      "photoFileId": "AgACAgIAAxkBAAOKaWo_spdMt_b8OsKl_2L176fvr5oAApoPaxsgflBLbZYOwn6Ly9wBAAMCAANtAAM4BA"
-    },
-    {
       "id": 3,
       "text": "test",
       "authorId": 273473755,
