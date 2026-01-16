@@ -28,6 +28,24 @@ async function readDbViaGithubApi() {
   }
 }
 
+function normalizePost(p) {
+  const photoIds = Array.isArray(p.photoFileIds)
+    ? p.photoFileIds
+    : (p.photoFileId ? [p.photoFileId] : [])
+
+  const media = Array.isArray(p.media) && p.media.length
+    ? p.media
+    : photoIds.map(id => ({ type: 'photo', fileId: id }))
+
+  return {
+    ...p,
+    timestamp: p.timestamp || p.createdAt || null,
+    category: p.category || 'all',
+    photoFileIds: photoIds,
+    media
+  }
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -39,17 +57,7 @@ module.exports = async (req, res) => {
 
   try {
     const db = await readDbViaGithubApi()
-
-    // Публичная лента — только approved
-    const posts = db.posts.map(p => ({
-      ...p,
-      timestamp: p.timestamp || p.createdAt || null,
-      category: p.category || 'all',
-      photoFileIds: Array.isArray(p.photoFileIds)
-        ? p.photoFileIds
-        : (p.photoFileId ? [p.photoFileId] : [])
-    }))
-
+    const posts = (db.posts || []).map(normalizePost)
     return res.status(200).json({ posts })
   } catch (e) {
     console.error('api/news error:', e)
