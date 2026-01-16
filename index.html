@@ -1,54 +1,456 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Лента района</title>
-<style>
-body{font-family:system-ui,Arial;margin:16px;background:#f5f5f5}
-h3{margin-bottom:8px}
-.card{background:white;border:1px solid #ddd;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-.meta{color:#666;font-size:12px;margin-bottom:8px}
-.text{line-height:1.5}
-img{max-width:100%;border-radius:8px;margin-top:10px;display:block}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Агрегатор для района</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      min-height:100vh;background:#f0f2f5;color:#1a1a1a;
+      transition:background 0.3s ease, color 0.3s ease;
+      padding-top:80px;padding-bottom:90px;
+    }
+    body[data-theme="dark"]{ background:#0e0e0e; color:#fff; }
+
+    .header{
+      position:fixed;top:12px;left:12px;right:12px;z-index:100;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 18px;border-radius:20px;
+    }
+    .logo-wrap{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+    .logo-img{
+      width:40px;height:40px;border-radius:10px;transition:transform 0.3s;cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    }
+    .logo-img:hover{transform:scale(1.1) rotate(5deg)}
+    h3{font-size:17px;font-weight:600;margin:0}
+    .subtitle{ font-size:12px;color:#666;margin-top:3px; }
+    body[data-theme="dark"] .subtitle{color:#999}
+
+    .theme-toggle{
+      background:transparent;border:none;font-size:24px;cursor:pointer;padding:8px;
+      border-radius:50%;transition:transform 0.3s,background 0.2s;
+    }
+    .theme-toggle:hover{transform:scale(1.15) rotate(15deg);background:rgba(0,0,0,0.05)}
+    body[data-theme="dark"] .theme-toggle:hover{background:rgba(255,255,255,0.08)}
+
+    .feed{display:grid;gap:16px;width:min(680px, 92vw);margin:20px auto;}
+    .card{
+      padding:18px;border-radius:20px;overflow:hidden;
+      background:rgba(255,255,255,0.65);
+      border:1px solid rgba(0,0,0,0.08);
+      transition:transform 0.3s, box-shadow 0.3s;
+      animation:fadeIn 0.5s ease-out;
+    }
+    body[data-theme="dark"] .card{background:rgba(30,30,30,0.65);border:1px solid rgba(255,255,255,0.1);}
+    .card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.15);}
+    body[data-theme="dark"] .card:hover{box-shadow:0 12px 32px rgba(0,0,0,0.5);}
+
+    .card-meta{font-size:11px;color:#888;margin-bottom:10px;line-height:1.4;}
+    .card-meta a{color:inherit;text-decoration:underline;}
+    .card-meta a:hover{opacity:0.85;}
+
+    .card-text{font-size:15px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;}
+    .card-text a{color:#007aff;text-decoration:none;transition:color 0.2s}
+    .card-text a:hover{text-decoration:underline;color:#0051d5}
+    body[data-theme="dark"] .card-text a{color:#0a84ff}
+
+    /* Галерея */
+    .gallery-wrap{position:relative;margin:10px 0 6px;}
+    .gallery{
+      display:flex;overflow-x:auto;gap:12px;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      padding:6px 0 10px;
+    }
+    .gallery::-webkit-scrollbar{height:6px;}
+    .gallery::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:6px;}
+    body[data-theme="dark"] .gallery::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);}
+
+    .gallery-item{flex:0 0 100%;scroll-snap-align:center;display:flex;justify-content:center;}
+    .gallery-item img, .gallery-item video{
+      max-width:420px;width:100%;height:auto;border-radius:14px;display:block;
+      background:rgba(0,0,0,0.06);
+    }
+    body[data-theme="dark"] .gallery-item img,
+    body[data-theme="dark"] .gallery-item video{background:rgba(255,255,255,0.06);}
+
+    .gallery-arrow{
+      position:absolute;top:50%;transform:translateY(-50%);
+      width:38px;height:38px;border-radius:999px;
+      border:1px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.75);
+      backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
+      box-shadow:0 8px 18px rgba(0,0,0,0.12);user-select:none;
+    }
+    body[data-theme="dark"] .gallery-arrow{
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(30,30,30,0.6);
+      box-shadow:0 10px 24px rgba(0,0,0,0.45);
+    }
+    .gallery-arrow:hover{transform:translateY(-50%) scale(1.05);}
+    .gallery-arrow:disabled{opacity:0.35;cursor:default;}
+    .gallery-arrow:disabled:hover{transform:translateY(-50%);}
+    .gallery-arrow.prev{left:8px;}
+    .gallery-arrow.next{right:8px;}
+
+    .gallery-dots{display:flex;gap:6px;justify-content:center;padding:6px 0 0;}
+    .dot{
+      width:7px;height:7px;border-radius:999px;
+      background:rgba(0,0,0,0.22);
+      border:none;padding:0;cursor:pointer;
+      transition:transform 0.15s ease, background 0.15s ease;
+    }
+    body[data-theme="dark"] .dot{background:rgba(255,255,255,0.22);}
+    .dot.active{background:rgba(0,122,255,0.95);transform:scale(1.25);}
+    body[data-theme="dark"] .dot.active{background:rgba(10,132,255,0.95);}
+
+    .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
+
+    .nav{
+      position:fixed;bottom:12px;left:12px;right:12px;z-index:100;
+      display:flex;justify-content:center;
+      padding:10px;border-radius:22px;
+    }
+    .nav-inner{display:flex;gap:8px;justify-content:center;width:100%;max-width:600px;}
+    .nav button{
+      background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.12);
+      padding:11px 24px;border-radius:18px;cursor:pointer;font-size:14px;font-weight:500;
+      transition:all 0.3s;color:#333;white-space:nowrap;
+    }
+    body[data-theme="dark"] .nav button{
+      background:rgba(50,50,50,0.6);border:1px solid rgba(255,255,255,0.18);color:#ccc;
+    }
+    .nav button:hover{
+      background:rgba(255,255,255,0.9);transform:translateY(-2px) scale(1.05);
+      box-shadow:0 6px 16px rgba(0,0,0,0.15);
+    }
+    body[data-theme="dark"] .nav button:hover{background:rgba(70,70,70,0.9);}
+    .nav button[aria-current="true"]{
+      background:#007aff;color:#fff;border-color:#007aff;
+      box-shadow:0 4px 12px rgba(0,122,255,0.4);
+    }
+    body[data-theme="dark"] .nav button[aria-current="true"]{
+      background:#0a84ff;border-color:#0a84ff;
+      box-shadow:0 4px 12px rgba(10,132,255,0.4);
+    }
+    .nav button .icon{display:none;font-size:20px}
+    .nav button .text{display:inline}
+
+    @media (max-width: 350px){
+      .nav button .icon{display:inline}
+      .nav button .text{display:none}
+    }
+
+    .liquid-glass{
+      backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
+      -webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
+    }
+    .header.liquid-glass{
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(255,255,255,0.4);
+      box-shadow:0 8px 32px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.5);
+    }
+    body[data-theme="dark"] .header.liquid-glass{
+      background:rgba(20,20,20,0.7);
+      border:1px solid rgba(255,255,255,0.2);
+      box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
+    }
+    .nav.liquid-glass{
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(255,255,255,0.4);
+      box-shadow:0 -4px 24px rgba(0,0,0,0.12);
+    }
+    body[data-theme="dark"] .nav.liquid-glass{
+      background:rgba(20,20,20,0.7);
+      border:1px solid rgba(255,255,255,0.2);
+      box-shadow:0 -4px 24px rgba(0,0,0,0.4);
+    }
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  </style>
 </head>
+
 <body>
-<h3>🏘 Лента района</h3>
-<p style="color:#666;font-size:14px">Собранные новости района.</p>
-<div id="list"></div>
-<script>
-  console.log('Loading news...');
-fetch('/api/news').then(function(r){return r.json()}).then(function(data){
-var el=document.getElementById('list');
-if(!data.posts||data.posts.length===0){
-el.innerHTML='<div class="card">Пока нет новостей.</div>';
-returnreturn;}console.log('News data:',data);
-}
-data.posts.forEach(function(p){
-var card=document.createElement('div');
-card.className='card';
-var meta=document.createElement('div');
-meta.className='meta';
-var date=new Date(p.createdAt).toLocaleString('ru-RU');
-meta.textContent='#'+p.id+' · '+date+' · '+p.source;
-card.appendChild(meta);
-var text=document.createElement('div');
-text.className='text';
-text.textContent=p.text;
-card.appendChild(text);
-if(p.photoFileId){
-var img=document.createElement('img');
-img.src='/api/photo/'+p.photoFileId;
-img.alt='фото';
-card.appendChild(img);
-}
-el.appendChild(card);
-});
-}).catch(function(err){
-  console.error('Error loading news:', err);
-document.getElementById('list').innerHTML='<div class="card">Ошибка загрузки: '+err.message+'</div>';
-});
-</script>
+  <header class="header liquid-glass">
+    <a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener">
+      <img class="logo-img" src="https://raw.githubusercontent.com/EgorLesNet/ispanskie_msk_bot_ver/main/public/logo.png" alt="Лого" />
+      <div>
+        <h3>Агрегатор для района</h3>
+        <div class="subtitle">by Испанские Кварталы | Прокшино</div>
+      </div>
+    </a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
+      <span id="theme-icon">🌙</span>
+    </button>
+  </header>
+
+  <main class="feed" id="feed"></main>
+
+  <nav class="nav liquid-glass">
+    <div class="nav-inner">
+      <button id="btn-all" aria-current="true" onclick="filterNews('all')">
+        <span class="icon">📰</span><span class="text">Новости</span>
+      </button>
+      <button id="btn-business" onclick="filterNews('business')">
+        <span class="icon">💼</span><span class="text">Бизнес</span>
+      </button>
+      <button id="btn-reco" onclick="filterNews('reco')">
+        <span class="icon">⭐</span><span class="text">Рекомендации</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    let allNews = [];
+    let currentFilter = 'all';
+
+    let hasBackgroundUpdates = false;
+    let resizeHandlerInstalled = false;
+
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById('theme-icon');
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? '' : 'dark');
+      icon.textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const useDark = saved === 'dark' || (!saved && prefersDark);
+      if (useDark) {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').textContent = '☀️';
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s || '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function linkify(text) {
+      const safe = escapeHtml(text);
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
+    function formatDate(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${day}.${month}.${year}, ${hours}:${minutes}`;
+    }
+
+    function buildSourceLine(n) {
+      const s = n && n.source ? n.source : null;
+      if (!s) return '';
+
+      const url = s.postUrl || s.chatUrl || '';
+      const title = s.title || (s.username ? '@' + s.username : 'Источник');
+
+      if (!url) return ` · Источник: ${escapeHtml(title)}`;
+      return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
+    }
+
+    function normalizeMedia(n) {
+      if (Array.isArray(n.media) && n.media.length) return n.media;
+
+      const photoIds = Array.isArray(n.photoFileIds)
+        ? n.photoFileIds
+        : (n.photoFileId ? [n.photoFileId] : []);
+
+      return photoIds.map(id => ({ type: 'photo', fileId: id }));
+    }
+
+    function renderGallery(mediaItems, postId) {
+      const items = Array.isArray(mediaItems) ? mediaItems.filter(x => x && x.fileId) : [];
+      if (!items.length) return '';
+
+      const slides = items.map(it => {
+        const src = `/api/media/${encodeURIComponent(it.fileId)}`;
+        if (it.type === 'video') {
+          return `<div class="gallery-item"><video controls playsinline preload="metadata" src="${src}"></video></div>`;
+        }
+        return `<div class="gallery-item"><img src="${src}" alt="photo"></div>`;
+      }).join('');
+
+      const dots = items.map((_, i) => {
+        const cls = i === 0 ? 'dot active' : 'dot';
+        return `<button class="${cls}" type="button" aria-label="Слайд ${i + 1}" data-dot="${i}"></button>`;
+      }).join('');
+
+      const controls = (items.length > 1)
+        ? `
+          <button class="gallery-arrow prev" type="button" aria-label="Предыдущий">‹</button>
+          <button class="gallery-arrow next" type="button" aria-label="Следующий">›</button>
+          <div class="gallery-dots">${dots}</div>
+        `
+        : '';
+
+      return `
+        <div class="gallery-wrap" data-post-id="${escapeHtml(postId)}">
+          <div class="gallery" aria-label="Галерея">
+            ${slides}
+          </div>
+          ${controls}
+        </div>
+      `;
+    }
+
+    function initGalleries() {
+      const wraps = document.querySelectorAll('.gallery-wrap');
+
+      wraps.forEach(wrap => {
+        const gallery = wrap.querySelector('.gallery');
+        const prev = wrap.querySelector('.gallery-arrow.prev');
+        const next = wrap.querySelector('.gallery-arrow.next');
+        const dots = Array.from(wrap.querySelectorAll('.dot'));
+
+        if (!gallery || dots.length <= 1 || !prev || !next) return;
+
+        const state = { idx: 0, raf: 0 };
+
+        function scrollToIndex(i) {
+          const max = dots.length - 1;
+          const idx = Math.max(0, Math.min(max, i));
+          const pageWidth = gallery.clientWidth || 1;
+          gallery.scrollTo({ left: idx * pageWidth, behavior: 'smooth' });
+        }
+
+        function setActive(idx) {
+          state.idx = idx;
+          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+          prev.disabled = idx <= 0;
+          next.disabled = idx >= dots.length - 1;
+        }
+
+        function updateFromScroll() {
+          const pageWidth = gallery.clientWidth || 1;
+          const idx = Math.round(gallery.scrollLeft / pageWidth);
+          setActive(Math.max(0, Math.min(dots.length - 1, idx)));
+        }
+
+        prev.addEventListener('click', () => scrollToIndex(state.idx - 1));
+        next.addEventListener('click', () => scrollToIndex(state.idx + 1));
+        dots.forEach((d, i) => d.addEventListener('click', () => scrollToIndex(i)));
+
+        gallery.addEventListener('scroll', () => {
+          if (state.raf) cancelAnimationFrame(state.raf);
+          state.raf = requestAnimationFrame(updateFromScroll);
+        });
+
+        setActive(0);
+      });
+
+      if (!resizeHandlerInstalled) {
+        resizeHandlerInstalled = true;
+        window.addEventListener('resize', () => {
+          document.querySelectorAll('.gallery-wrap').forEach(wrap => {
+            const gallery = wrap.querySelector('.gallery');
+            const dots = Array.from(wrap.querySelectorAll('.dot'));
+            const prev = wrap.querySelector('.gallery-arrow.prev');
+            const next = wrap.querySelector('.gallery-arrow.next');
+            if (!gallery || dots.length <= 1 || !prev || !next) return;
+
+            const pageWidth = gallery.clientWidth || 1;
+            const idx = Math.round(gallery.scrollLeft / pageWidth);
+
+            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+            prev.disabled = idx <= 0;
+            next.disabled = idx >= dots.length - 1;
+          });
+        });
+      }
+    }
+
+    function renderNews() {
+      const feed = document.getElementById('feed');
+      const filtered = currentFilter === 'all'
+        ? allNews
+        : allNews.filter(n => n.category === currentFilter);
+
+      if (!filtered.length) {
+        feed.innerHTML = '<div class="no-news">Нет новостей в этой категории.</div>';
+        return;
+      }
+
+      feed.innerHTML = filtered.map(n => {
+        const ts = n.timestamp || n.createdAt || null;
+        const media = normalizeMedia(n);
+
+        let html = '<div class="card">';
+        html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
+        html += renderGallery(media, n.id);
+        html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+        html += '</div>';
+        return html;
+      }).join('');
+
+      initGalleries();
+    }
+
+    function filterNews(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
+      const btn = document.getElementById(`btn-${cat}`);
+      if (btn) btn.setAttribute('aria-current', 'true');
+      renderNews();
+    }
+
+    function sameTop(a, b) {
+      const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
+      const b0 = (Array.isArray(b) && b.length) ? b[0] : null;
+      return a0 && b0 && a0.id === b0.id && a.length === b.length;
+    }
+
+    async function loadNews({ render = true } = {}) {
+      try {
+        const res = await fetch('/api/news', { cache: 'no-store' });
+        const data = await res.json();
+        const next = Array.isArray(data.posts) ? data.posts : [];
+
+        const changed = !sameTop(allNews, next);
+        allNews = next;
+
+        if (render && changed) renderNews();
+        if (!render && changed) hasBackgroundUpdates = true;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    initTheme();
+    loadNews({ render: true });
+
+    // Фоновое обновление ТОЛЬКО когда вкладка не видима
+    setInterval(() => {
+      if (document.visibilityState !== 'visible') loadNews({ render: false });
+    }, 3000);
+
+    // Вернулся на вкладку -> перерисовать то, что уже подгрузилось в фоне
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && hasBackgroundUpdates) {
+        hasBackgroundUpdates = false;
+        renderNews();
+      }
+    });
+  </script>
 </body>
 </html>
