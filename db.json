@@ -1,19 +1,6 @@
 {
   "posts": [
     {
-      "id": 8,
-      "text": "Вот они, дружные испанские, кто-то заботливо положил потерянные деньги в лифте на поручни ;)) \n\nВеласкеса 1/3\n\n📷 @Laliqqq",
-      "authorId": 273473755,
-      "authorName": "fusuges",
-      "authorUsername": "fusuges",
-      "createdAt": "2026-01-16T17:53:55.666Z",
-      "category": "all",
-      "photoFileId": "AgACAgIAAxkBAAPhaWp7MkDAZ5t06gTHIeOqF_5h2sQAAq8Naxt6-FFLx7jzXNCGf3wBAAMCAAN5AAM4BA",
-      "moderationMessage": null,
-      "status": "approved",
-      "source": "admin"
-    },
-    {
       "id": 7,
       "text": "post",
       "authorId": 273473755,
