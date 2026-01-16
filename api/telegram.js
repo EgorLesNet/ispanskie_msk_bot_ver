@@ -114,9 +114,7 @@ bot.start(async ctx => {
 bot.on('photo', async ctx => {
   const userId = ctx.from.id
   const isAdmin = isAdminUser(ctx.from)
-  const caption = ctx.message.caption || ''
-  const photoFileId = ctx.message.photo[ctx.message.photo.length - 1].file_id
-
+  const caption = ctx.message.caption || ctx.message.text || ''
   if (caption.trim()) {
     const post = await addNews({ text: caption, author: ctx.from, isAdmin, photoFileId })
     if (isAdmin) {
