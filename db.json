@@ -43,20 +43,8 @@
       "status": "approved",
       "source": "admin",
       "photoFileId": null
-    },
-    {
-      "id": 1,
-      "text": "test",
-      "authorId": 273473755,
-      "authorName": "fusuges",
-      "authorUsername": "fusuges",
-      "createdAt": "2026-01-16T12:34:40.167Z",
-      "status": "approved",
-      "source": "admin",
-      "photoFileId": null
     }
   ],
-  "pending": [
-  ],
+  "pending": [],
   "rejected": []
 }
