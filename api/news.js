@@ -61,7 +61,7 @@ async function writeDB(db) {
     return res.status(200).end();
   }
 
-  const db = readDB();
+  const db = await readDB();
 
   // GET /api/news - Get all posts
   if (req.method === 'GET') {
