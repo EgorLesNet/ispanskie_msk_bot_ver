@@ -1,13 +1,26 @@
 const GITHUB_REPO = 'EgorLesNet/ispanskie_msk_bot_ver'
 const DB_FILE_PATH = 'db.json'
 const DB_BRANCH = process.env.DB_BRANCH || 'main'
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '' // можно тот же токен, что и для записи
 
-async function loadFromGitHub() {
-  const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${DB_BRANCH}/${DB_FILE_PATH}`
-  const response = await fetch(url, { cache: 'no-store' })
-  if (!response.ok) return { posts: [], pending: [], rejected: [] }
-  const data = await response.json()
-  // Нормализация, чтобы не падать, если каких-то ключей нет
+async function readDbViaGithubApi() {
+  const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}?ref=${encodeURIComponent(DB_BRANCH)}`
+  const resp = await fetch(apiUrl, {
+    headers: {
+      Accept: 'application/vnd.github.v3+json',
+      ...(GITHUB_TOKEN ? { Authorization: `token ${GITHUB_TOKEN}` } : {})
+    },
+    cache: 'no-store'
+  })
+
+  if (!resp.ok) return { posts: [], pending: [], rejected: [] }
+
+  const json = await resp.json()
+  const contentB64 = json?.content || ''
+  const buf = Buffer.from(contentB64, 'base64')
+  const text = buf.toString('utf8')
+  const data = JSON.parse(text)
+
   return {
     posts: Array.isArray(data.posts) ? data.posts : [],
     pending: Array.isArray(data.pending) ? data.pending : [],
@@ -19,17 +32,22 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-  // Важно: чтобы Vercel/браузер не кешировали API-ответ
   res.setHeader('Cache-Control', 'no-store')
 
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' })
 
   try {
-    const db = await loadFromGitHub()
+    const db = await readDbViaGithubApi()
 
-    // Публичная лента — только одобренные
-    return res.status(200).json({ posts: db.posts })
+    // Подгоняем под текущий фронт: ему нужны timestamp и category (иначе фильтры ломаются)
+    const posts = db.posts.map(p => ({
+      ...p,
+      timestamp: p.timestamp || p.createdAt || null,
+      category: p.category || 'all'
+    }))
+
+    return res.status(200).json({ posts })
   } catch (e) {
     console.error('api/news error:', e)
     return res.status(500).json({ error: 'Failed to load news' })
