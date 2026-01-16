@@ -48,7 +48,10 @@
       "createdAt": "2026-01-16T17:58:58.421Z",
       "category": "all",
       "photoFileId": null,
-      "moderationMessage": null,
+      "moderationMessage": {
+        "chatId": 273473755,
+        "messageId": 236
+      },
       "status": "pending",
       "source": "user"
     }
