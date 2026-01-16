@@ -50,6 +50,7 @@
       border:1px solid rgba(0,0,0,0.08);
       transition:transform 0.3s, box-shadow 0.3s;
       animation:fadeIn 0.5s ease-out;
+      overflow:hidden;
     }
     body[data-theme="dark"] .card{
       background:rgba(30,30,30,0.65);
@@ -62,15 +63,42 @@
     body[data-theme="dark"] .card:hover{
       box-shadow:0 12px 32px rgba(0,0,0,0.5);
     }
-    .card-meta{ font-size:11px;color:#888;margin-bottom:10px; }
+
+    .card-meta{ font-size:11px;color:#888;margin-bottom:10px;line-height:1.4; }
+    .card-meta a{ color:inherit; text-decoration:underline; }
+    .card-meta a:hover{ opacity:0.85; }
+
     .card-text{ font-size:15px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word; }
     .card-text a{color:#007aff;text-decoration:none;transition:color 0.2s}
     .card-text a:hover{text-decoration:underline;color:#0051d5}
     body[data-theme="dark"] .card-text a{color:#0a84ff}
 
-    .card-photo{
-      max-width:400px;width:100%;height:auto;display:block;margin:12px auto 12px;
+    /* Галерея */
+    .gallery{
+      display:flex;
+      overflow-x:auto;
+      gap:12px;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      padding:6px 0 10px;
+      margin:10px 0 6px;
+    }
+    .gallery::-webkit-scrollbar{ height:6px; }
+    .gallery::-webkit-scrollbar-thumb{ background:rgba(0,0,0,0.2); border-radius:6px; }
+    body[data-theme="dark"] .gallery::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.15); }
+
+    .gallery-item{
+      flex:0 0 100%;
+      scroll-snap-align:center;
+      display:flex;
+      justify-content:center;
+    }
+    .gallery-item img{
+      max-width:420px;
+      width:100%;
+      height:auto;
       border-radius:14px;
+      display:block;
     }
 
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
@@ -184,6 +212,11 @@
     let allNews = [];
     let currentFilter = 'all';
 
+    // чтобы "обновлять только когда не смотрит":
+    // пока вкладка скрыта -> подгружаем в фоне, но не перерисовываем
+    // когда вкладка снова видима -> просто renderNews() без fetch
+    let hasBackgroundUpdates = false;
+
     function toggleTheme() {
       const body = document.body;
       const icon = document.getElementById('theme-icon');
@@ -203,12 +236,21 @@
       }
     }
 
-    function linkify(text) {
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      return String(text || '').replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+    function escapeHtml(s) {
+      return String(s || '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
     }
 
-    // Дата/время без случайных значений
+    function linkify(text) {
+      const safe = escapeHtml(text);
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
     function formatDate(ts) {
       if (!ts) return '';
       const d = new Date(ts);
@@ -218,6 +260,29 @@
       const hours = String(d.getHours()).padStart(2, '0');
       const minutes = String(d.getMinutes()).padStart(2, '0');
       return `${day}.${month}.${year}, ${hours}:${minutes}`;
+    }
+
+    function buildSourceLine(n) {
+      const s = n && n.source ? n.source : null;
+      if (!s) return '';
+
+      const url = s.postUrl || s.chatUrl || '';
+      const title = s.title || (s.username ? '@' + s.username : 'Источник');
+
+      if (!url) return ` · Источник: ${escapeHtml(title)}`;
+      return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
+    }
+
+    function renderGallery(photoIds) {
+      const ids = Array.isArray(photoIds) ? photoIds.filter(Boolean) : [];
+      if (!ids.length) return '';
+
+      const items = ids.map(id => {
+        const src = `/api/photo/${encodeURIComponent(id)}`;
+        return `<div class="gallery-item"><img src="${src}" alt="photo"></div>`;
+      }).join('');
+
+      return `<div class="gallery" aria-label="Галерея фото">${items}</div>`;
     }
 
     function renderNews() {
@@ -232,12 +297,13 @@
       }
 
       feed.innerHTML = filtered.map(n => {
-        let html = '<div class="card">';
         const ts = n.timestamp || n.createdAt || null;
-        html += `<div class="card-meta">#${n.id} · ${formatDate(ts)}</div>`;
-        if (n.photoFileId) {
-          html += `<img class="card-photo" src="/api/photo/${n.photoFileId}" alt="photo">`;
-        }
+        const photoIds = Array.isArray(n.photoFileIds) ? n.photoFileIds
+          : (n.photoFileId ? [n.photoFileId] : []);
+
+        let html = '<div class="card">';
+        html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
+        html += renderGallery(photoIds);
         html += `<div class="card-text">${linkify(n.text || '')}</div>`;
         html += '</div>';
         return html;
@@ -252,28 +318,43 @@
       renderNews();
     }
 
-    async function loadNews() {
+    function sameTop(a, b) {
+      // лёгкая проверка "изменилось ли"
+      const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
+      const b0 = (Array.isArray(b) && b.length) ? b[0] : null;
+      return a0 && b0 && a0.id === b0.id && a.length === b.length;
+    }
+
+    async function loadNews({ render = true } = {}) {
       try {
         const res = await fetch('/api/news', { cache: 'no-store' });
         const data = await res.json();
-        allNews = Array.isArray(data.posts) ? data.posts : [];
-        renderNews();
+        const next = Array.isArray(data.posts) ? data.posts : [];
+
+        const changed = !sameTop(allNews, next);
+        allNews = next;
+
+        if (render && changed) renderNews();
+        if (!render && changed) hasBackgroundUpdates = true;
       } catch (e) {
         console.error(e);
       }
     }
 
     initTheme();
-    loadNews();
+    loadNews({ render: true });
 
-    // Обновляем ленту только когда вкладка НЕ видима (пользователь не смотрит)
+    // Фоновое обновление ТОЛЬКО когда вкладка не видима
     setInterval(() => {
-      if (document.visibilityState !== 'visible') loadNews();
+      if (document.visibilityState !== 'visible') loadNews({ render: false });
     }, 3000);
 
-    // Если пользователь ушёл со вкладки — сразу подтянем обновления
+    // Вернулся на вкладку -> просто перерисовать то, что уже подгрузилось в фоне
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState !== 'visible') loadNews();
+      if (document.visibilityState === 'visible' && hasBackgroundUpdates) {
+        hasBackgroundUpdates = false;
+        renderNews();
+      }
     });
   </script>
 </body>
