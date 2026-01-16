@@ -214,6 +214,28 @@ async function notifyAdmin(ctx, post) {
   }
 }
 
+async function deleteNews(postId) {
+  const db = await readNewsDB()
+
+  const places = [
+    { key: 'posts', title: 'published' },
+    { key: 'pending', title: 'pending' },
+    { key: 'rejected', title: 'rejected' }
+  ]
+
+  for (const place of places) {
+    const arr = db[place.key]
+    const idx = arr.findIndex(p => p && p.id === postId)
+    if (idx !== -1) {
+      const removed = arr.splice(idx, 1)[0]
+      await writeNewsDB(db)
+      return { place: place.title, post: removed }
+    }
+  }
+
+  return null
+}
+
 bot.start(async ctx => {
   userStates.delete(ctx.from.id)
 
