@@ -1,6 +1,22 @@
 {
   "posts": [
     {
+      "id": 12,
+      "text": "🌎 🏗️ \nА101 начинает строить новые ЖК у метро Прокшино. \n\nА101 начинает застройку леса и поля у метро “Прокшино”. Будет 2 ЖК и\nСпортивно-событийный комплекс. \n\n🌎 Ссылка на чат будущих ЖК\n\nА больше информации в карточках!\n\n🙂😀😀😀😀😀😀😀😀",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-16T18:13:34.382Z",
+      "category": "all",
+      "photoFileId": "AgACAgIAAxkBAAO0aWp0uUMjX5KWdVO-YIB4IuOnvXMAAmbqMRu8z4hJnP-pbFELQrUBAAMCAAN5AAM4BA",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAO0aWp0uUMjX5KWdVO-YIB4IuOnvXMAAmbqMRu8z4hJnP-pbFELQrUBAAMCAAN5AAM4BA"
+      ],
+      "moderationMessage": null,
+      "status": "approved",
+      "source": "admin"
+    },
+    {
       "id": 11,
       "text": "🌎 🏗️ \nА101 начинает строить новые ЖК у метро Прокшино. \n\nА101 начинает застройку леса и поля у метро “Прокшино”. Будет 2 ЖК и\nСпортивно-событийный комплекс. \n\n🌎 Ссылка на чат будущих ЖК\n\nА больше информации в карточках!\n\n🙂😀😀😀😀😀😀😀😀",
       "authorId": 273473755,
