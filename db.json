@@ -38,7 +38,8 @@
       "photoFileId": null
     }
   ],
-  "pending": [
+  "pending": [],
+  "rejected": [
     {
       "id": 9,
       "text": "Покорми кота через 2 минуты.",
@@ -52,9 +53,8 @@
         "chatId": 273473755,
         "messageId": 236
       },
-      "status": "pending",
+      "status": "rejected",
       "source": "user"
     }
-  ],
-  "rejected": []
+  ]
 }
