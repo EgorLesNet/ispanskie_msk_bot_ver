@@ -19,8 +19,10 @@
   <div id="list"></div>
   <script>
     fetch('/api/news')
+            console.log('Fetching news...');
       .then(function(r) { return r.json(); })
       .then(function(data) {
+                console.log('Received data:', data);
         var el = document.getElementById('list');
         if (!data.posts || data.posts.length === 0) {
           el.innerHTML = '<div class="card">Пока нет новостей.</div>';
