@@ -5,181 +5,252 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Агрегатор для района</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
 body{
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-margin:0;padding:0 0 80px 0;min-height:100vh;
-background:#BFEDC1;
-color:#1a1a1a;
+  margin:0; padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  min-height:100vh;
+  background:#f0f2f5;
+  color:#1a1a1a;
+  transition:background 0.3s ease, color 0.3s ease;
 }
 body[data-theme="dark"]{
-background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
-color:#fff;
+  background:#0e0e0e;
+  color:#fff;
 }
-.liquid-glass{
-background:rgba(255,255,255,0.6);
-backdrop-filter:blur(15px);
--webkit-backdrop-filter:blur(15px);
-border:1px solid rgba(200,200,200,0.3);
-border-radius:16px;
-box-shadow:0 8px 32px rgba(0,0,0,0.1),inset 0 1px 1px rgba(255,255,255,0.3);
-transition:all 0.3s ease;
-}
-body[data-theme="dark"] .liquid-glass{
-background:rgba(30,30,50,0.3);
-border:1px solid rgba(255,255,255,0.1);
-box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 1px rgba(255,255,255,0.15);
-}
+
 .header{
-display:flex;justify-content:space-between;align-items:center;padding:16px 20px;
-position:sticky;top:0;z-index:100;
-border-radius:0;
+  position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 20px;
+  border-radius:0;
 }
-.logo{font-size:32px;text-decoration:none;line-height:1;transition:transform 0.3s;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))}
+.logo{
+  font-size:32px;text-decoration:none;line-height:1;transition:transform 0.3s;cursor:pointer;
+}
 .logo:hover{transform:scale(1.1)}
-h3{font-size:18px;font-weight:600}
-.theme-btn{
-background:rgba(255,255,255,0.2);
-border:1px solid rgba(255,255,255,0.3);
-width:40px;height:40px;border-radius:50%;
-cursor:pointer;font-size:24px;transition:all 0.3s;
-}
-.theme-btn:hover{transform:scale(1.1);background:rgba(255,255,255,0.3)}
+h3{font-size:18px;font-weight:600;margin:0}
 .subtitle{
-color:inherit;font-size:13px;padding:12px 20px;text-align:center;opacity:0.9;margin:12px 8px;
+  font-size:13px;color:#666;margin-top:4px;
+}
+body[data-theme="dark"] .subtitle{color:#999}
+.theme-toggle{
+  background:transparent;border:none;font-size:26px;cursor:pointer;padding:6px;
+  border-radius:50%;transition:transform 0.2s,background 0.2s;
+}
+.theme-toggle:hover{transform:scale(1.1);background:rgba(0,0,0,0.05)}
+body[data-theme="dark"] .theme-toggle:hover{background:rgba(255,255,255,0.05)}
+
+.feed{
+  display:grid;gap:16px;
+  width:min(680px, 92vw);
+  margin:20px auto;
+  padding-bottom:80px;
 }
 .card{
-margin:12px 8px;padding:14px;overflow:hidden;transition:all 0.3s;
+  padding:18px;
+  border-radius:18px;
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(0,0,0,0.08);
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+body[data-theme="dark"] .card{
+  background:rgba(30,30,30,0.6);
+  border:1px solid rgba(255,255,255,0.1);
 }
 .card:hover{
-transform:translateY(-2px);
-box-shadow:0 12px 48px rgba(0,0,0,0.15),inset 0 1px 1px rgba(255,255,255,0.4);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);
 }
-.meta{font-size:12px;padding:0 0 8px 0;opacity:0.8}
-.text{
-line-height:1.5;padding:0;font-size:15px;word-wrap:break-word;
+body[data-theme="dark"] .card:hover{
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
 }
-.text a{color:#0088cc;text-decoration:none;font-weight:500}
-.text a:hover{text-decoration:underline}
-body[data-theme="dark"] .text a{color:#64b5f6}
-img{max-width:100%;width:100%;display:block;margin:0 0 12px 0;border-radius:12px}
+.card-meta{
+  font-size:12px;color:#888;margin-bottom:8px;
+}
+.card-text{
+  font-size:15px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;
+}
+.card-text a{color:#007aff;text-decoration:none}
+.card-text a:hover{text-decoration:underline}
+body[data-theme="dark"] .card-text a{color:#0a84ff}
+.card-photo{
+  max-width:400px;width:100%;height:auto;display:block;margin:12px auto 12px;
+  border-radius:12px;
+}
+.no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
+
 .nav{
-position:fixed;bottom:0;left:0;right:0;
-display:flex;justify-content:center;align-items:center;
-padding:12px;z-index:1000;
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  display:flex;justify-content:center;
+  padding:12px 0;
+  border-radius:0;
 }
 .nav-inner{
-display:flex;justify-content:space-around;align-items:center;
-max-width:600px;width:100%;
-padding:8px 4px;
+  display:flex;gap:8px;justify-content:center;
 }
-.nav-item{
-flex:1;text-align:center;padding:10px 8px;cursor:pointer;
-font-size:14px;font-weight:500;transition:all 0.3s;border:none;background:transparent;
-border-radius:12px;margin:0 4px;opacity:0.6;color:inherit;
+.nav button{
+  background:rgba(255,255,255,0.5);border:1px solid rgba(0,0,0,0.1);
+  padding:10px 24px;border-radius:20px;cursor:pointer;font-size:14px;
+  transition:all 0.2s;color:#333;
 }
-.nav-item.active{
-opacity:1;font-weight:700;
-background:rgba(0,0,0,0.15);
-box-shadow:0 4px 12px rgba(0,0,0,0.2);
+body[data-theme="dark"] .nav button{
+  background:rgba(50,50,50,0.5);border:1px solid rgba(255,255,255,0.15);color:#ccc;
 }
-body[data-theme="dark"] .nav-item.active{
-background:rgba(255,255,255,0.2);
+.nav button:hover{
+  background:rgba(255,255,255,0.8);transform:translateY(-2px);
 }
-.nav-item:hover{opacity:1;transform:scale(1.05)}
-.hidden{display:none}
-@media(min-width:768px){
-body{max-width:600px;margin:0 auto;padding:0 0 80px 0}
-.card{margin:12px 0}
-.subtitle{margin:12px 0}
-.nav-inner{border-radius:24px;padding:8px 4px}
+body[data-theme="dark"] .nav button:hover{
+  background:rgba(70,70,70,0.8);
+}
+.nav button[aria-current="true"]{
+  background:#007aff;color:#fff;border-color:#007aff;
+}
+body[data-theme="dark"] .nav button[aria-current="true"]{
+  background:#0a84ff;border-color:#0a84ff;
+}
+
+/* Liquid glass */
+.liquid-glass{
+  backdrop-filter:blur(14px) url(#lg-refraction);
+  -webkit-backdrop-filter:blur(14px) url(#lg-refraction);
+}
+.header.liquid-glass{
+  background:rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.22);
+  box-shadow:0 18px 60px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.35);
+}
+body[data-theme="dark"] .header.liquid-glass{
+  background:rgba(30,30,30,0.10);
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 18px 60px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.15);
+}
+.nav.liquid-glass{
+  background:rgba(255,255,255,0.10);
+  border-top:1px solid rgba(0,0,0,0.08);
+  box-shadow:0 -8px 30px rgba(0,0,0,0.08);
+}
+body[data-theme="dark"] .nav.liquid-glass{
+  background:rgba(30,30,30,0.10);
+  border-top:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 -8px 30px rgba(0,0,0,0.25);
 }
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="lg-refraction" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="2" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
 <div class="header liquid-glass">
-<a href="https://t.me/ispanskie_msk" target="_blank" class="logo">🏘️</a>
-<div><h3>Агрегатор для района</h3></div>
-<button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+  <div>
+    <a href="https://t.me/ispanskie_msk" class="logo">🏘️</a>
+  </div>
+  <div style="text-align:center;flex:1">
+    <h3>Агрегатор для района</h3>
+    <div class="subtitle">by Испанские Кварталы | Прокшино</div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+    <span id="theme-icon">🌙</span>
+  </button>
 </div>
-<p class="subtitle liquid-glass">by Испанские Кварталы | Прокшино</p>
-<div id="list"></div>
-<div class="nav">
-<div class="nav-inner liquid-glass">
-<button class="nav-item active" onclick="filterCategory('all')" data-category="all">Новости</button>
-<button class="nav-item" onclick="filterCategory('business')" data-category="business">Бизнес</button>
-<button class="nav-item" onclick="filterCategory('recommendations')" data-category="recommendations">Рекомендации</button>
+
+<div class="feed" id="feed"></div>
+
+<div class="nav liquid-glass">
+  <div class="nav-inner">
+    <button onclick="filterNews('all')" aria-current="true" id="btn-all">Новости</button>
+    <button onclick="filterNews('business')" id="btn-business">Бизнес</button>
+    <button onclick="filterNews('recommendations')" id="btn-recommendations">Рекомендации</button>
+  </div>
 </div>
-</div>
+
 <script>
-var allNews=[];
-var currentCategory='all';
-function setTheme(t){
-document.documentElement.setAttribute('data-theme',t);
-var btn=document.querySelector('.theme-btn');
-btn.textContent=t==='dark'?'☀️':'🌙';
-localStorage.setItem('theme',t);
+let allNews = [];
+let currentFilter = 'all';
+
+// Theme
+function toggleTheme() {
+  const body = document.body;
+  const icon = document.getElementById('theme-icon');
+  const isDark = body.getAttribute('data-theme') === 'dark';
+  body.setAttribute('data-theme', isDark ? '' : 'dark');
+  icon.textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
 }
-function toggleTheme(){
-var current=document.documentElement.getAttribute('data-theme')||'light';
-setTheme(current==='dark'?'light':'dark');
+
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const useDark = saved === 'dark' || (!saved && prefersDark);
+  if (useDark) {
+    document.body.setAttribute('data-theme', 'dark');
+    document.getElementById('theme-icon').textContent = '☀️';
+  }
 }
-function linkify(text){
-var urlRegex=/(https?:\/\/[^\s]+)/g;
-return text.replace(urlRegex,function(url){
-return '<a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
-});
+
+// News
+function linkify(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
 }
-function filterCategory(cat){
-currentCategory=cat;
-document.querySelectorAll('.nav-item').forEach(function(item){
-item.classList.remove('active');
-});
-document.querySelector('[data-category="'+cat+'"]').classList.add('active');
-renderNews();
+
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  return `#${Math.floor(Math.random()*1000)} · ${day}.${month}.${year}, ${hours}:${minutes}:${seconds} · all`;
 }
-function renderNews(){
-var el=document.getElementById('list');
-var filtered=currentCategory==='all'?allNews:allNews.filter(function(p){return p.category===currentCategory});
-if(filtered.length===0){
-el.innerHTML='<div class="card liquid-glass"><div class="text">Нет новостей в этой категории.</div></div>';
-return;
+
+function renderNews() {
+  const feed = document.getElementById('feed');
+  const filtered = currentFilter === 'all' ? allNews : allNews.filter(n => n.category === currentFilter);
+  if (!filtered.length) {
+    feed.innerHTML = '<div class="no-news">Нет новостей в этой категории.</div>';
+    return;
+  }
+  feed.innerHTML = filtered.map(n => {
+    let html = '<div class="card">';
+    html += `<div class="card-meta">${formatDate(n.timestamp)}</div>`;
+    if (n.photoFileId) {
+      html += `<img class="card-photo" src="/api/photo/${n.photoFileId}" alt="photo">`;
+    }
+    html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+    html += '</div>';
+    return html;
+  }).join('');
 }
-el.innerHTML='';
-filtered.forEach(function(p){
-var card=document.createElement('div');
-card.className='card liquid-glass';
-if(p.photoFileId){
-var img=document.createElement('img');
-img.src='/api/photo/'+p.photoFileId;
-img.alt='фото';
-card.appendChild(img);
+
+function filterNews(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
+  const btnId = `btn-${cat}`;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.setAttribute('aria-current', 'true');
+  renderNews();
 }
-var meta=document.createElement('div');
-meta.className='meta';
-var date=new Date(p.createdAt).toLocaleString('ru-RU');
-meta.textContent='#'+p.id+' · '+date+' · '+p.category;
-card.appendChild(meta);
-var text=document.createElement('div');
-text.className='text';
-text.innerHTML=linkify(p.text);
-card.appendChild(text);
-el.appendChild(card);
-});
+
+async function loadNews() {
+  try {
+    const res = await fetch('/api/news');
+    const data = await res.json();
+    allNews = Array.isArray(data) ? data : [];
+    renderNews();
+  } catch (e) {
+    console.error(e);
+  }
 }
-var saved=localStorage.getItem('theme');
-if(saved){setTheme(saved);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){setTheme('dark');}
-fetch('/api/news').then(function(r){return r.json()}).then(function(data){
-if(data.posts && data.posts.length){
-el=document.getElementById('list');
-el.innerHTML='<div class="card liquid-glass"><div class="text">Загрузка новостей...</div></div>';
-}
-allNews=data.posts.map(function(p){return Object.assign({},p,{category:p.category||'all'})});
-renderNews();
-}).catch(function(err){
-console.error('Error loading news:',err);
-document.getElementById('list').innerHTML='<div class="card liquid-glass"><div class="text">Ошибка загрузки. Попробуйте обновить страницу.</div></div>';
-});
+
+initTheme();
+loadNews();
 </script>
 </body>
 </html>
