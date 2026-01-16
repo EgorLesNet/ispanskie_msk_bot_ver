@@ -89,12 +89,13 @@ body[data-theme="dark"] .card-text a{color:#0a84ff}
   border-radius:22px;
 }
 .nav-inner{
-  display:flex;gap:10px;justify-content:center;
+  display:flex;gap:8px;justify-content:center;width:100%;
+  max-width:600px;
 }
 .nav button{
   background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.12);
-  padding:11px 26px;border-radius:18px;cursor:pointer;font-size:14px;font-weight:500;
-  transition:all 0.3s;color:#333;
+  padding:11px 24px;border-radius:18px;cursor:pointer;font-size:14px;font-weight:500;
+  transition:all 0.3s;color:#333;white-space:nowrap;
 }
 body[data-theme="dark"] .nav button{
   background:rgba(50,50,50,0.6);border:1px solid rgba(255,255,255,0.18);color:#ccc;
@@ -113,6 +114,20 @@ body[data-theme="dark"] .nav button:hover{
 body[data-theme="dark"] .nav button[aria-current="true"]{
   background:#0a84ff;border-color:#0a84ff;
   box-shadow:0 4px 12px rgba(10,132,255,0.4);
+}
+.nav button .icon{display:none;font-size:20px}
+.nav button .text{display:inline}
+
+/* Адаптив для маленьких экранов */
+@media (max-width: 400px){
+  .nav-inner{gap:6px}
+  .nav button{padding:10px 18px;font-size:13px}
+}
+@media (max-width: 350px){
+  .nav-inner{gap:5px}
+  .nav button{padding:10px 12px;font-size:12px}
+  .nav button .icon{display:inline}
+  .nav button .text{display:none}
 }
 
 /* Liquid glass - только CSS для Telegram */
@@ -166,9 +181,18 @@ body[data-theme="dark"] .nav.liquid-glass{
 
 <div class="nav liquid-glass">
   <div class="nav-inner">
-    <button onclick="filterNews('all')" aria-current="true" id="btn-all">Новости</button>
-    <button onclick="filterNews('business')" id="btn-business">Бизнес</button>
-    <button onclick="filterNews('recommendations')" id="btn-recommendations">Рекомендации</button>
+    <button onclick="filterNews('all')" aria-current="true" id="btn-all">
+      <span class="icon">📰</span>
+      <span class="text">Новости</span>
+    </button>
+    <button onclick="filterNews('business')" id="btn-business">
+      <span class="icon">💼</span>
+      <span class="text">Бизнес</span>
+    </button>
+    <button onclick="filterNews('recommendations')" id="btn-recommendations">
+      <span class="icon">⭐</span>
+      <span class="text">Рекомендации</span>
+    </button>
   </div>
 </div>
 
