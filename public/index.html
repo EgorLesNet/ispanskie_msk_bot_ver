@@ -9,18 +9,18 @@
 body{
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 margin:0;padding:0 0 80px 0;min-height:100vh;
-background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+background:#BFEDC1;
 color:#1a1a1a;
 }
 body[data-theme="dark"]{
-background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
+background:#985F99;
 color:#fff;
 }
 .header{
 display:flex;justify-content:space-between;align-items:center;padding:16px 20px;
 position:sticky;top:0;z-index:100;
 }
-.logo{font-size:28px;text-decoration:none;line-height:1;transition:transform 0.3s}
+.logo{font-size:32px;text-decoration:none;line-height:1;transition:transform 0.3s;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))}
 .logo:hover{transform:scale(1.1)}
 h3{font-size:18px;font-weight:600}
 .theme-btn{
@@ -50,9 +50,10 @@ display:flex;justify-content:space-around;padding:12px 0 8px 0;z-index:1000;
 .nav-item{
 flex:1;text-align:center;padding:10px 8px;cursor:pointer;
 font-size:14px;font-weight:500;transition:all 0.3s;border:none;background:transparent;
-border-radius:12px;margin:0 4px;opacity:0.7;
+border-radius:12px;margin:0 4px;opacity:0.6;color:inherit;
 }
-.nav-item.active{opacity:1;font-weight:600}
+.nav-item.active{opacity:1;font-weight:700;background:rgba(0,0,0,0.1)}
+body[data-theme="dark"] .nav-item.active{background:rgba(255,255,255,0.15)}
 .nav-item:hover{opacity:1;transform:scale(1.05)}
 .hidden{display:none}
 @media(min-width:768px){
@@ -82,10 +83,10 @@ var currentCategory='all';
 function applyGlass(){
 var elements=document.querySelectorAll('.header,.subtitle,.card,.nav');
 elements.forEach(function(el){
-el.style.background='rgba(255,255,255,0.15)';
+el.style.background='rgba(255,255,255,0.25)';
 el.style.backdropFilter='blur(10px)';
 el.style.webkitBackdropFilter='blur(10px)';
-el.style.border='1px solid rgba(255,255,255,0.2)';
+el.style.border='1px solid rgba(255,255,255,0.3)';
 el.style.borderRadius='16px';
 el.style.boxShadow='0 8px 32px 0 rgba(0,0,0,0.1)';
 });
@@ -107,8 +108,8 @@ localStorage.setItem('theme',t);
 if(t==='dark'){
 var elements=document.querySelectorAll('.header,.subtitle,.card,.nav');
 elements.forEach(function(el){
-el.style.background='rgba(0,0,0,0.3)';
-el.style.border='1px solid rgba(255,255,255,0.1)';
+el.style.background='rgba(0,0,0,0.25)';
+el.style.border='1px solid rgba(255,255,255,0.2)';
 el.style.boxShadow='0 8px 32px 0 rgba(0,0,0,0.3)';
 });
 }else{
