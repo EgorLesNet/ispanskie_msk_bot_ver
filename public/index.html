@@ -242,8 +242,7 @@ async function loadNews() {
   try {
     const res = await fetch('/api/news');
     const data = await res.json();
-    allNews = Array.isArray(data.posts) ? dat.potsa : [];
-    renderNews();
+    allNews = Array.isArray(data.posts) ? data.posts : [];    renderNews();
   } catch (e) {
     console.error(e);
   }
