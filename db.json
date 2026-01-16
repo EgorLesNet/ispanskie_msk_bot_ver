@@ -1,6 +1,17 @@
 {
   "posts": [
     {
+      "id": 7,
+      "text": "Тест",
+      "authorId": 164794874,
+      "authorName": "Bella",
+      "authorUsername": "io_spero",
+      "createdAt": "2026-01-16T16:15:40.752Z",
+      "status": "pending",
+      "source": "user",
+      "photoFileId": null
+    },
+    {
       "id": 6,
       "text": "Тест",
       "authorId": 164794874,
