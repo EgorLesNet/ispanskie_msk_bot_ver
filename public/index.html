@@ -1,285 +1,280 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Агрегатор для района</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  min-height:100vh;
-  background:#f0f2f5;
-  color:#1a1a1a;
-  transition:background 0.3s ease, color 0.3s ease;
-  padding-top:80px;
-  padding-bottom:90px;
-}
-body[data-theme="dark"]{
-  background:#0e0e0e;
-  color:#fff;
-}
-
-.header{
-  position:fixed;top:12px;left:12px;right:12px;z-index:100;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:14px 18px;
-  border-radius:20px;
-}
-.logo-img{
-  width:40px;height:40px;border-radius:10px;transition:transform 0.3s;cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-.logo-img:hover{transform:scale(1.1) rotate(5deg)}
-h3{font-size:17px;font-weight:600;margin:0}
-.subtitle{
-  font-size:12px;color:#666;margin-top:3px;
-}
-body[data-theme="dark"] .subtitle{color:#999}
-.theme-toggle{
-  background:transparent;border:none;font-size:24px;cursor:pointer;padding:8px;
-  border-radius:50%;transition:transform 0.3s,background 0.2s;
-}
-.theme-toggle:hover{transform:scale(1.15) rotate(15deg);background:rgba(0,0,0,0.05)}
-body[data-theme="dark"] .theme-toggle:hover{background:rgba(255,255,255,0.08)}
-
-.feed{
-  display:grid;gap:16px;
-  width:min(680px, 92vw);
-  margin:20px auto;
-}
-.card{
-  padding:18px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.65);
-  border:1px solid rgba(0,0,0,0.08);
-  transition:transform 0.3s, box-shadow 0.3s;
-  animation:fadeIn 0.5s ease-out;
-}
-body[data-theme="dark"] .card{
-  background:rgba(30,30,30,0.65);
-  border:1px solid rgba(255,255,255,0.1);
-}
-.card:hover{
-  transform:translateY(-4px);
-  box-shadow:0 12px 32px rgba(0,0,0,0.15);
-}
-body[data-theme="dark"] .card:hover{
-  box-shadow:0 12px 32px rgba(0,0,0,0.5);
-}
-.card-meta{
-  font-size:11px;color:#888;margin-bottom:10px;
-}
-.card-text{
-  font-size:15px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;
-}
-.card-text a{color:#007aff;text-decoration:none;transition:color 0.2s}
-.card-text a:hover{text-decoration:underline;color:#0051d5}
-body[data-theme="dark"] .card-text a{color:#0a84ff}
-.card-photo{
-  max-width:400px;width:100%;height:auto;display:block;margin:12px auto 12px;
-  border-radius:14px;
-}
-.no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
-
-.nav{
-  position:fixed;bottom:12px;left:12px;right:12px;z-index:100;
-  display:flex;justify-content:center;
-  padding:10px;
-  border-radius:22px;
-}
-.nav-inner{
-  display:flex;gap:8px;justify-content:center;width:100%;
-  max-width:600px;
-}
-.nav button{
-  background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.12);
-  padding:11px 24px;border-radius:18px;cursor:pointer;font-size:14px;font-weight:500;
-  transition:all 0.3s;color:#333;white-space:nowrap;
-}
-body[data-theme="dark"] .nav button{
-  background:rgba(50,50,50,0.6);border:1px solid rgba(255,255,255,0.18);color:#ccc;
-}
-.nav button:hover{
-  background:rgba(255,255,255,0.9);transform:translateY(-2px) scale(1.05);
-  box-shadow:0 6px 16px rgba(0,0,0,0.15);
-}
-body[data-theme="dark"] .nav button:hover{
-  background:rgba(70,70,70,0.9);
-}
-.nav button[aria-current="true"]{
-  background:#007aff;color:#fff;border-color:#007aff;
-  box-shadow:0 4px 12px rgba(0,122,255,0.4);
-}
-body[data-theme="dark"] .nav button[aria-current="true"]{
-  background:#0a84ff;border-color:#0a84ff;
-  box-shadow:0 4px 12px rgba(10,132,255,0.4);
-}
-.nav button .icon{display:none;font-size:20px}
-.nav button .text{display:inline}
-
-/* Адаптив для маленьких экранов */
-@media (max-width: 400px){
-  .nav-inner{gap:6px}
-  .nav button{padding:10px 18px;font-size:13px}
-}
-@media (max-width: 350px){
-  .nav-inner{gap:5px}
-  .nav button{padding:10px 12px;font-size:12px}
-  .nav button .icon{display:inline}
-  .nav button .text{display:none}
-}
-
-/* Liquid glass - только CSS для Telegram */
-.liquid-glass{
-  backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
-  -webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
-}
-.header.liquid-glass{
-  background:rgba(255,255,255,0.7);
-  border:1px solid rgba(255,255,255,0.4);
-  box-shadow:0 8px 32px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.5);
-}
-body[data-theme="dark"] .header.liquid-glass{
-  background:rgba(20,20,20,0.7);
-  border:1px solid rgba(255,255,255,0.2);
-  box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
-}
-.nav.liquid-glass{
-  background:rgba(255,255,255,0.7);
-  border:1px solid rgba(255,255,255,0.4);
-  box-shadow:0 -4px 24px rgba(0,0,0,0.12);
-}
-body[data-theme="dark"] .nav.liquid-glass{
-  background:rgba(20,20,20,0.7);
-  border:1px solid rgba(255,255,255,0.2);
-  box-shadow:0 -4px 24px rgba(0,0,0,0.4);
-}
-
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
-}
-</style>
-</head>
-<body>
-
-<div class="header liquid-glass">
-  <a href="https://t.me/ispanskie_msk">
-    <img src="/logo.png" class="logo-img" alt="Лого">
-  </a>
-  <div style="text-align:center;flex:1">
-    <h3>Агрегатор для района</h3>
-    <div class="subtitle">by Испанские Кварталы | Прокшино</div>
-  </div>
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-    <span id="theme-icon">🌙</span>
-  </button>
-</div>
-
-<div class="feed" id="feed"></div>
-
-<div class="nav liquid-glass">
-  <div class="nav-inner">
-    <button onclick="filterNews('all')" aria-current="true" id="btn-all">
-      <span class="icon">📰</span>
-      <span class="text">Новости</span>
-    </button>
-    <button onclick="filterNews('business')" id="btn-business">
-      <span class="icon">💼</span>
-      <span class="text">Бизнес</span>
-    </button>
-    <button onclick="filterNews('recommendations')" id="btn-recommendations">
-      <span class="icon">⭐</span>
-      <span class="text">Рекомендации</span>
-    </button>
-  </div>
-</div>
-
-<script>
-let allNews = [];
-let currentFilter = 'all';
-
-function toggleTheme() {
-  const body = document.body;
-  const icon = document.getElementById('theme-icon');
-  const isDark = body.getAttribute('data-theme') === 'dark';
-  body.setAttribute('data-theme', isDark ? '' : 'dark');
-  icon.textContent = isDark ? '🌙' : '☀️';
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-}
-
-function initTheme() {
-  const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const useDark = saved === 'dark' || (!saved && prefersDark);
-  if (useDark) {
-    document.body.setAttribute('data-theme', 'dark');
-    document.getElementById('theme-icon').textContent = '☀️';
-  }
-}
-
-function linkify(text) {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
-}
-
-function formatDate(ts) {
-  if (!ts) return '';
-  const d = new Date(ts);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  const seconds = String(d.getSeconds()).padStart(2, '0');
-  return `#${Math.floor(Math.random()*1000)} · ${day}.${month}.${year}, ${hours}:${minutes}:${seconds} · all`;
-}
-
-function renderNews() {
-  const feed = document.getElementById('feed');
-  const filtered = currentFilter === 'all' ? allNews : allNews.filter(n => n.category === currentFilter);
-  if (!filtered.length) {
-    feed.innerHTML = '<div class="no-news">Нет новостей в этой категории.</div>';
-    return;
-  }
-  feed.innerHTML = filtered.map(n => {
-    let html = '<div class="card">';
-    html += `<div class="card-meta">${formatDate(n.timestamp)}</div>`;
-    if (n.photoFileId) {
-      html += `<img class="card-photo" src="/api/photo/${n.photoFileId}" alt="photo">`;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Агрегатор для района</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      min-height:100vh;
+      background:#f0f2f5;
+      color:#1a1a1a;
+      transition:background 0.3s ease, color 0.3s ease;
+      padding-top:80px;
+      padding-bottom:90px;
     }
-    html += `<div class="card-text">${linkify(n.text || '')}</div>`;
-    html += '</div>';
-    return html;
-  }).join('');
-}
+    body[data-theme="dark"]{ background:#0e0e0e; color:#fff; }
 
-function filterNews(cat) {
-  currentFilter = cat;
-  document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
-  const btnId = `btn-${cat}`;
-  const btn = document.getElementById(btnId);
-  if (btn) btn.setAttribute('aria-current', 'true');
-  renderNews();
-}
+    .header{
+      position:fixed;top:12px;left:12px;right:12px;z-index:100;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 18px;border-radius:20px;
+    }
+    .logo-wrap{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+    .logo-img{
+      width:40px;height:40px;border-radius:10px;transition:transform 0.3s;cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    }
+    .logo-img:hover{transform:scale(1.1) rotate(5deg)}
+    h3{font-size:17px;font-weight:600;margin:0}
+    .subtitle{ font-size:12px;color:#666;margin-top:3px; }
+    body[data-theme="dark"] .subtitle{color:#999}
 
-async function loadNews() {
-  try {
-    const res = await fetch('/api/news', { cache: 'no-store' });
-    const data = await res.json();
-    allNews = Array.isArray(data.posts) ? data.posts : [];
-    renderNews();
-  } catch (e) {
-    console.error(e);
-  }
-}
+    .theme-toggle{
+      background:transparent;border:none;font-size:24px;cursor:pointer;padding:8px;
+      border-radius:50%;transition:transform 0.3s,background 0.2s;
+    }
+    .theme-toggle:hover{transform:scale(1.15) rotate(15deg);background:rgba(0,0,0,0.05)}
+    body[data-theme="dark"] .theme-toggle:hover{background:rgba(255,255,255,0.08)}
 
-initTheme();
-loadNews();
-setInterval(() => {
-  if (document.visibilityState === 'visible') loadNews();
-}, 10000);
-</script>
+    .feed{
+      display:grid;gap:16px;
+      width:min(680px, 92vw);
+      margin:20px auto;
+    }
+    .card{
+      padding:18px;border-radius:20px;
+      background:rgba(255,255,255,0.65);
+      border:1px solid rgba(0,0,0,0.08);
+      transition:transform 0.3s, box-shadow 0.3s;
+      animation:fadeIn 0.5s ease-out;
+    }
+    body[data-theme="dark"] .card{
+      background:rgba(30,30,30,0.65);
+      border:1px solid rgba(255,255,255,0.1);
+    }
+    .card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 12px 32px rgba(0,0,0,0.15);
+    }
+    body[data-theme="dark"] .card:hover{
+      box-shadow:0 12px 32px rgba(0,0,0,0.5);
+    }
+    .card-meta{ font-size:11px;color:#888;margin-bottom:10px; }
+    .card-text{ font-size:15px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word; }
+    .card-text a{color:#007aff;text-decoration:none;transition:color 0.2s}
+    .card-text a:hover{text-decoration:underline;color:#0051d5}
+    body[data-theme="dark"] .card-text a{color:#0a84ff}
+
+    .card-photo{
+      max-width:400px;width:100%;height:auto;display:block;margin:12px auto 12px;
+      border-radius:14px;
+    }
+
+    .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
+
+    .nav{
+      position:fixed;bottom:12px;left:12px;right:12px;z-index:100;
+      display:flex;justify-content:center;
+      padding:10px;border-radius:22px;
+    }
+    .nav-inner{ display:flex;gap:8px;justify-content:center;width:100%; max-width:600px; }
+    .nav button{
+      background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.12);
+      padding:11px 24px;border-radius:18px;cursor:pointer;font-size:14px;font-weight:500;
+      transition:all 0.3s;color:#333;white-space:nowrap;
+    }
+    body[data-theme="dark"] .nav button{
+      background:rgba(50,50,50,0.6);border:1px solid rgba(255,255,255,0.18);color:#ccc;
+    }
+    .nav button:hover{
+      background:rgba(255,255,255,0.9);transform:translateY(-2px) scale(1.05);
+      box-shadow:0 6px 16px rgba(0,0,0,0.15);
+    }
+    body[data-theme="dark"] .nav button:hover{ background:rgba(70,70,70,0.9); }
+    .nav button[aria-current="true"]{
+      background:#007aff;color:#fff;border-color:#007aff;
+      box-shadow:0 4px 12px rgba(0,122,255,0.4);
+    }
+    body[data-theme="dark"] .nav button[aria-current="true"]{
+      background:#0a84ff;border-color:#0a84ff;
+      box-shadow:0 4px 12px rgba(10,132,255,0.4);
+    }
+    .nav button .icon{display:none;font-size:20px}
+    .nav button .text{display:inline}
+
+    @media (max-width: 400px){
+      .nav-inner{gap:6px}
+      .nav button{padding:10px 18px;font-size:13px}
+    }
+    @media (max-width: 350px){
+      .nav-inner{gap:5px}
+      .nav button{padding:10px 12px;font-size:12px}
+      .nav button .icon{display:inline}
+      .nav button .text{display:none}
+    }
+
+    /* Liquid glass */
+    .liquid-glass{
+      backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
+      -webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
+    }
+    .header.liquid-glass{
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(255,255,255,0.4);
+      box-shadow:0 8px 32px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.5);
+    }
+    body[data-theme="dark"] .header.liquid-glass{
+      background:rgba(20,20,20,0.7);
+      border:1px solid rgba(255,255,255,0.2);
+      box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
+    }
+    .nav.liquid-glass{
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(255,255,255,0.4);
+      box-shadow:0 -4px 24px rgba(0,0,0,0.12);
+    }
+    body[data-theme="dark"] .nav.liquid-glass{
+      background:rgba(20,20,20,0.7);
+      border:1px solid rgba(255,255,255,0.2);
+      box-shadow:0 -4px 24px rgba(0,0,0,0.4);
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(10px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header liquid-glass">
+    <a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener">
+      <img class="logo-img" src="https://raw.githubusercontent.com/EgorLesNet/ispanskie_msk_bot_ver/main/public/logo.png" alt="Лого" />
+      <div>
+        <h3>Агрегатор для района</h3>
+        <div class="subtitle">by Испанские Кварталы | Прокшино</div>
+      </div>
+    </a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
+      <span id="theme-icon">🌙</span>
+    </button>
+  </header>
+
+  <main class="feed" id="feed"></main>
+
+  <nav class="nav liquid-glass">
+    <div class="nav-inner">
+      <button id="btn-all" aria-current="true" onclick="filterNews('all')">
+        <span class="icon">📰</span><span class="text">Новости</span>
+      </button>
+      <button id="btn-business" onclick="filterNews('business')">
+        <span class="icon">💼</span><span class="text">Бизнес</span>
+      </button>
+      <button id="btn-reco" onclick="filterNews('reco')">
+        <span class="icon">⭐</span><span class="text">Рекомендации</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    let allNews = [];
+    let currentFilter = 'all';
+
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById('theme-icon');
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? '' : 'dark');
+      icon.textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const useDark = saved === 'dark' || (!saved && prefersDark);
+      if (useDark) {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').textContent = '☀️';
+      }
+    }
+
+    function linkify(text) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return String(text || '').replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+    }
+
+    // Дата/время без случайных значений
+    function formatDate(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${day}.${month}.${year}, ${hours}:${minutes}`;
+    }
+
+    function renderNews() {
+      const feed = document.getElementById('feed');
+      const filtered = currentFilter === 'all'
+        ? allNews
+        : allNews.filter(n => n.category === currentFilter);
+
+      if (!filtered.length) {
+        feed.innerHTML = '<div class="no-news">Нет новостей в этой категории.</div>';
+        return;
+      }
+
+      feed.innerHTML = filtered.map(n => {
+        let html = '<div class="card">';
+        const ts = n.timestamp || n.createdAt || null;
+        html += `<div class="card-meta">#${n.id} · ${formatDate(ts)}</div>`;
+        if (n.photoFileId) {
+          html += `<img class="card-photo" src="/api/photo/${n.photoFileId}" alt="photo">`;
+        }
+        html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+        html += '</div>';
+        return html;
+      }).join('');
+    }
+
+    function filterNews(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
+      const btn = document.getElementById(`btn-${cat}`);
+      if (btn) btn.setAttribute('aria-current', 'true');
+      renderNews();
+    }
+
+    async function loadNews() {
+      try {
+        const res = await fetch('/api/news', { cache: 'no-store' });
+        const data = await res.json();
+        allNews = Array.isArray(data.posts) ? data.posts : [];
+        renderNews();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    initTheme();
+    loadNews();
+
+    // Обновляем ленту только когда вкладка НЕ видима (пользователь не смотрит)
+    setInterval(() => {
+      if (document.visibilityState !== 'visible') loadNews();
+    }, 3000);
+
+    // Если пользователь ушёл со вкладки — сразу подтянем обновления
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') loadNews();
+    });
+  </script>
 </body>
 </html>
