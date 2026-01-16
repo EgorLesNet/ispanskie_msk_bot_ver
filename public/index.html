@@ -6,12 +6,12 @@
 <title>Лента района</title>
 <style>
 :root{
---bg:#f5f5f5;--card-bg:#fff;--text:#000;--text-gray:#666;--border:#ddd;--shadow:rgba(0,0,0,0.1);
+--bg:#f5f5f5;--card-bg:#fff;--text:#000;--text-gray:#666;--border:#ddd;--shadow:rgba(0,0,0,0.1);--nav-bg:#fff;--active:#007bff;
 }
 [data-theme="dark"]{
---bg:#1a1a1a;--card-bg:#2d2d2d;--text:#e0e0e0;--text-gray:#aaa;--border:#444;--shadow:rgba(0,0,0,0.3);
+--bg:#1a1a1a;--card-bg:#2d2d2d;--text:#e0e0e0;--text-gray:#aaa;--border:#444;--shadow:rgba(0,0,0,0.3);--nav-bg:#2d2d2d;--active:#4a9eff;
 }
-body{font-family:system-ui,Arial;margin:16px;background:var(--bg);color:var(--text);transition:background 0.3s,color 0.3s}
+body{font-family:system-ui,Arial;margin:0;padding:16px 16px 80px 16px;background:var(--bg);color:var(--text);transition:background 0.3s,color 0.3s}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 h3{margin:0}
 .theme-btn{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:8px 16px;cursor:pointer;font-size:20px;transition:all 0.3s}
@@ -20,6 +20,11 @@ h3{margin:0}
 .meta{color:var(--text-gray);font-size:12px;margin-bottom:8px}
 .text{line-height:1.5}
 img{max-width:100%;border-radius:8px;margin-top:10px;display:block}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--nav-bg);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0;box-shadow:0 -2px 10px var(--shadow);z-index:1000}
+.nav-item{flex:1;text-align:center;padding:8px;cursor:pointer;color:var(--text-gray);font-size:14px;transition:color 0.3s;border:none;background:transparent}
+.nav-item.active{color:var(--active);font-weight:bold}
+.nav-item:hover{color:var(--active)}
+.hidden{display:none}
 </style>
 </head>
 <body>
@@ -29,7 +34,14 @@ img{max-width:100%;border-radius:8px;margin-top:10px;display:block}
 </div>
 <p style="color:var(--text-gray);font-size:14px">Собранные новости района.</p>
 <div id="list"></div>
+<div class="nav">
+<button class="nav-item active" onclick="filterCategory('all')" data-category="all">Новости</button>
+<button class="nav-item" onclick="filterCategory('business')" data-category="business">Бизнес</button>
+<button class="nav-item" onclick="filterCategory('recommendations')" data-category="recommendations">Рекомендации</button>
+</div>
 <script>
+var allNews=[];
+var currentCategory='all';
 function setTheme(t){
 document.documentElement.setAttribute('data-theme',t);
 var btn=document.querySelector('.theme-btn');
@@ -40,16 +52,23 @@ function toggleTheme(){
 var current=document.documentElement.getAttribute('data-theme')||'light';
 setTheme(current==='dark'?'light':'dark');
 }
-var saved=localStorage.getItem('theme');
-if(saved){setTheme(saved);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){setTheme('dark');}
-console.log('Loading news...');
-fetch('/api/news').then(function(r){return r.json()}).then(function(data){
+function filterCategory(cat){
+currentCategory=cat;
+document.querySelectorAll('.nav-item').forEach(function(item){
+item.classList.remove('active');
+});
+document.querySelector('[data-category="'+cat+'"]').classList.add('active');
+renderNews();
+}
+function renderNews(){
 var el=document.getElementById('list');
-if(!data.posts||data.posts.length===0){
-el.innerHTML='<div class="card">Пока нет новостей.</div>';
+var filtered=currentCategory==='all'?allNews:allNews.filter(function(p){return p.category===currentCategory});
+if(filtered.length===0){
+el.innerHTML='<div class="card">Нет новостей в этой категории.</div>';
 return;
 }
-data.posts.forEach(function(p){
+el.innerHTML='';
+filtered.forEach(function(p){
 var card=document.createElement('div');
 card.className='card';
 var meta=document.createElement('div');
@@ -69,6 +88,19 @@ card.appendChild(img);
 }
 el.appendChild(card);
 });
+}
+var saved=localStorage.getItem('theme');
+if(saved){setTheme(saved);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){setTheme('dark');}
+console.log('Loading news...');
+fetch('/api/news').then(function(r){return r.json()}).then(function(data){
+if(!data.posts||data.posts.length===0){
+document.getElementById('list').innerHTML='<div class="card">Пока нет новостей.</div>';
+return;
+}
+allNews=data.posts.map(function(p){
+return Object.assign({},p,{category:p.category||'all'});
+});
+renderNews();
 }).catch(function(err){
 console.error('Error loading news:', err);
 document.getElementById('list').innerHTML='<div class="card">Ошибка загрузки: '+err.message+'</div>';
