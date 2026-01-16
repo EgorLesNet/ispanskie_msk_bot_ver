@@ -25,6 +25,7 @@
             try {
       const res = await fetch('/api/news?t=' + Date.now())                const el = document.getElementById('list')
                 el.innerHTML = ''
+                      const data = await res.json()
 
                 if (!data.posts || data.posts.length === 0) {
                     el.innerHTML = '<div class="card">Пока нет новостей.</div>'
