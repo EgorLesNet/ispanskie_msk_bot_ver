@@ -1,7 +1,7 @@
 const GITHUB_REPO = 'EgorLesNet/ispanskie_msk_bot_ver'
 const DB_FILE_PATH = 'db.json'
 const DB_BRANCH = process.env.DB_BRANCH || 'main'
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '' // можно тот же токен, что и для записи
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''
 
 async function readDbViaGithubApi() {
   const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}?ref=${encodeURIComponent(DB_BRANCH)}`
@@ -40,11 +40,14 @@ module.exports = async (req, res) => {
   try {
     const db = await readDbViaGithubApi()
 
-    // Подгоняем под текущий фронт: ему нужны timestamp и category (иначе фильтры ломаются)
+    // Публичная лента — только approved
     const posts = db.posts.map(p => ({
       ...p,
       timestamp: p.timestamp || p.createdAt || null,
-      category: p.category || 'all'
+      category: p.category || 'all',
+      photoFileIds: Array.isArray(p.photoFileIds)
+        ? p.photoFileIds
+        : (p.photoFileId ? [p.photoFileId] : [])
     }))
 
     return res.status(200).json({ posts })
