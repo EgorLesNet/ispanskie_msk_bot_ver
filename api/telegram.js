@@ -16,8 +16,12 @@ if (!BOT_TOKEN) throw new Error('BOT_TOKEN is required')
 
 const bot = new Telegraf(BOT_TOKEN)
 
-// In-memory state: if user sends photo without caption, wait for next text
+// Состояние для "одно фото -> потом текст"
 const userStates = new Map()
+// Состояние для альбомов (несколько фото, media_group_id)
+const mediaGroups = new Map()
+// userId -> { photoFileIds: [] } (альбом без подписи, ждём текст)
+const pendingAlbumByUser = new Map()
 
 function isAdmin(ctx) {
   const u = ctx?.from
@@ -30,15 +34,13 @@ function isAdmin(ctx) {
   return byUsername || byId
 }
 
-// ---- DB helpers ----
-
 function normalizeDb(raw) {
   const db = raw && typeof raw === 'object' ? raw : {}
   const postsRaw = Array.isArray(db.posts) ? db.posts : []
   let pending = Array.isArray(db.pending) ? db.pending : []
   let rejected = Array.isArray(db.rejected) ? db.rejected : []
 
-  // Migration: old schema stored pending inside posts
+  // Миграция: если раньше pending лежали в posts
   const posts = []
   const migratedPending = []
   for (const p of postsRaw) {
@@ -77,8 +79,8 @@ async function writeNewsDB(db) {
   const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}`
 
   try {
-    // Try to get SHA (file may not exist on first run)
     let sha = null
+
     const getResponse = await fetch(`${apiUrl}?ref=${encodeURIComponent(DB_BRANCH)}`, {
       headers: {
         Authorization: `token ${GITHUB_TOKEN}`,
@@ -97,11 +99,7 @@ async function writeNewsDB(db) {
 
     const content = Buffer.from(JSON.stringify(db, null, 2)).toString('base64')
 
-    const putBody = {
-      message: 'Update news via bot',
-      content,
-      branch: DB_BRANCH
-    }
+    const putBody = { message: 'Update news via bot', content, branch: DB_BRANCH }
     if (sha) putBody.sha = sha
 
     const updateResponse = await fetch(apiUrl, {
@@ -127,9 +125,7 @@ async function writeNewsDB(db) {
   }
 }
 
-// ---- News logic ----
-
-async function submitNews({ text, author, admin, photoFileId }) {
+async function submitNews({ text, author, admin, photoFileId, photoFileIds }) {
   const db = await readNewsDB()
   const id = nextPostId(db)
 
@@ -140,8 +136,11 @@ async function submitNews({ text, author, admin, photoFileId }) {
     authorName: [author?.first_name, author?.last_name].filter(Boolean).join(' ').trim(),
     authorUsername: author?.username || null,
     createdAt: new Date().toISOString(),
+    // Сайт сейчас показывает только одно фото, поэтому сохраняем первое как photoFileId
     photoFileId: photoFileId || null,
-    moderationMessage: null // will be filled after notifyAdmin
+    // На будущее: можно использовать для галереи
+    photoFileIds: Array.isArray(photoFileIds) ? photoFileIds : undefined,
+    moderationMessage: null
   }
 
   let saved
@@ -159,7 +158,6 @@ async function submitNews({ text, author, admin, photoFileId }) {
 
 async function moderateNews(postId, action) {
   const db = await readNewsDB()
-
   const idx = db.pending.findIndex(p => p && p.id === postId)
   if (idx === -1) return null
 
@@ -184,7 +182,6 @@ async function moderateNews(postId, action) {
 }
 
 async function attachModerationMessage(postId, msg) {
-  // msg is Telegram "Message" object that includes message_id
   const db = await readNewsDB()
   const p = db.pending.find(x => x && x.id === postId)
   if (!p) return false
@@ -228,7 +225,6 @@ async function notifyAdmin(ctx, post) {
       })
     }
 
-    // Persist admin message_id -> postId mapping for reply-based delete
     if (sent?.message_id) {
       await attachModerationMessage(post.id, sent)
     }
@@ -250,9 +246,8 @@ async function findPostIdByReplyMessage(replyMsg) {
   if (replyChatId == null || replyMessageId == null) return null
 
   const db = await readNewsDB()
-
-  // Best: match by stored moderationMessage (usually only pending has it)
   const all = [...db.pending, ...db.posts, ...db.rejected]
+
   for (const p of all) {
     const mm = p?.moderationMessage
     if (mm && mm.chatId === replyChatId && mm.messageId === replyMessageId) {
@@ -260,9 +255,7 @@ async function findPostIdByReplyMessage(replyMsg) {
     }
   }
 
-  // Fallback: parse from caption/text of the replied-to message
-  const fallbackId = extractPostIdFromText(replyMsg.text || replyMsg.caption || '')
-  return fallbackId || null
+  return extractPostIdFromText(replyMsg.text || replyMsg.caption || '') || null
 }
 
 async function deleteNews(postId) {
@@ -287,75 +280,7 @@ async function deleteNews(postId) {
   return null
 }
 
-// ---- Bot handlers ----
-
-bot.start(async ctx => {
-  userStates.delete(ctx.from.id)
-
-  await ctx.reply(
-    'Добро пожаловать!\n\nИспользуйте кнопку ниже, чтобы открыть приложение:',
-    {
-      reply_markup: {
-        keyboard: [[{ text: '📱 Открыть приложение', web_app: { url: WEBAPP_URL } }]],
-        resize_keyboard: true
-      }
-    }
-  )
-
-  await ctx.reply('Или отправьте новость текстом (можно с фото):', {
-    reply_markup: { remove_keyboard: true }
-  })
-})
-
-bot.on('photo', async ctx => {
-  const admin = isAdmin(ctx)
-  const photos = ctx.message.photo || []
-  const best = photos.length ? photos[photos.length - 1] : null
-  const photoFileId = best?.file_id || null
-  const caption = (ctx.message.caption || '').trim()
-
-  if (caption) {
-    const post = await submitNews({ text: caption, author: ctx.from, admin, photoFileId })
-
-    if (admin) {
-      await ctx.reply('✅ Новость опубликована!')
-    } else {
-      await ctx.reply('📩 Новость отправлена на проверку.')
-      await notifyAdmin(ctx, post)
-    }
-    return
-  }
-
-  if (!photoFileId) {
-    await ctx.reply('Не удалось прочитать фото, попробуйте отправить ещё раз.')
-    return
-  }
-
-  userStates.set(ctx.from.id, { photoFileId })
-  await ctx.reply('🖼 Фото получено! Теперь отправьте текст новости:')
-})
-
-bot.on('text', async ctx => {
-  const admin = isAdmin(ctx)
-  const text = (ctx.message.text || '').trim()
-  if (!text) return
-
-  // commands
-  if (text.startsWith('/')) return
-
-  const state = userStates.get(ctx.from.id)
-  const photoFileId = state?.photoFileId || null
-  userStates.delete(ctx.from.id)
-
-  const post = await submitNews({ text, author: ctx.from, admin, photoFileId })
-
-  if (admin) {
-    await ctx.reply('✅ Новость опубликована!')
-  } else {
-    await ctx.reply('📩 Новость отправлена на проверку.')
-    await notifyAdmin(ctx, post)
-  }
-})
+// ---- Команды (ВАЖНО: ставим ДО bot.on('text')) ----
 
 bot.command('delete', async ctx => {
   if (!isAdmin(ctx)) {
@@ -367,7 +292,7 @@ bot.command('delete', async ctx => {
   const parts = full.split(/\s+/)
   let postId = parts[1] ? Number(parts[1]) : null
 
-  // If no ID, try resolve from reply
+  // Если id не дали — попробуем взять из reply
   if (!postId) {
     const reply = ctx.message?.reply_to_message || null
     postId = await findPostIdByReplyMessage(reply)
@@ -384,7 +309,7 @@ bot.command('delete', async ctx => {
     return
   }
 
-  // If we know moderation message, try deleting it from admin chat too
+  // Попробуем удалить модерационное сообщение у админа (если сохранили message_id)
   try {
     const mm = result.post?.moderationMessage
     if (mm?.chatId != null && mm?.messageId != null) {
@@ -393,6 +318,150 @@ bot.command('delete', async ctx => {
   } catch (_) {}
 
   await ctx.reply(`🗑 Удалено: #${postId} (раздел: ${result.place}).`)
+})
+
+bot.command('start', async ctx => {
+  userStates.delete(ctx.from.id)
+  pendingAlbumByUser.delete(ctx.from.id)
+
+  await ctx.reply(
+    'Добро пожаловать!\n\nИспользуйте кнопку ниже, чтобы открыть приложение:',
+    {
+      reply_markup: {
+        keyboard: [[{ text: '📱 Открыть приложение', web_app: { url: WEBAPP_URL } }]],
+        resize_keyboard: true
+      }
+    }
+  )
+
+  await ctx.reply('Или отправьте новость текстом (можно с фото):', {
+    reply_markup: { remove_keyboard: true }
+  })
+})
+
+// ---- Фото (включая альбомы) ----
+
+bot.on('photo', async ctx => {
+  const admin = isAdmin(ctx)
+
+  const photos = ctx.message.photo || []
+  const best = photos.length ? photos[photos.length - 1] : null
+  const photoFileId = best?.file_id || null
+
+  const caption = (ctx.message.caption || '').trim()
+  const mediaGroupId = ctx.message.media_group_id || null
+
+  if (!photoFileId) {
+    await ctx.reply('Не удалось прочитать фото, попробуйте отправить ещё раз.')
+    return
+  }
+
+  // Альбом (несколько фото)
+  if (mediaGroupId) {
+    const key = `${ctx.from.id}:${mediaGroupId}`
+    const cur = mediaGroups.get(key) || { photoFileIds: [], caption: '', timer: null }
+
+    cur.photoFileIds.push(photoFileId)
+    if (caption) cur.caption = caption
+
+    if (cur.timer) clearTimeout(cur.timer)
+
+    cur.timer = setTimeout(async () => {
+      mediaGroups.delete(key)
+
+      // Если подпись (текст) была в альбоме — публикуем одним постом
+      if (cur.caption && cur.caption.trim()) {
+        const post = await submitNews({
+          text: cur.caption.trim(),
+          author: ctx.from,
+          admin,
+          photoFileId: cur.photoFileIds[0] || null,
+          photoFileIds: cur.photoFileIds
+        })
+
+        if (admin) {
+          await ctx.reply('✅ Новость опубликована!')
+        } else {
+          await ctx.reply('📩 Новость отправлена на проверку.')
+          await notifyAdmin(ctx, post)
+        }
+      } else {
+        // Текста нет — ждём отдельным сообщением
+        pendingAlbumByUser.set(ctx.from.id, { photoFileIds: cur.photoFileIds })
+        await ctx.reply('🖼 Фото(альбом) получены! Теперь отправьте текст новости:')
+      }
+    }, 900)
+
+    mediaGroups.set(key, cur)
+    return
+  }
+
+  // Обычное одиночное фото (не альбом)
+  if (caption) {
+    const post = await submitNews({ text: caption, author: ctx.from, admin, photoFileId })
+
+    if (admin) {
+      await ctx.reply('✅ Новость опубликована!')
+    } else {
+      await ctx.reply('📩 Новость отправлена на проверку.')
+      await notifyAdmin(ctx, post)
+    }
+    return
+  }
+
+  userStates.set(ctx.from.id, { photoFileId })
+  await ctx.reply('🖼 Фото получено! Теперь отправьте текст новости:')
+})
+
+// ---- Текст ----
+// ВАЖНО: используем next(), чтобы команды (/delete, /start, etc) не “съедались”
+bot.on('text', async (ctx, next) => {
+  const text = (ctx.message.text || '').trim()
+  if (!text) return
+
+  // Команды отдаём дальше, чтобы их обработал bot.command(...)
+  if (text.startsWith('/')) {
+    if (typeof next === 'function') return next()
+    return
+  }
+
+  const admin = isAdmin(ctx)
+
+  // 1) Если ждём текст после альбома
+  const album = pendingAlbumByUser.get(ctx.from.id)
+  if (album?.photoFileIds?.length) {
+    pendingAlbumByUser.delete(ctx.from.id)
+
+    const post = await submitNews({
+      text,
+      author: ctx.from,
+      admin,
+      photoFileId: album.photoFileIds[0] || null,
+      photoFileIds: album.photoFileIds
+    })
+
+    if (admin) {
+      await ctx.reply('✅ Новость опубликована!')
+    } else {
+      await ctx.reply('📩 Новость отправлена на проверку.')
+      await notifyAdmin(ctx, post)
+    }
+    return
+  }
+
+  // 2) Если ждём текст после одиночного фото
+  const state = userStates.get(ctx.from.id)
+  const photoFileId = state?.photoFileId || null
+  userStates.delete(ctx.from.id)
+
+  const post = await submitNews({ text, author: ctx.from, admin, photoFileId })
+
+  if (admin) {
+    await ctx.reply('✅ Новость опубликована!')
+  } else {
+    await ctx.reply('📩 Новость отправлена на проверку.')
+    await notifyAdmin(ctx, post)
+  }
 })
 
 bot.on('callback_query', async ctx => {
@@ -416,7 +485,6 @@ bot.on('callback_query', async ctx => {
     return
   }
 
-  // remove buttons from the moderation message
   try {
     await ctx.editMessageReplyMarkup()
   } catch (_) {}
@@ -429,7 +497,6 @@ bot.on('callback_query', async ctx => {
     await ctx.reply(`Новость #${result.post.id} отклонена.`)
   }
 
-  // optional: notify author (works if author has chat open with bot)
   try {
     if (result.post.authorId) {
       const msg =
@@ -445,7 +512,6 @@ bot.on('callback_query', async ctx => {
 module.exports = async (req, res) => {
   try {
     let update = req.body
-
     if (typeof update === 'string') update = JSON.parse(update)
     else if (Buffer.isBuffer(update)) update = JSON.parse(update.toString('utf8'))
 
