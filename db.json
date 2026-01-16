@@ -78,17 +78,6 @@
       "moderationMessage": null,
       "status": "approved",
       "source": "admin"
-    },
-    {
-      "id": 2,
-      "text": "send",
-      "authorId": 273473755,
-      "authorName": "fusuges",
-      "authorUsername": "fusuges",
-      "createdAt": "2026-01-16T12:52:34.688Z",
-      "status": "approved",
-      "source": "admin",
-      "photoFileId": null
     }
   ],
   "pending": [],
