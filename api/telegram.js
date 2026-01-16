@@ -122,7 +122,8 @@ bot.on('photo', async ctx => {
     if (isAdmin) {
       await ctx.reply('✅ Новость опубликована!')
     } else {
-      const post = await addNews({ text: caption, author: ctx.from, isAdmin, photoFileId })      try {
+      const post = await addNews({ text: caption, author: ctx.from, isAdmin, photoFileId })
+              try {
         await ctx.telegram.sendPhoto(ctx.botInfo.id, photoFileId, {
           caption: `📬 Новая новость #${post.id} от ${post.authorName}${post.authorUsername ? ' (@' + post.authorUsername + ')' : ''}:\n\n${post.text}`,
           reply_markup: { inline_keyboard: [[
