@@ -38,7 +38,21 @@
       "photoFileId": null
     }
   ],
-  "pending": [],
+  "pending": [
+    {
+      "id": 10,
+      "text": "Ну, сколько можно?!\nДай отдохнуть рабочему классу!",
+      "authorId": 164794874,
+      "authorName": "Bella",
+      "authorUsername": "io_spero",
+      "createdAt": "2026-01-16T18:00:33.373Z",
+      "category": "all",
+      "photoFileId": null,
+      "moderationMessage": null,
+      "status": "pending",
+      "source": "user"
+    }
+  ],
   "rejected": [
     {
       "id": 9,
