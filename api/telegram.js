@@ -19,9 +19,7 @@ const bot = new Telegraf(BOT_TOKEN)
 // если юзер отправил одиночное фото без подписи — ждём текст
 const userStates = new Map()
 
-// media_group_id -> сборка альбома "на лету" без таймеров
-// key = `${fromId}:${mediaGroupId}`
-// value = { postId: number|null, photoFileIds: string[], admin: bool, author: from, caption: string|null, createdAt: ISO }
+// альбомы (несколько фото): ключ `${fromId}:${mediaGroupId}`
 const albums = new Map()
 
 function isAdmin(ctx) {
@@ -31,11 +29,60 @@ function isAdmin(ctx) {
   const byId =
     ADMIN_CHAT_ID != null &&
     (Number(u?.id) === ADMIN_CHAT_ID || Number(chat?.id) === ADMIN_CHAT_ID)
-
   return byUsername || byId
 }
 
-// ---------- GitHub DB (через Contents API, чтобы меньше было проблем с кешем) ----------
+/**
+ * Достаём источник пересланного сообщения.
+ * Поддержка старых полей forward_from_chat/forward_from_message_id и новых forward_origin. [web:9]
+ */
+function getForwardSource(msg) {
+  if (!msg) return null
+
+  // Старый формат
+  if (msg.forward_from_chat) {
+    const chat = msg.forward_from_chat
+    const messageId = msg.forward_from_message_id || null
+    const username = chat.username || null
+    const chatUrl = username ? `https://t.me/${username}` : null
+    const postUrl = username && messageId ? `https://t.me/${username}/${messageId}` : null
+    return {
+      title: chat.title || null,
+      username,
+      chatId: chat.id ?? null,
+      messageId,
+      chatUrl,
+      postUrl
+    }
+  }
+
+  // Новый формат (Bot API: forward_origin)
+  if (msg.forward_origin) {
+    const fo = msg.forward_origin
+
+    // fo.type: "channel" / "chat" / "user" / ...
+    const chat = fo.chat || fo.sender_chat || null
+    const messageId = fo.message_id || null
+
+    if (chat) {
+      const username = chat.username || null
+      const chatUrl = username ? `https://t.me/${username}` : null
+      const postUrl = username && messageId ? `https://t.me/${username}/${messageId}` : null
+      return {
+        title: chat.title || null,
+        username,
+        chatId: chat.id ?? null,
+        messageId,
+        chatUrl,
+        postUrl
+      }
+    }
+  }
+
+  return null
+}
+
+// ---------- GitHub DB (Contents API) ----------
 
 function normalizeDb(raw) {
   const db = raw && typeof raw === 'object' ? raw : {}
@@ -43,7 +90,7 @@ function normalizeDb(raw) {
   const pendingRaw = Array.isArray(db.pending) ? db.pending : []
   const rejectedRaw = Array.isArray(db.rejected) ? db.rejected : []
 
-  // миграция старого формата: pending мог лежать в posts
+  // миграция: если раньше pending лежали в posts
   const posts = []
   const pending = [...pendingRaw]
   for (const p of postsRaw) {
@@ -90,7 +137,6 @@ async function readNewsDB() {
 
 async function writeNewsDB(db) {
   if (!GITHUB_TOKEN) return false
-
   const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}`
 
   try {
@@ -113,7 +159,6 @@ async function writeNewsDB(db) {
     }
 
     const content = Buffer.from(JSON.stringify(db, null, 2)).toString('base64')
-
     const putBody = { message: 'Update news via bot', content, branch: DB_BRANCH }
     if (sha) putBody.sha = sha
 
@@ -142,7 +187,7 @@ async function writeNewsDB(db) {
 
 // ---------- Посты ----------
 
-async function submitNews({ text, author, admin, photoFileId, photoFileIds }) {
+async function submitNews({ text, author, admin, photoFileId, photoFileIds, source }) {
   const db = await readNewsDB()
   const id = nextPostId(db)
 
@@ -153,18 +198,24 @@ async function submitNews({ text, author, admin, photoFileId, photoFileIds }) {
     authorName: [author?.first_name, author?.last_name].filter(Boolean).join(' ').trim(),
     authorUsername: author?.username || null,
     createdAt: new Date().toISOString(),
+    timestamp: new Date().toISOString(),
     category: 'all',
+
     photoFileId: photoFileId || null,
     photoFileIds: Array.isArray(photoFileIds) ? photoFileIds : undefined,
+
+    // источник пересланного сообщения (если есть)
+    source: source || null,
+
     moderationMessage: null
   }
 
   let saved
   if (admin) {
-    saved = { ...base, status: 'approved', source: 'admin' }
+    saved = { ...base, status: 'approved', sourceType: 'admin' }
     db.posts.unshift(saved)
   } else {
-    saved = { ...base, status: 'pending', source: 'user' }
+    saved = { ...base, status: 'pending', sourceType: 'user' }
     db.pending.unshift(saved)
   }
 
@@ -182,9 +233,11 @@ async function appendPhotosToPost(postId, newPhotoFileIds) {
     const p = bucket.find(x => x && x.id === postId)
     if (!p) continue
 
-    const existing = Array.isArray(p.photoFileIds) ? p.photoFileIds : (p.photoFileId ? [p.photoFileId] : [])
-    const merged = [...existing]
+    const existing = Array.isArray(p.photoFileIds)
+      ? p.photoFileIds
+      : (p.photoFileId ? [p.photoFileId] : [])
 
+    const merged = [...existing]
     for (const id of newPhotoFileIds) {
       if (id && !merged.includes(id)) merged.push(id)
     }
@@ -250,10 +303,15 @@ function adminKeyboard(postId) {
 async function notifyAdmin(ctx, post) {
   if (!ADMIN_CHAT_ID) return
 
+  const src = post.source
+  const srcLine = src?.postUrl
+    ? `\n\nИсточник: ${src.title || ''} ${src.postUrl}`.trim()
+    : (src?.chatUrl ? `\n\nИсточник: ${src.title || ''} ${src.chatUrl}`.trim() : '')
+
   const header =
     `📬 Новая новость #${post.id} от ${post.authorName || 'Unknown'}${
       post.authorUsername ? ` (@${post.authorUsername})` : ''
-    }:\n\n${post.text}`
+    }:\n\n${post.text}${srcLine}`
 
   try {
     let sent
@@ -323,7 +381,7 @@ async function deleteNews(postId) {
   return null
 }
 
-// ---------- Команды (должны быть ДО on('text')) ----------
+// ---------- Команды (важно: до on('text')) ----------
 
 bot.command('start', async ctx => {
   userStates.delete(ctx.from.id)
@@ -383,19 +441,22 @@ bot.command('delete', async ctx => {
 
 bot.on('photo', async ctx => {
   const admin = isAdmin(ctx)
+  const msg = ctx.message
 
-  const photos = ctx.message.photo || []
+  const photos = msg.photo || []
   const best = photos.length ? photos[photos.length - 1] : null
   const photoFileId = best?.file_id || null
-  const caption = (ctx.message.caption || '').trim()
-  const mediaGroupId = ctx.message.media_group_id || null
+  const caption = (msg.caption || '').trim()
+  const mediaGroupId = msg.media_group_id || null
 
   if (!photoFileId) {
     await ctx.reply('Не удалось прочитать фото, попробуйте ещё раз.')
     return
   }
 
-  // Альбом (несколько фото) — без таймеров
+  const source = getForwardSource(msg)
+
+  // Альбом (несколько фото)
   if (mediaGroupId) {
     const key = `${ctx.from.id}:${mediaGroupId}`
     const cur = albums.get(key) || {
@@ -403,22 +464,23 @@ bot.on('photo', async ctx => {
       photoFileIds: [],
       admin,
       author: ctx.from,
-      caption: null
+      caption: null,
+      source: source || null
     }
 
     cur.photoFileIds.push(photoFileId)
-
-    // если caption пришёл на одном из фото — фиксируем
     if (caption) cur.caption = caption
+    if (source && !cur.source) cur.source = source
 
-    // если пост ещё не создан и caption уже есть — создаём сразу и отвечаем сразу
+    // Если caption уже есть и пост ещё не создан — создаём и отвечаем сразу
     if (!cur.postId && cur.caption) {
       const post = await submitNews({
         text: cur.caption,
         author: ctx.from,
         admin,
         photoFileId: cur.photoFileIds[0] || null,
-        photoFileIds: cur.photoFileIds
+        photoFileIds: cur.photoFileIds,
+        source: cur.source
       })
 
       cur.postId = post.id
@@ -433,22 +495,29 @@ bot.on('photo', async ctx => {
       return
     }
 
-    // если пост уже создан (caption был раньше) — просто дополняем фото
+    // Если пост уже есть — просто дополняем фото
     if (cur.postId) {
       albums.set(key, cur)
       await appendPhotosToPost(cur.postId, [photoFileId])
-      // НЕ отвечаем каждый раз, чтобы не спамить
       return
     }
 
-    // caption ещё нет — ждём (но ничего не отвечаем, потому что нет текста новости)
+    // Текста ещё нет — ждём (в альбомах caption обычно на одном из фото)
     albums.set(key, cur)
     return
   }
 
   // Одиночное фото
   if (caption) {
-    const post = await submitNews({ text: caption, author: ctx.from, admin, photoFileId })
+    const post = await submitNews({
+      text: caption,
+      author: ctx.from,
+      admin,
+      photoFileId,
+      photoFileIds: [photoFileId],
+      source
+    })
+
     if (admin) {
       await ctx.reply('✅ Новость опубликована!')
     } else {
@@ -458,7 +527,7 @@ bot.on('photo', async ctx => {
     return
   }
 
-  userStates.set(ctx.from.id, { photoFileId })
+  userStates.set(ctx.from.id, { photoFileId, source })
   await ctx.reply('🖼 Фото получено! Теперь отправьте текст новости:')
 })
 
@@ -478,9 +547,17 @@ bot.on('text', async (ctx, next) => {
 
   const state = userStates.get(ctx.from.id)
   const photoFileId = state?.photoFileId || null
+  const source = state?.source || getForwardSource(ctx.message) || null
   userStates.delete(ctx.from.id)
 
-  const post = await submitNews({ text, author: ctx.from, admin, photoFileId })
+  const post = await submitNews({
+    text,
+    author: ctx.from,
+    admin,
+    photoFileId,
+    photoFileIds: photoFileId ? [photoFileId] : undefined,
+    source
+  })
 
   if (admin) {
     await ctx.reply('✅ Новость опубликована!')
