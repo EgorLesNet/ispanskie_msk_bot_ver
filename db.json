@@ -1,19 +1,5 @@
 {
-  "posts": [
-    {
-      "id": 7,
-      "text": "post",
-      "authorId": 273473755,
-      "authorName": "fusuges",
-      "authorUsername": "fusuges",
-      "createdAt": "2026-01-16T17:44:54.280Z",
-      "category": "all",
-      "photoFileId": null,
-      "moderationMessage": null,
-      "status": "approved",
-      "source": "admin"
-    }
-  ],
+  "posts": [],
   "pending": [],
   "rejected": [
     {
