@@ -1,22 +1,6 @@
 {
   "posts": [
     {
-      "id": 9,
-      "text": "Джинсы, 30, 800",
-      "authorId": 164794874,
-      "authorName": "Bella",
-      "authorUsername": "io_spero",
-      "createdAt": "2026-01-16T17:55:56.306Z",
-      "category": "all",
-      "photoFileId": null,
-      "moderationMessage": {
-        "chatId": 273473755,
-        "messageId": 229
-      },
-      "status": "approved",
-      "source": "user"
-    },
-    {
       "id": 8,
       "text": "Вот они, дружные испанские, кто-то заботливо положил потерянные деньги в лифте на поручни ;)) \n\nВеласкеса 1/3\n\n📷 @Laliqqq",
       "authorId": 273473755,
