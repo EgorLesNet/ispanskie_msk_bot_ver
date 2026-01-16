@@ -4,6 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Агрегатор для района</title>
+
+  <!-- Leaflet (карта) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{
@@ -36,7 +40,11 @@
     .theme-toggle:hover{transform:scale(1.15) rotate(15deg);background:rgba(0,0,0,0.05)}
     body[data-theme="dark"] .theme-toggle:hover{background:rgba(255,255,255,0.08)}
 
-    .feed{display:grid;gap:16px;width:min(680px, 92vw);margin:20px auto;}
+    .feed{
+      display:grid;gap:16px;
+      width:min(680px, 92vw);
+      margin:20px auto;
+    }
     .card{
       padding:18px;border-radius:20px;overflow:hidden;
       background:rgba(255,255,255,0.65);
@@ -47,67 +55,13 @@
     body[data-theme="dark"] .card{background:rgba(30,30,30,0.65);border:1px solid rgba(255,255,255,0.1);}
     .card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.15);}
     body[data-theme="dark"] .card:hover{box-shadow:0 12px 32px rgba(0,0,0,0.5);}
-
     .card-meta{font-size:11px;color:#888;margin-bottom:10px;line-height:1.4;}
     .card-meta a{color:inherit;text-decoration:underline;}
     .card-meta a:hover{opacity:0.85;}
-
     .card-text{font-size:15px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;}
     .card-text a{color:#007aff;text-decoration:none;transition:color 0.2s}
     .card-text a:hover{text-decoration:underline;color:#0051d5}
     body[data-theme="dark"] .card-text a{color:#0a84ff}
-
-    /* Галерея */
-    .gallery-wrap{position:relative;margin:10px 0 6px;}
-    .gallery{
-      display:flex;overflow-x:auto;gap:12px;
-      scroll-snap-type:x mandatory;
-      -webkit-overflow-scrolling:touch;
-      padding:6px 0 10px;
-    }
-    .gallery::-webkit-scrollbar{height:6px;}
-    .gallery::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:6px;}
-    body[data-theme="dark"] .gallery::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);}
-
-    .gallery-item{flex:0 0 100%;scroll-snap-align:center;display:flex;justify-content:center;}
-    .gallery-item img, .gallery-item video{
-      max-width:420px;width:100%;height:auto;border-radius:14px;display:block;
-      background:rgba(0,0,0,0.06);
-    }
-    body[data-theme="dark"] .gallery-item img,
-    body[data-theme="dark"] .gallery-item video{background:rgba(255,255,255,0.06);}
-
-    .gallery-arrow{
-      position:absolute;top:50%;transform:translateY(-50%);
-      width:38px;height:38px;border-radius:999px;
-      border:1px solid rgba(0,0,0,0.12);
-      background:rgba(255,255,255,0.75);
-      backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-      cursor:pointer;display:flex;align-items:center;justify-content:center;
-      transition:transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
-      box-shadow:0 8px 18px rgba(0,0,0,0.12);user-select:none;
-    }
-    body[data-theme="dark"] .gallery-arrow{
-      border:1px solid rgba(255,255,255,0.18);
-      background:rgba(30,30,30,0.6);
-      box-shadow:0 10px 24px rgba(0,0,0,0.45);
-    }
-    .gallery-arrow:hover{transform:translateY(-50%) scale(1.05);}
-    .gallery-arrow:disabled{opacity:0.35;cursor:default;}
-    .gallery-arrow:disabled:hover{transform:translateY(-50%);}
-    .gallery-arrow.prev{left:8px;}
-    .gallery-arrow.next{right:8px;}
-
-    .gallery-dots{display:flex;gap:6px;justify-content:center;padding:6px 0 0;}
-    .dot{
-      width:7px;height:7px;border-radius:999px;
-      background:rgba(0,0,0,0.22);
-      border:none;padding:0;cursor:pointer;
-      transition:transform 0.15s ease, background 0.15s ease;
-    }
-    body[data-theme="dark"] .dot{background:rgba(255,255,255,0.22);}
-    .dot.active{background:rgba(0,122,255,0.95);transform:scale(1.25);}
-    body[data-theme="dark"] .dot.active{background:rgba(10,132,255,0.95);}
 
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
 
@@ -138,13 +92,6 @@
       background:#0a84ff;border-color:#0a84ff;
       box-shadow:0 4px 12px rgba(10,132,255,0.4);
     }
-    .nav button .icon{display:none;font-size:20px}
-    .nav button .text{display:inline}
-
-    @media (max-width: 350px){
-      .nav button .icon{display:inline}
-      .nav button .text{display:none}
-    }
 
     .liquid-glass{
       backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
@@ -171,6 +118,117 @@
       box-shadow:0 -4px 24px rgba(0,0,0,0.4);
     }
 
+    /* ---- Business view ---- */
+    #businessView{
+      width:min(900px, 94vw);
+      margin:18px auto;
+      display:none;
+      gap:12px;
+    }
+    .biz-topbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .biz-filters{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+    .chip{
+      border:1px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.6);
+      padding:8px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:13px;
+      transition:transform .15s ease, background .2s ease;
+    }
+    body[data-theme="dark"] .chip{
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(50,50,50,0.6);
+      color:#ddd;
+    }
+    .chip.active{
+      background:#007aff;
+      border-color:#007aff;
+      color:#fff;
+    }
+    body[data-theme="dark"] .chip.active{
+      background:#0a84ff;
+      border-color:#0a84ff;
+    }
+    .chip:hover{transform:scale(1.03)}
+
+    .biz-actions{display:flex;gap:8px;align-items:center}
+    .btn{
+      border:1px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.75);
+      padding:9px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:13px;
+      transition:transform .15s ease, background .2s ease;
+    }
+    body[data-theme="dark"] .btn{
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(50,50,50,0.75);
+      color:#ddd;
+    }
+    .btn:hover{transform:translateY(-1px)}
+
+    .biz-layout{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    #map{
+      height: 62vh;
+      min-height: 420px;
+      border-radius:20px;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,0.1);
+      box-shadow:0 10px 28px rgba(0,0,0,0.12);
+    }
+    body[data-theme="dark"] #map{
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 10px 28px rgba(0,0,0,0.45);
+    }
+
+    .biz-form{
+      display:none;
+      padding:14px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.65);
+      border:1px solid rgba(0,0,0,0.08);
+    }
+    body[data-theme="dark"] .biz-form{
+      background:rgba(30,30,30,0.65);
+      border:1px solid rgba(255,255,255,0.1);
+    }
+    .biz-form .row{display:grid;gap:8px;margin:10px 0}
+    .biz-form input, .biz-form select, .biz-form textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.9);
+      font-size:14px;
+    }
+    body[data-theme="dark"] .biz-form input,
+    body[data-theme="dark"] .biz-form select,
+    body[data-theme="dark"] .biz-form textarea{
+      border:1px solid rgba(255,255,255,0.15);
+      background:rgba(20,20,20,0.8);
+      color:#fff;
+    }
+    .biz-form textarea{min-height:80px;resize:vertical}
+    .hint{font-size:12px;color:#777;line-height:1.4}
+    body[data-theme="dark"] .hint{color:#aaa}
+
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
@@ -190,29 +248,91 @@
     </button>
   </header>
 
+  <!-- NEWS VIEW -->
   <main class="feed" id="feed"></main>
+
+  <!-- BUSINESS VIEW -->
+  <section id="businessView">
+    <div class="biz-topbar">
+      <div class="biz-filters" id="bizFilters"></div>
+
+      <div class="biz-actions">
+        <button class="btn" id="btnSetBizSecret" type="button">🔐 Секрет</button>
+        <button class="btn" id="btnAddBiz" type="button">➕ Добавить бизнес</button>
+      </div>
+    </div>
+
+    <div class="biz-layout">
+      <div id="map"></div>
+
+      <div class="biz-form" id="bizForm">
+        <div class="hint">
+          1) Нажми на карте точку (координаты подставятся).<br/>
+          2) Заполни поля и нажми “Сохранить”.<br/>
+          3) Нужен секрет (кнопка “🔐 Секрет”).
+        </div>
+
+        <div class="row">
+          <label>Категория</label>
+          <select id="bizCategory">
+            <option value="Кафе/Рестораны">Кафе/Рестораны</option>
+            <option value="Магазины">Магазины</option>
+            <option value="Услуги">Услуги</option>
+            <option value="Красота">Красота</option>
+            <option value="Медицина">Медицина</option>
+            <option value="Спорт">Спорт</option>
+            <option value="Дети">Дети</option>
+            <option value="Другое">Другое</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label>Название</label>
+          <input id="bizName" placeholder="Например: Пекарня ‘Хлеб’" />
+        </div>
+
+        <div class="row">
+          <label>Описание</label>
+          <textarea id="bizDesc" placeholder="Коротко: что за бизнес, часы, особенности"></textarea>
+        </div>
+
+        <div class="row">
+          <label>Адрес (опционально)</label>
+          <input id="bizAddress" placeholder="Например: ул. ..., дом ..." />
+        </div>
+
+        <div class="row">
+          <label>Ссылка (сайт/телеграм) (опционально)</label>
+          <input id="bizUrl" placeholder="https://t.me/..." />
+        </div>
+
+        <div class="row">
+          <label>Координаты</label>
+          <input id="bizLat" placeholder="lat" />
+          <input id="bizLng" placeholder="lng" />
+          <div class="hint" id="bizPickHint">Кликни по карте, чтобы выбрать точку.</div>
+        </div>
+
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn" id="btnSaveBiz" type="button">✅ Сохранить</button>
+          <button class="btn" id="btnCancelBiz" type="button">✖ Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <nav class="nav liquid-glass">
     <div class="nav-inner">
-      <button id="btn-all" aria-current="true" onclick="filterNews('all')">
-        <span class="icon">📰</span><span class="text">Новости</span>
-      </button>
-      <button id="btn-business" onclick="filterNews('business')">
-        <span class="icon">💼</span><span class="text">Бизнес</span>
-      </button>
-      <button id="btn-reco" onclick="filterNews('reco')">
-        <span class="icon">⭐</span><span class="text">Рекомендации</span>
-      </button>
+      <button id="btn-all" aria-current="true" onclick="switchTab('all')">📰 Новости</button>
+      <button id="btn-business" onclick="switchTab('business')">💼 Бизнес</button>
+      <button id="btn-reco" onclick="switchTab('reco')">⭐ Рекомендации</button>
     </div>
   </nav>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script>
-    let allNews = [];
-    let currentFilter = 'all';
-
-    let hasBackgroundUpdates = false;
-    let resizeHandlerInstalled = false;
-
+    // ---------------- theme ----------------
     function toggleTheme() {
       const body = document.body;
       const icon = document.getElementById('theme-icon');
@@ -221,7 +341,6 @@
       icon.textContent = isDark ? '🌙' : '☀️';
       localStorage.setItem('theme', isDark ? 'light' : 'dark');
     }
-
     function initTheme() {
       const saved = localStorage.getItem('theme');
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -232,6 +351,7 @@
       }
     }
 
+    // ---------------- shared helpers ----------------
     function escapeHtml(s) {
       return String(s || '')
         .replaceAll('&','&amp;')
@@ -240,13 +360,11 @@
         .replaceAll('"','&quot;')
         .replaceAll("'","&#039;");
     }
-
     function linkify(text) {
       const safe = escapeHtml(text);
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
     }
-
     function formatDate(ts) {
       if (!ts) return '';
       const d = new Date(ts);
@@ -257,161 +375,69 @@
       const minutes = String(d.getMinutes()).padStart(2, '0');
       return `${day}.${month}.${year}, ${hours}:${minutes}`;
     }
-
     function buildSourceLine(n) {
       const s = n && n.source ? n.source : null;
       if (!s) return '';
-
       const url = s.postUrl || s.chatUrl || '';
       const title = s.title || (s.username ? '@' + s.username : 'Источник');
-
       if (!url) return ` · Источник: ${escapeHtml(title)}`;
       return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
     }
 
-    function normalizeMedia(n) {
-      if (Array.isArray(n.media) && n.media.length) return n.media;
+    // ---------------- tabs ----------------
+    let currentTab = 'all'; // all | business | reco
 
-      const photoIds = Array.isArray(n.photoFileIds)
-        ? n.photoFileIds
-        : (n.photoFileId ? [n.photoFileId] : []);
-
-      return photoIds.map(id => ({ type: 'photo', fileId: id }));
+    function setNavActive(id) {
+      document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
+      const btn = document.getElementById('btn-' + id);
+      if (btn) btn.setAttribute('aria-current', 'true');
     }
 
-    function renderGallery(mediaItems, postId) {
-      const items = Array.isArray(mediaItems) ? mediaItems.filter(x => x && x.fileId) : [];
-      if (!items.length) return '';
+    function switchTab(tab) {
+      currentTab = tab;
+      setNavActive(tab);
 
-      const slides = items.map(it => {
-        const src = `/api/media/${encodeURIComponent(it.fileId)}`;
-        if (it.type === 'video') {
-          return `<div class="gallery-item"><video controls playsinline preload="metadata" src="${src}"></video></div>`;
-        }
-        return `<div class="gallery-item"><img src="${src}" alt="photo"></div>`;
-      }).join('');
+      const feed = document.getElementById('feed');
+      const businessView = document.getElementById('businessView');
 
-      const dots = items.map((_, i) => {
-        const cls = i === 0 ? 'dot active' : 'dot';
-        return `<button class="${cls}" type="button" aria-label="Слайд ${i + 1}" data-dot="${i}"></button>`;
-      }).join('');
-
-      const controls = (items.length > 1)
-        ? `
-          <button class="gallery-arrow prev" type="button" aria-label="Предыдущий">‹</button>
-          <button class="gallery-arrow next" type="button" aria-label="Следующий">›</button>
-          <div class="gallery-dots">${dots}</div>
-        `
-        : '';
-
-      return `
-        <div class="gallery-wrap" data-post-id="${escapeHtml(postId)}">
-          <div class="gallery" aria-label="Галерея">
-            ${slides}
-          </div>
-          ${controls}
-        </div>
-      `;
-    }
-
-    function initGalleries() {
-      const wraps = document.querySelectorAll('.gallery-wrap');
-
-      wraps.forEach(wrap => {
-        const gallery = wrap.querySelector('.gallery');
-        const prev = wrap.querySelector('.gallery-arrow.prev');
-        const next = wrap.querySelector('.gallery-arrow.next');
-        const dots = Array.from(wrap.querySelectorAll('.dot'));
-
-        if (!gallery || dots.length <= 1 || !prev || !next) return;
-
-        const state = { idx: 0, raf: 0 };
-
-        function scrollToIndex(i) {
-          const max = dots.length - 1;
-          const idx = Math.max(0, Math.min(max, i));
-          const pageWidth = gallery.clientWidth || 1;
-          gallery.scrollTo({ left: idx * pageWidth, behavior: 'smooth' });
-        }
-
-        function setActive(idx) {
-          state.idx = idx;
-          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-          prev.disabled = idx <= 0;
-          next.disabled = idx >= dots.length - 1;
-        }
-
-        function updateFromScroll() {
-          const pageWidth = gallery.clientWidth || 1;
-          const idx = Math.round(gallery.scrollLeft / pageWidth);
-          setActive(Math.max(0, Math.min(dots.length - 1, idx)));
-        }
-
-        prev.addEventListener('click', () => scrollToIndex(state.idx - 1));
-        next.addEventListener('click', () => scrollToIndex(state.idx + 1));
-        dots.forEach((d, i) => d.addEventListener('click', () => scrollToIndex(i)));
-
-        gallery.addEventListener('scroll', () => {
-          if (state.raf) cancelAnimationFrame(state.raf);
-          state.raf = requestAnimationFrame(updateFromScroll);
-        });
-
-        setActive(0);
-      });
-
-      if (!resizeHandlerInstalled) {
-        resizeHandlerInstalled = true;
-        window.addEventListener('resize', () => {
-          document.querySelectorAll('.gallery-wrap').forEach(wrap => {
-            const gallery = wrap.querySelector('.gallery');
-            const dots = Array.from(wrap.querySelectorAll('.dot'));
-            const prev = wrap.querySelector('.gallery-arrow.prev');
-            const next = wrap.querySelector('.gallery-arrow.next');
-            if (!gallery || dots.length <= 1 || !prev || !next) return;
-
-            const pageWidth = gallery.clientWidth || 1;
-            const idx = Math.round(gallery.scrollLeft / pageWidth);
-
-            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-            prev.disabled = idx <= 0;
-            next.disabled = idx >= dots.length - 1;
-          });
-        });
+      if (tab === 'business') {
+        feed.style.display = 'none';
+        businessView.style.display = 'grid';
+        ensureMap();
+        loadBusinesses({ render: true });
+        return;
       }
+
+      businessView.style.display = 'none';
+      feed.style.display = 'grid';
+
+      renderNews();
     }
+
+    // ---------------- news ----------------
+    let allNews = [];
+    let hasBackgroundUpdates = false;
 
     function renderNews() {
       const feed = document.getElementById('feed');
-      const filtered = currentFilter === 'all'
-        ? allNews
-        : allNews.filter(n => n.category === currentFilter);
+
+      const filtered = (currentTab === 'reco')
+        ? allNews.filter(n => (n.category || 'all') === 'reco')
+        : allNews;
 
       if (!filtered.length) {
-        feed.innerHTML = '<div class="no-news">Нет новостей в этой категории.</div>';
+        feed.innerHTML = '<div class="no-news">Нет новостей.</div>';
         return;
       }
 
       feed.innerHTML = filtered.map(n => {
         const ts = n.timestamp || n.createdAt || null;
-        const media = normalizeMedia(n);
-
         let html = '<div class="card">';
         html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
-        html += renderGallery(media, n.id);
         html += `<div class="card-text">${linkify(n.text || '')}</div>`;
         html += '</div>';
         return html;
       }).join('');
-
-      initGalleries();
-    }
-
-    function filterNews(cat) {
-      currentFilter = cat;
-      document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
-      const btn = document.getElementById(`btn-${cat}`);
-      if (btn) btn.setAttribute('aria-current', 'true');
-      renderNews();
     }
 
     function sameTop(a, b) {
@@ -429,28 +455,208 @@
         const changed = !sameTop(allNews, next);
         allNews = next;
 
-        if (render && changed) renderNews();
+        // Рендерим только если сейчас открыта лента (не карта)
+        if (render && changed && currentTab !== 'business') renderNews();
         if (!render && changed) hasBackgroundUpdates = true;
       } catch (e) {
         console.error(e);
       }
     }
 
-    initTheme();
-    loadNews({ render: true });
-
-    // Фоновое обновление ТОЛЬКО когда вкладка не видима
+    // обновляем новости в фоне только когда вкладка скрыта
     setInterval(() => {
       if (document.visibilityState !== 'visible') loadNews({ render: false });
     }, 3000);
 
-    // Вернулся на вкладку -> перерисовать то, что уже подгрузилось в фоне
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && hasBackgroundUpdates) {
+      if (document.visibilityState === 'visible' && hasBackgroundUpdates && currentTab !== 'business') {
         hasBackgroundUpdates = false;
         renderNews();
       }
     });
+
+    // ---------------- business map ----------------
+    let bizList = [];
+    let bizCategoryFilter = 'Все';
+
+    let map = null;
+    let markersLayer = null;
+    let pickMarker = null;
+
+    function ensureMap() {
+      if (map) return;
+
+      // Центр района: можно потом поправить точнее
+      const center = [55.57, 37.43];
+
+      map = L.map('map', { zoomControl: true }).setView(center, 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      markersLayer = L.layerGroup().addTo(map);
+
+      map.on('click', (e) => {
+        const form = document.getElementById('bizForm');
+        if (form.style.display !== 'block') return;
+
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+
+        document.getElementById('bizLat').value = lat.toFixed(6);
+        document.getElementById('bizLng').value = lng.toFixed(6);
+
+        if (pickMarker) pickMarker.remove();
+        pickMarker = L.marker([lat, lng]).addTo(map);
+        document.getElementById('bizPickHint').textContent = 'Точка выбрана. Можно сохранять.';
+      });
+    }
+
+    function buildBizFilters() {
+      const container = document.getElementById('bizFilters');
+
+      const cats = new Set(['Все']);
+      bizList.forEach(b => cats.add(b.category || 'Другое'));
+
+      const items = Array.from(cats);
+
+      container.innerHTML = items.map(c => {
+        const active = c === bizCategoryFilter ? 'chip active' : 'chip';
+        return `<button class="${active}" type="button" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`;
+      }).join('');
+
+      container.querySelectorAll('button[data-cat]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          bizCategoryFilter = btn.getAttribute('data-cat') || 'Все';
+          buildBizFilters();
+          renderBusinesses();
+        });
+      });
+    }
+
+    function renderBusinesses() {
+      if (!map || !markersLayer) return;
+
+      markersLayer.clearLayers();
+
+      const filtered = (bizCategoryFilter === 'Все')
+        ? bizList
+        : bizList.filter(b => (b.category || 'Другое') === bizCategoryFilter);
+
+      filtered.forEach(b => {
+        const lat = Number(b.lat);
+        const lng = Number(b.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        const title = escapeHtml(b.name || 'Бизнес');
+        const cat = escapeHtml(b.category || 'Другое');
+        const desc = b.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.35;">${escapeHtml(b.description)}</div>` : '';
+        const addr = b.address ? `<div style="margin-top:6px;font-size:12px;opacity:0.85;">${escapeHtml(b.address)}</div>` : '';
+        const link = b.url ? `<div style="margin-top:8px;"><a href="${escapeHtml(b.url)}" target="_blank" rel="noopener">Открыть ссылку</a></div>` : '';
+
+        const popupHtml = `
+          <div style="font-size:14px;font-weight:600;">${title}</div>
+          <div style="font-size:12px;opacity:0.85;margin-top:2px;">${cat}</div>
+          ${desc}
+          ${addr}
+          ${link}
+        `;
+
+        L.marker([lat, lng]).addTo(markersLayer).bindPopup(popupHtml);
+      });
+    }
+
+    async function loadBusinesses({ render = true } = {}) {
+      try {
+        const res = await fetch('/api/businesses', { cache: 'no-store' });
+        const data = await res.json();
+        bizList = Array.isArray(data.businesses) ? data.businesses : [];
+        buildBizFilters();
+        if (render) renderBusinesses();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function getBizSecret() {
+      return localStorage.getItem('biz_admin_secret') || '';
+    }
+    function setBizSecret() {
+      const cur = getBizSecret();
+      const s = prompt('Введите секрет BUSINESS_ADMIN_KEY (сохранится в браузере):', cur || '');
+      if (s == null) return;
+      localStorage.setItem('biz_admin_secret', s.trim());
+      alert('Секрет сохранён.');
+    }
+
+    function openBizForm() {
+      document.getElementById('bizForm').style.display = 'block';
+      document.getElementById('bizPickHint').textContent = 'Кликни по карте, чтобы выбрать точку.';
+    }
+    function closeBizForm() {
+      document.getElementById('bizForm').style.display = 'none';
+      document.getElementById('bizName').value = '';
+      document.getElementById('bizDesc').value = '';
+      document.getElementById('bizAddress').value = '';
+      document.getElementById('bizUrl').value = '';
+      document.getElementById('bizLat').value = '';
+      document.getElementById('bizLng').value = '';
+      document.getElementById('bizPickHint').textContent = 'Кликни по карте, чтобы выбрать точку.';
+      if (pickMarker) { pickMarker.remove(); pickMarker = null; }
+    }
+
+    async function saveBusiness() {
+      const secret = getBizSecret();
+      if (!secret) {
+        alert('Сначала задай секрет кнопкой “🔐 Секрет”.');
+        return;
+      }
+
+      const payload = {
+        secret,
+        name: document.getElementById('bizName').value,
+        category: document.getElementById('bizCategory').value,
+        description: document.getElementById('bizDesc').value,
+        address: document.getElementById('bizAddress').value,
+        url: document.getElementById('bizUrl').value,
+        lat: document.getElementById('bizLat').value,
+        lng: document.getElementById('bizLng').value
+      };
+
+      try {
+        const res = await fetch('/api/businesses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          alert('Ошибка сохранения: ' + (data.error || res.status));
+          return;
+        }
+
+        closeBizForm();
+        await loadBusinesses({ render: true });
+        alert('Бизнес добавлен!');
+      } catch (e) {
+        console.error(e);
+        alert('Ошибка сети при сохранении.')
+      }
+    }
+
+    // ---------------- init ----------------
+    initTheme();
+    loadNews({ render: true });
+    renderNews();
+
+    document.getElementById('btnSetBizSecret').addEventListener('click', setBizSecret);
+    document.getElementById('btnAddBiz').addEventListener('click', openBizForm);
+    document.getElementById('btnCancelBiz').addEventListener('click', closeBizForm);
+    document.getElementById('btnSaveBiz').addEventListener('click', saveBusiness);
   </script>
 </body>
 </html>
