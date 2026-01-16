@@ -277,7 +277,9 @@ async function loadNews() {
 
 initTheme();
 loadNews();
-setInterval(loadNews, 3000);
+setInterval(() => {
+  if (document.visibilityState === 'visible') loadNews();
+}, 3000);
 </script>
 </body>
 </html>
