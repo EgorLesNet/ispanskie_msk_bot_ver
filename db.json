@@ -38,6 +38,20 @@
       "photoFileId": null
     }
   ],
-  "pending": [],
+  "pending": [
+    {
+      "id": 9,
+      "text": "Джинсы, 30, 800",
+      "authorId": 164794874,
+      "authorName": "Bella",
+      "authorUsername": "io_spero",
+      "createdAt": "2026-01-16T17:55:56.306Z",
+      "category": "all",
+      "photoFileId": null,
+      "moderationMessage": null,
+      "status": "pending",
+      "source": "user"
+    }
+  ],
   "rejected": []
 }
