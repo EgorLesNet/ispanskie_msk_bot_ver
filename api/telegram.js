@@ -67,7 +67,7 @@ async function writeNewsDB(db) {
 
 async function addNews({ text, author, isAdmin, photoFileId }) {
     const db = await readNewsDB()
-        const post = {
+          const post = {
     id: db.posts.length > 0 ? Math.max(...db.posts.map(p => p.id)) + 1 : 1,    text,
     authorId: author.id,
     authorName: [author.first_name, author.last_name].filter(Boolean).join(' '),
