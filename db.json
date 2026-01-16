@@ -1,22 +1,6 @@
 {
   "posts": [],
   "pending": [],
-  "rejected": [
-    {
-      "id": 9,
-      "text": "Покорми кота через 2 минуты.",
-      "authorId": 164794874,
-      "authorName": "Bella",
-      "authorUsername": "io_spero",
-      "createdAt": "2026-01-16T17:58:58.421Z",
-      "category": "all",
-      "photoFileId": null,
-      "moderationMessage": {
-        "chatId": 273473755,
-        "messageId": 236
-      },
-      "status": "rejected",
-      "source": "user"
-    }
-  ]
+  "rejected": [],
+  "businesses": []
 }
