@@ -2,12 +2,12 @@
   "posts": [
     {
       "id": 9,
-      "text": "test",
+      "text": "Новость",
       "authorId": 273473755,
       "authorName": "fusuges",
       "authorUsername": "fusuges",
-      "createdAt": "2026-01-16T17:13:52.577Z",
-      "photoFileId": "AgACAgIAAxkBAAOUaWpTNPMTboFmbopskHHkAAG6esivAAKOEmsbJ-D5Sqp6peIvM1WWAQADAgADeQADOAQ",
+      "createdAt": "2026-01-16T17:13:53.518Z",
+      "photoFileId": null,
       "status": "approved",
       "source": "admin"
     },
