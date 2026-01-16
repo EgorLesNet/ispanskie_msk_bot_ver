@@ -6,33 +6,36 @@
 <title>Лента района</title>
 <style>
 :root{
---bg:#f5f5f5;--card-bg:#fff;--text:#000;--text-gray:#666;--border:#ddd;--shadow:rgba(0,0,0,0.1);--nav-bg:#fff;--active:#007bff;
+--bg:#f0f2f5;--card-bg:#fff;--text:#000;--text-gray:#8e8e93;--border:#e5e5ea;--shadow:rgba(0,0,0,0.08);--nav-bg:#fff;--active:#0088cc;
 }
 [data-theme="dark"]{
---bg:#1a1a1a;--card-bg:#2d2d2d;--text:#e0e0e0;--text-gray:#aaa;--border:#444;--shadow:rgba(0,0,0,0.3);--nav-bg:#2d2d2d;--active:#4a9eff;
+--bg:#0e0e0e;--card-bg:#1c1c1e;--text:#fff;--text-gray:#8e8e93;--border:#2c2c2e;--shadow:rgba(0,0,0,0.4);--nav-bg:#1c1c1e;--active:#64b5f6;
 }
-body{font-family:system-ui,Arial;margin:0;padding:16px 16px 80px 16px;background:var(--bg);color:var(--text);transition:background 0.3s,color 0.3s}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-h3{margin:0}
-.theme-btn{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:8px 16px;cursor:pointer;font-size:20px;transition:all 0.3s}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:0;padding:0 0 70px 0;background:var(--bg);color:var(--text);transition:background 0.3s,color 0.3s}
+.header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--nav-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+h3{margin:0;font-size:18px;font-weight:600}
+.theme-btn{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:18px;transition:all 0.3s}
 .theme-btn:hover{transform:scale(1.1)}
-.card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 3px var(--shadow);transition:background 0.3s,border-color 0.3s}
-.meta{color:var(--text-gray);font-size:12px;margin-bottom:8px}
-.text{line-height:1.5;margin-bottom:10px}
-img{max-width:400px;width:100%;border-radius:10px;margin:10px auto;display:block}
-.nav{position:fixed;bottom:0;left:0;right:0;background:var(--nav-bg);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0;box-shadow:0 -2px 10px var(--shadow);z-index:1000}
-.nav-item{flex:1;text-align:center;padding:10px;cursor:pointer;color:var(--text-gray);font-size:16px;font-weight:500;transition:color 0.3s;border:none;background:transparent}
-.nav-item.active{color:var(--active);font-weight:bold}
+.card{background:var(--card-bg);border-radius:12px;margin:8px;padding:0;box-shadow:0 1px 2px var(--shadow);overflow:hidden}
+.meta{color:var(--text-gray);font-size:13px;padding:12px 12px 8px 12px}
+.text{line-height:1.4;padding:0 12px 12px 12px;font-size:15px;word-wrap:break-word}
+.text a{color:var(--active);text-decoration:none}
+.text a:hover{text-decoration:underline}
+img{max-width:100%;width:100%;display:block;margin:0}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--nav-bg);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -1px 3px var(--shadow);z-index:1000}
+.nav-item{flex:1;text-align:center;padding:8px;cursor:pointer;color:var(--text-gray);font-size:15px;font-weight:500;transition:color 0.2s;border:none;background:transparent}
+.nav-item.active{color:var(--active);font-weight:600}
 .nav-item:hover{color:var(--active)}
+.subtitle{color:var(--text-gray);font-size:14px;padding:8px 16px}
 .hidden{display:none}
 </style>
 </head>
 <body>
 <div class="header">
-<h3>🏘 Лента района</h3>
+<h3>🏘️ Лента района</h3>
 <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
 </div>
-<p style="color:var(--text-gray);font-size:14px">Собранные новости района.</p>
+<p class="subtitle">Собранные новости района.</p>
 <div id="list"></div>
 <div class="nav">
 <button class="nav-item active" onclick="filterCategory('all')" data-category="all">Новости</button>
@@ -42,16 +45,26 @@ img{max-width:400px;width:100%;border-radius:10px;margin:10px auto;display:block
 <script>
 var allNews=[];
 var currentCategory='all';
+
 function setTheme(t){
 document.documentElement.setAttribute('data-theme',t);
 var btn=document.querySelector('.theme-btn');
 btn.textContent=t==='dark'?'☀️':'🌙';
 localStorage.setItem('theme',t);
 }
+
 function toggleTheme(){
 var current=document.documentElement.getAttribute('data-theme')||'light';
 setTheme(current==='dark'?'light':'dark');
 }
+
+function linkify(text){
+var urlRegex=/(https?:\/\/[^\s]+)/g;
+return text.replace(urlRegex,function(url){
+return '<a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
+});
+}
+
 function filterCategory(cat){
 currentCategory=cat;
 document.querySelectorAll('.nav-item').forEach(function(item){
@@ -60,50 +73,53 @@ item.classList.remove('active');
 document.querySelector('[data-category="'+cat+'"]').classList.add('active');
 renderNews();
 }
+
 function renderNews(){
 var el=document.getElementById('list');
 var filtered=currentCategory==='all'?allNews:allNews.filter(function(p){return p.category===currentCategory});
 if(filtered.length===0){
-el.innerHTML='<div class="card">Нет новостей в этой категории.</div>';
+el.innerHTML='<div class="card"><div class="text">Нет новостей в этой категории.</div></div>';
 return;
 }
 el.innerHTML='';
 filtered.forEach(function(p){
 var card=document.createElement('div');
 card.className='card';
-var meta=document.createElement('div');
-meta.className='meta';
-var date=new Date(p.createdAt).toLocaleString('ru-RU');
-meta.textContent='#'+p.id+' · '+date+' · '+p.source;
-card.appendChild(meta);
-var text=document.createElement('div');
-text.className='text';
-text.textContent=p.text;
-card.appendChild(text);
-if(p.photoFileId){
+
+if(p.photoId){
 var img=document.createElement('img');
-img.src='/api/photo/'+p.photoFileId;
+img.src='/api/photo/'+p.photoId;
 img.alt='фото';
 card.appendChild(img);
 }
+
+var meta=document.createElement('div');
+meta.className='meta';
+var date=new Date(p.createdAt).toLocaleString('ru-RU');
+meta.textContent='#'+p.id+' · '+date+' · '+p.category;
+card.appendChild(meta);
+
+var text=document.createElement('div');
+text.className='text';
+text.innerHTML=linkify(p.text);
+card.appendChild(text);
+
 el.appendChild(card);
 });
 }
+
 var saved=localStorage.getItem('theme');
 if(saved){setTheme(saved);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){setTheme('dark');}
-console.log('Loading news...');
 fetch('/api/news').then(function(r){return r.json()}).then(function(data){
-if(!data.posts||data.posts.length===0){
-document.getElementById('list').innerHTML='<div class="card">Пока нет новостей.</div>';
-return;
+if(data.posts && data.posts.length){
+el=document.getElementById('list');
+el.innerHTML='<div class="card"><div class="text">Загрузка новостей...</div></div>';
 }
-allNews=data.posts.map(function(p){
-return Object.assign({},p,{category:p.category||'all'});
-});
+allNews=data.posts.map(function(p){return Object.assign({},p,{category:p.category||'all'})});
 renderNews();
 }).catch(function(err){
-console.error('Error loading news:', err);
-document.getElementById('list').innerHTML='<div class="card">Ошибка загрузки: '+err.message+'</div>';
+console.error('Error loading news:',err);
+document.getElementById('list').innerHTML='<div class="card"><div class="text">Ошибка загрузки. Попробуйте обновить страницу.</div></div>';
 });
 </script>
 </body>
