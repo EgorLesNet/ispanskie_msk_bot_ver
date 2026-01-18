@@ -4,6 +4,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 3,
+      "name": "Сдэк",
+      "category": "Услуги",
+      "lat": 55.592152,
+      "lng": 37.460858,
+      "description": "Почтовая служба\n09:00 - 21:00",
+      "address": null,
+      "url": "www.cdek.ru",
+      "reviews": [],
+      "createdAt": "2026-01-18T08:43:53.386Z"
+    },
+    {
       "id": 2,
       "name": "Пятерочка",
       "category": "Магазины",
