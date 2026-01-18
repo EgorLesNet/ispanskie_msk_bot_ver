@@ -1,6 +1,37 @@
 {
   "posts": [
     {
+      "id": 15,
+      "text": "🌎 ❄️\nНачали убирать снег! \n\nНо пока только на Испанском бульваре, и только для машин. Про пешеходов опять забыли.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-18T10:47:28.708Z",
+      "timestamp": "2026-01-18T10:47:28.708Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIBpWlspEh3ONi1QEQfszzLkjmBfVpcAAKnDWsb7MdZSyM_ba4aSY3sAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIBpWlspEh3ONi1QEQfszzLkjmBfVpcAAKnDWsb7MdZSyM_ba4aSY3sAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIBpWlspEh3ONi1QEQfszzLkjmBfVpcAAKnDWsb7MdZSyM_ba4aSY3sAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "Испанские Кварталы | Прокшино ❄️☃️",
+        "username": "ispanskie_msk",
+        "chatId": -1001907008907,
+        "messageId": 530,
+        "chatUrl": "https://t.me/ispanskie_msk",
+        "postUrl": "https://t.me/ispanskie_msk/530"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 14,
       "text": "🌎 ❄️\nНачали убирать снег! \n\nНо пока только на Испанском бульваре, и только для машин. Про пешеходов опять забыли.",
       "authorId": 273473755,
