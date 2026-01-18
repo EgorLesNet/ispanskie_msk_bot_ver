@@ -1,6 +1,34 @@
 {
   "posts": [
     {
+      "id": 17,
+      "text": "☀️ Сегодня был такой солнечный день",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-18T07:04:25.803Z",
+      "timestamp": "2026-01-18T07:04:25.803Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAIBWGlshfjNMj6_Qs1MRidQuaAdD1TNAAIdjgACevhZS9Y3mWtMrAioOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8892,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8892"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 16,
       "text": "Соседи!\n\nКоммунальные службы приступили к расчистке проездов и парковочных карманов на Испанском бульваре. Просьба к автовладельцам по возможности убрать транспорт для работы спец.техники.",
       "authorId": 273473755,
