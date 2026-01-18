@@ -661,13 +661,6 @@
     }
 
     function renderMediaContent(text) {
-      let html = text;
-      
-      // Ссылки на фото
-      const photoRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|bmp))/gi;
-      const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov))/gi;
-      const youtubeRegex = /(https?:\/\/(www\.)?youtube\.com\/watch\?v=([^\s&]+)|https?:\/\/youtu\.be\/([^\s&]+))/gi;
-      
       let mediaHtml = '';
       let textWithoutMedia = text;
       
@@ -675,24 +668,29 @@
       const photos = [];
       const videos = [];
       
+      // Ссылки на фото (более гибкий поиск)
+      const photoRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]*\.(jpg|jpeg|png|gif|webp|bmp|JPG|JPEG|PNG|GIF|WEBP|BMP))/g;
       let match;
-      photoRegex.lastIndex = 0;
       while ((match = photoRegex.exec(text)) !== null) {
-        photos.push(match[0]);
+        photos.push(match[1]);
         textWithoutMedia = textWithoutMedia.replace(match[0], '');
       }
       
-      videoRegex.lastIndex = 0;
+      // Ссылки на видео
+      const videoRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]*\.(mp4|webm|ogg|mov|MP4|WEBM|OGG|MOV))/g;
       while ((match = videoRegex.exec(text)) !== null) {
-        videos.push(match[0]);
+        videos.push(match[1]);
         textWithoutMedia = textWithoutMedia.replace(match[0], '');
       }
       
-      youtubeRegex.lastIndex = 0;
+      // YouTube ссылки
+      const youtubeRegex = /(https?:\/\/(www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)|https?:\/\/youtu\.be\/([a-zA-Z0-9_-]+))/g;
       while ((match = youtubeRegex.exec(text)) !== null) {
         const videoId = match[3] || match[4];
-        videos.push(`https://www.youtube.com/embed/${videoId}`);
-        textWithoutMedia = textWithoutMedia.replace(match[0], '');
+        if (videoId) {
+          videos.push(`https://www.youtube.com/embed/${videoId}`);
+          textWithoutMedia = textWithoutMedia.replace(match[0], '');
+        }
       }
       
       // Рендерим медиа
@@ -700,23 +698,28 @@
         mediaHtml = '<div class="card-media">';
         
         photos.forEach(url => {
-          mediaHtml += `<img src="${escapeHtml(url)}" alt="photo" loading="lazy" onerror="this.style.display='none'" />`;
+          const safeUrl = escapeHtml(url);
+          mediaHtml += `<img src="${safeUrl}" alt="photo" loading="lazy" onerror="this.parentElement.removeChild(this)" style="width:100%;height:auto;max-height:300px;border-radius:12px;object-fit:cover;" crossorigin="anonymous" />`;
         });
         
         videos.forEach(url => {
           if (url.includes('youtube.com/embed')) {
-            mediaHtml += `<iframe width="100%" height="250" src="${escapeHtml(url)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px;"></iframe>`;
+            mediaHtml += `<iframe width="100%" height="250" src="${escapeHtml(url)}?modestbranding=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px;"></iframe>`;
           } else {
-            mediaHtml += `<video controls style="width:100%;border-radius:12px;"><source src="${escapeHtml(url)}" type="video/mp4"><source src="${escapeHtml(url)}" type="video/webm">Ваш браузер не поддерживает видео</video>`;
+            const safeUrl = escapeHtml(url);
+            mediaHtml += `<video controls style="width:100%;max-height:300px;border-radius:12px;background:#000;"><source src="${safeUrl}" type="video/${url.split('.').pop().toLowerCase()}">Ваш браузер не поддерживает видео</video>`;
           }
         });
         
         mediaHtml += '</div>';
       }
       
-      // Ссылки в тексте
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const finalText = escapeHtml(textWithoutMedia).replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+      // Ссылки в тексте (не захватываем уже обработанные медиа)
+      const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/g;
+      const finalText = escapeHtml(textWithoutMedia).replace(urlRegex, (url) => {
+        // Не оборачиваем уже обработанные ссылки в ссылки
+        return `<a href="${url}" target="_blank" rel="noopener">${url}</a>`;
+      });
       
       return finalText + mediaHtml;
     }
