@@ -161,8 +161,9 @@
 
     .biz-layout{display:grid;gap:12px;}
     #map{
-      height: 62vh;
-      min-height: 420px;
+      height: 50vh;
+      min-height: 350px;
+      max-height: calc(100vh - 280px);
       border-radius:20px;
       overflow:hidden;
       border:1px solid rgba(0,0,0,0.1);
@@ -171,6 +172,13 @@
     body[data-theme="dark"] #map{
       border:1px solid rgba(255,255,255,0.12);
       box-shadow:0 10px 28px rgba(0,0,0,0.45);
+    }
+    @media (max-height: 600px) {
+      #map{
+        height: 40vh;
+        min-height: 280px;
+        max-height: calc(100vh - 320px);
+      }
     }
 
     .biz-form{
@@ -430,7 +438,7 @@
       <div class="biz-filters" id="bizFilters"></div>
 
       <div class="biz-actions">
-        <button class="btn" id="btnSetBizSecret" type="button">🔐 Секрет</button>
+        <button class="btn" id="btnSetBizSecret" type="button">🔐</button>
         <button class="btn" id="btnAddBiz" type="button">➕ Добавить бизнес</button>
       </div>
     </div>
@@ -442,7 +450,7 @@
         <div class="hint">
           1) Нажми на карте точку (координаты подставятся).<br/>
           2) Заполни поля и нажми "Сохранить".<br/>
-          3) Нужен секрет (кнопка "🔐 Секрет").
+          3) Нужен секретный код (кнопка "🔐").
         </div>
 
         <div class="row">
@@ -889,12 +897,12 @@
     function setBizSecret() {
       const cur = getBizSecret();
       const s = prompt(
-        'Введите секрет BUSINESS_ADMIN_KEY (сохранится в браузере):',
+        'Введите секретный код BUSINESS_ADMIN_KEY (сохранится в браузере):',
         cur || ''
       );
       if (s == null) return;
       localStorage.setItem('biz_admin_secret', s.trim());
-      alert('Секрет сохранён.');
+      alert('Секретный код сохранён.');
     }
 
     function openBizForm() {
@@ -921,7 +929,7 @@
     async function saveBusiness() {
       const secret = getBizSecret();
       if (!secret) {
-        alert('Сначала задай секрет кнопкой "🔐 Секрет".');
+        alert('Сначала задайте секретный код кнопкой "🔐".');
         return;
       }
       const payload = {
