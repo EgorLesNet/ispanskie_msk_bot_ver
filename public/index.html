@@ -4,16 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Агрегатор для района</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-      min-height:100vh;
-      background:#f0f2f5;
-      color:#1a1a1a;
+      min-height:100vh;background:#f0f2f5;color:#1a1a1a;
       transition:background 0.3s ease, color 0.3s ease;
-      padding-top:80px;
-      padding-bottom:90px;
+      padding-top:80px;padding-bottom:90px;
     }
     body[data-theme="dark"]{ background:#0e0e0e; color:#fff; }
 
@@ -45,116 +45,22 @@
       margin:20px auto;
     }
     .card{
-      padding:18px;border-radius:20px;
+      padding:18px;border-radius:20px;overflow:hidden;
       background:rgba(255,255,255,0.65);
       border:1px solid rgba(0,0,0,0.08);
       transition:transform 0.3s, box-shadow 0.3s;
       animation:fadeIn 0.5s ease-out;
-      overflow:hidden;
     }
-    body[data-theme="dark"] .card{
-      background:rgba(30,30,30,0.65);
-      border:1px solid rgba(255,255,255,0.1);
-    }
-    .card:hover{
-      transform:translateY(-4px);
-      box-shadow:0 12px 32px rgba(0,0,0,0.15);
-    }
-    body[data-theme="dark"] .card:hover{
-      box-shadow:0 12px 32px rgba(0,0,0,0.5);
-    }
-
-    .card-meta{ font-size:11px;color:#888;margin-bottom:10px;line-height:1.4; }
-    .card-meta a{ color:inherit; text-decoration:underline; }
-    .card-meta a:hover{ opacity:0.85; }
-
-    .card-text{ font-size:15px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word; }
+    body[data-theme="dark"] .card{background:rgba(30,30,30,0.65);border:1px solid rgba(255,255,255,0.1);}
+    .card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.15);}
+    body[data-theme="dark"] .card:hover{box-shadow:0 12px 32px rgba(0,0,0,0.5);}
+    .card-meta{font-size:11px;color:#888;margin-bottom:10px;line-height:1.4;}
+    .card-meta a{color:inherit;text-decoration:underline;}
+    .card-meta a:hover{opacity:0.85;}
+    .card-text{font-size:15px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;}
     .card-text a{color:#007aff;text-decoration:none;transition:color 0.2s}
     .card-text a:hover{text-decoration:underline;color:#0051d5}
     body[data-theme="dark"] .card-text a{color:#0a84ff}
-
-    /* Галерея */
-    .gallery-wrap{
-      position:relative;
-      margin:10px 0 6px;
-    }
-    .gallery{
-      display:flex;
-      overflow-x:auto;
-      gap:12px;
-      scroll-snap-type:x mandatory;
-      -webkit-overflow-scrolling:touch;
-      padding:6px 0 10px;
-    }
-    .gallery::-webkit-scrollbar{ height:6px; }
-    .gallery::-webkit-scrollbar-thumb{ background:rgba(0,0,0,0.2); border-radius:6px; }
-    body[data-theme="dark"] .gallery::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.15); }
-
-    .gallery-item{
-      flex:0 0 100%;
-      scroll-snap-align:center;
-      display:flex;
-      justify-content:center;
-    }
-    .gallery-item img{
-      max-width:420px;
-      width:100%;
-      height:auto;
-      border-radius:14px;
-      display:block;
-    }
-
-    .gallery-arrow{
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      width:38px;height:38px;
-      border-radius:999px;
-      border:1px solid rgba(0,0,0,0.12);
-      background:rgba(255,255,255,0.75);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      transition:transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
-      box-shadow:0 8px 18px rgba(0,0,0,0.12);
-      user-select:none;
-    }
-    body[data-theme="dark"] .gallery-arrow{
-      border:1px solid rgba(255,255,255,0.18);
-      background:rgba(30,30,30,0.6);
-      box-shadow:0 10px 24px rgba(0,0,0,0.45);
-    }
-    .gallery-arrow:hover{ transform:translateY(-50%) scale(1.05); }
-    .gallery-arrow:disabled{ opacity:0.35; cursor:default; }
-    .gallery-arrow:disabled:hover{ transform:translateY(-50%); }
-
-    .gallery-arrow.prev{ left:8px; }
-    .gallery-arrow.next{ right:8px; }
-
-    .gallery-dots{
-      display:flex;
-      gap:6px;
-      justify-content:center;
-      padding:6px 0 0;
-    }
-    .dot{
-      width:7px;height:7px;
-      border-radius:999px;
-      background:rgba(0,0,0,0.22);
-      border:none;
-      padding:0;
-      cursor:pointer;
-      transition:transform 0.15s ease, background 0.15s ease;
-    }
-    body[data-theme="dark"] .dot{ background:rgba(255,255,255,0.22); }
-    .dot.active{
-      background:rgba(0,122,255,0.95);
-      transform:scale(1.25);
-    }
-    body[data-theme="dark"] .dot.active{ background:rgba(10,132,255,0.95); }
 
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
 
@@ -163,7 +69,7 @@
       display:flex;justify-content:center;
       padding:10px;border-radius:22px;
     }
-    .nav-inner{ display:flex;gap:8px;justify-content:center;width:100%; max-width:600px; }
+    .nav-inner{display:flex;gap:8px;justify-content:center;width:100%;max-width:600px;}
     .nav button{
       background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.12);
       padding:11px 24px;border-radius:18px;cursor:pointer;font-size:14px;font-weight:500;
@@ -176,7 +82,7 @@
       background:rgba(255,255,255,0.9);transform:translateY(-2px) scale(1.05);
       box-shadow:0 6px 16px rgba(0,0,0,0.15);
     }
-    body[data-theme="dark"] .nav button:hover{ background:rgba(70,70,70,0.9); }
+    body[data-theme="dark"] .nav button:hover{background:rgba(70,70,70,0.9);}
     .nav button[aria-current="true"]{
       background:#007aff;color:#fff;border-color:#007aff;
       box-shadow:0 4px 12px rgba(0,122,255,0.4);
@@ -185,21 +91,7 @@
       background:#0a84ff;border-color:#0a84ff;
       box-shadow:0 4px 12px rgba(10,132,255,0.4);
     }
-    .nav button .icon{display:none;font-size:20px}
-    .nav button .text{display:inline}
 
-    @media (max-width: 400px){
-      .nav-inner{gap:6px}
-      .nav button{padding:10px 18px;font-size:13px}
-    }
-    @media (max-width: 350px){
-      .nav-inner{gap:5px}
-      .nav button{padding:10px 12px;font-size:12px}
-      .nav button .icon{display:inline}
-      .nav button .text{display:none}
-    }
-
-    /* Liquid glass */
     .liquid-glass{
       backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
       -webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
@@ -225,10 +117,114 @@
       box-shadow:0 -4px 24px rgba(0,0,0,0.4);
     }
 
-    @keyframes fadeIn{
-      from{opacity:0;transform:translateY(10px)}
-      to{opacity:1;transform:translateY(0)}
+    /* Business view */
+    #businessView{
+      width:min(900px, 94vw);
+      margin:18px auto;
+      display:none;
+      gap:12px;
     }
+    .biz-topbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .biz-filters{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+    .chip{
+      border:1px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.6);
+      padding:8px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:13px;
+      transition:transform .15s ease, background .2s ease;
+    }
+    body[data-theme="dark"] .chip{
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(50,50,50,0.6);
+      color:#ddd;
+    }
+    .chip.active{
+      background:#007aff;
+      border-color:#007aff;
+      color:#fff;
+    }
+    body[data-theme="dark"] .chip.active{
+      background:#0a84ff;
+      border-color:#0a84ff;
+    }
+    .chip:hover{transform:scale(1.03)}
+
+    .biz-actions{display:flex;gap:8px;align-items:center}
+    .btn{
+      border:1px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.75);
+      padding:9px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:13px;
+      transition:transform .15s ease, background .2s ease;
+    }
+    body[data-theme="dark"] .btn{
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(50,50,50,0.75);
+      color:#ddd;
+    }
+    .btn:hover{transform:translateY(-1px)}
+
+    .biz-layout{display:grid;gap:12px;}
+    #map{
+      height: 62vh;
+      min-height: 420px;
+      border-radius:20px;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,0.1);
+      box-shadow:0 10px 28px rgba(0,0,0,0.12);
+    }
+    body[data-theme="dark"] #map{
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 10px 28px rgba(0,0,0,0.45);
+    }
+
+    .biz-form{
+      display:none;
+      padding:14px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.65);
+      border:1px solid rgba(0,0,0,0.08);
+    }
+    body[data-theme="dark"] .biz-form{
+      background:rgba(30,30,30,0.65);
+      border:1px solid rgba(255,255,255,0.1);
+    }
+    .biz-form .row{display:grid;gap:8px;margin:10px 0}
+    .biz-form input, .biz-form select, .biz-form textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.9);
+      font-size:14px;
+    }
+    body[data-theme="dark"] .biz-form input,
+    body[data-theme="dark"] .biz-form select,
+    body[data-theme="dark"] .biz-form textarea{
+      border:1px solid rgba(255,255,255,0.15);
+      background:rgba(20,20,20,0.8);
+      color:#fff;
+    }
+    .biz-form textarea{min-height:80px;resize:vertical}
+    .hint{font-size:12px;color:#777;line-height:1.4}
+    body[data-theme="dark"] .hint{color:#aaa}
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 
@@ -249,261 +245,9 @@
 
   <main class="feed" id="feed"></main>
 
-  <nav class="nav liquid-glass">
-    <div class="nav-inner">
-      <button id="btn-all" aria-current="true" onclick="filterNews('all')">
-        <span class="icon">📰</span><span class="text">Новости</span>
-      </button>
-      <button id="btn-business" onclick="filterNews('business')">
-        <span class="icon">💼</span><span class="text">Бизнес</span>
-      </button>
-      <button id="btn-reco" onclick="filterNews('reco')">
-        <span class="icon">⭐</span><span class="text">Рекомендации</span>
-      </button>
-    </div>
-  </nav>
+  <section id="businessView">
+    <div class="biz-topbar">
+      <div class="biz-filters" id="bizFilters"></div>
 
-  <script>
-    let allNews = [];
-    let currentFilter = 'all';
-
-    // пока вкладка скрыта -> подгружаем в фоне, но не перерисовываем
-    // когда вкладка снова видима -> просто renderNews() без fetch
-    let hasBackgroundUpdates = false;
-
-    // один обработчик resize на всю страницу
-    let resizeHandlerInstalled = false;
-
-    function toggleTheme() {
-      const body = document.body;
-      const icon = document.getElementById('theme-icon');
-      const isDark = body.getAttribute('data-theme') === 'dark';
-      body.setAttribute('data-theme', isDark ? '' : 'dark');
-      icon.textContent = isDark ? '🌙' : '☀️';
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    }
-
-    function initTheme() {
-      const saved = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const useDark = saved === 'dark' || (!saved && prefersDark);
-      if (useDark) {
-        document.body.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-icon').textContent = '☀️';
-      }
-    }
-
-    function escapeHtml(s) {
-      return String(s || '')
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'","&#039;");
-    }
-
-    function linkify(text) {
-      const safe = escapeHtml(text);
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-    }
-
-    function formatDate(ts) {
-      if (!ts) return '';
-      const d = new Date(ts);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-      return `${day}.${month}.${year}, ${hours}:${minutes}`;
-    }
-
-    function buildSourceLine(n) {
-      const s = n && n.source ? n.source : null;
-      if (!s) return '';
-
-      const url = s.postUrl || s.chatUrl || '';
-      const title = s.title || (s.username ? '@' + s.username : 'Источник');
-
-      if (!url) return ` · Источник: ${escapeHtml(title)}`;
-      return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
-    }
-
-    function renderGallery(photoIds, postId) {
-      const ids = Array.isArray(photoIds) ? photoIds.filter(Boolean) : [];
-      if (!ids.length) return '';
-
-      const items = ids.map(id => {
-        const src = `/api/photo/${encodeURIComponent(id)}`;
-        return `<div class="gallery-item"><img src="${src}" alt="photo"></div>`;
-      }).join('');
-
-      const dots = ids.map((_, i) => {
-        const cls = i === 0 ? 'dot active' : 'dot';
-        return `<button class="${cls}" type="button" aria-label="Фото ${i + 1}" data-dot="${i}"></button>`;
-      }).join('');
-
-      const arrowsAndDots = (ids.length > 1)
-        ? `
-          <button class="gallery-arrow prev" type="button" aria-label="Предыдущее фото">‹</button>
-          <button class="gallery-arrow next" type="button" aria-label="Следующее фото">›</button>
-          <div class="gallery-dots">${dots}</div>
-        `
-        : '';
-
-      return `
-        <div class="gallery-wrap" data-post-id="${escapeHtml(postId)}">
-          <div class="gallery" aria-label="Галерея фото">
-            ${items}
-          </div>
-          ${arrowsAndDots}
-        </div>
-      `;
-    }
-
-    function initGalleries() {
-      const wraps = document.querySelectorAll('.gallery-wrap');
-
-      wraps.forEach(wrap => {
-        const gallery = wrap.querySelector('.gallery');
-        const prev = wrap.querySelector('.gallery-arrow.prev');
-        const next = wrap.querySelector('.gallery-arrow.next');
-        const dots = Array.from(wrap.querySelectorAll('.dot'));
-
-        // если 0/1 фото — нечего инициализировать
-        if (!gallery || dots.length <= 1 || !prev || !next) return;
-
-        const state = { idx: 0, raf: 0 };
-
-        function scrollToIndex(i) {
-          const max = dots.length - 1;
-          const idx = Math.max(0, Math.min(max, i));
-          const pageWidth = gallery.clientWidth || 1;
-          gallery.scrollTo({ left: idx * pageWidth, behavior: 'smooth' });
-        }
-
-        function setActive(idx) {
-          state.idx = idx;
-          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-          prev.disabled = idx <= 0;
-          next.disabled = idx >= dots.length - 1;
-        }
-
-        function updateFromScroll() {
-          const pageWidth = gallery.clientWidth || 1;
-          const idx = Math.round(gallery.scrollLeft / pageWidth);
-          setActive(Math.max(0, Math.min(dots.length - 1, idx)));
-        }
-
-        prev.addEventListener('click', () => scrollToIndex(state.idx - 1));
-        next.addEventListener('click', () => scrollToIndex(state.idx + 1));
-        dots.forEach((d, i) => d.addEventListener('click', () => scrollToIndex(i)));
-
-        gallery.addEventListener('scroll', () => {
-          if (state.raf) cancelAnimationFrame(state.raf);
-          state.raf = requestAnimationFrame(updateFromScroll);
-        });
-
-        // initial
-        setActive(0);
-      });
-
-      if (!resizeHandlerInstalled) {
-        resizeHandlerInstalled = true;
-        window.addEventListener('resize', () => {
-          document.querySelectorAll('.gallery-wrap').forEach(wrap => {
-            const gallery = wrap.querySelector('.gallery');
-            const dots = Array.from(wrap.querySelectorAll('.dot'));
-            const prev = wrap.querySelector('.gallery-arrow.prev');
-            const next = wrap.querySelector('.gallery-arrow.next');
-            if (!gallery || dots.length <= 1 || !prev || !next) return;
-
-            const pageWidth = gallery.clientWidth || 1;
-            const idx = Math.round(gallery.scrollLeft / pageWidth);
-
-            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-            prev.disabled = idx <= 0;
-            next.disabled = idx >= dots.length - 1;
-          });
-        });
-      }
-    }
-
-    function renderNews() {
-      const feed = document.getElementById('feed');
-      const filtered = currentFilter === 'all'
-        ? allNews
-        : allNews.filter(n => n.category === currentFilter);
-
-      if (!filtered.length) {
-        feed.innerHTML = '<div class="no-news">Нет новостей в этой категории.</div>';
-        return;
-      }
-
-      feed.innerHTML = filtered.map(n => {
-        const ts = n.timestamp || n.createdAt || null;
-
-        const photoIds = Array.isArray(n.photoFileIds)
-          ? n.photoFileIds
-          : (n.photoFileId ? [n.photoFileId] : []);
-
-        let html = '<div class="card">';
-        html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
-        html += renderGallery(photoIds, n.id);
-        html += `<div class="card-text">${linkify(n.text || '')}</div>`;
-        html += '</div>';
-        return html;
-      }).join('');
-
-      initGalleries();
-    }
-
-    function filterNews(cat) {
-      currentFilter = cat;
-      document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
-      const btn = document.getElementById(`btn-${cat}`);
-      if (btn) btn.setAttribute('aria-current', 'true');
-      renderNews();
-    }
-
-    function sameTop(a, b) {
-      const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
-      const b0 = (Array.isArray(b) && b.length) ? b[0] : null;
-      return a0 && b0 && a0.id === b0.id && a.length === b.length;
-    }
-
-    async function loadNews({ render = true } = {}) {
-      try {
-        const res = await fetch('/api/news', { cache: 'no-store' });
-        const data = await res.json();
-        const next = Array.isArray(data.posts) ? data.posts : [];
-
-        const changed = !sameTop(allNews, next);
-        allNews = next;
-
-        if (render && changed) renderNews();
-        if (!render && changed) hasBackgroundUpdates = true;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    initTheme();
-    loadNews({ render: true });
-
-    // Фоновое обновление ТОЛЬКО когда вкладка не видима
-    setInterval(() => {
-      if (document.visibilityState !== 'visible') loadNews({ render: false });
-    }, 3000);
-
-    // Вернулся на вкладку -> просто перерисовать то, что уже подгрузилось в фоне
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && hasBackgroundUpdates) {
-        hasBackgroundUpdates = false;
-        renderNews();
-      }
-    });
-  </script>
-</body>
-</html>
+      <div class="biz-actions">
+        <button c
