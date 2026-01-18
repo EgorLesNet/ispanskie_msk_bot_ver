@@ -1,6 +1,37 @@
 {
   "posts": [
     {
+      "id": 7,
+      "text": "😀 🏗\nЧто нас ждёт в 2026?\n\nЭтот пост — краткая сводка того, что планируется к застройке вокруг нас в 2026 году. \nКазалось бы, уже все построено, но нет, наш район ждут большие перемены. Хорошие или плохие - решать вам в комментариях.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-18T09:13:16.123Z",
+      "timestamp": "2026-01-18T09:13:16.123Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIBiWlspCvmIiWcKQaKLRDmfop3G3ALAAJUEWsbWZfRSg4e8dBZnIm8AQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIBiWlspCvmIiWcKQaKLRDmfop3G3ALAAJUEWsbWZfRSg4e8dBZnIm8AQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIBiWlspCvmIiWcKQaKLRDmfop3G3ALAAJUEWsbWZfRSg4e8dBZnIm8AQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "Испанские Кварталы | Прокшино ❄️☃️",
+        "username": "ispanskie_msk",
+        "chatId": -1001907008907,
+        "messageId": 498,
+        "chatUrl": "https://t.me/ispanskie_msk",
+        "postUrl": "https://t.me/ispanskie_msk/498"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 6,
       "text": "📰 🧊\nБезопасность превыше всего!\n\nСмертельно опасную горку во вторых кварталах, рядом с Магеллана 4 закрыли забором. \nК сожалению, в этом году дети остались без оборудованной ледяной горки, поэтому безопасного места для катания нет. \n\nИсточник",
       "authorId": 273473755,
