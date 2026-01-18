@@ -662,58 +662,52 @@
 
     function renderMediaContent(text) {
       let mediaHtml = '';
-      let textWithoutMedia = text;
       
       // Собираем все медиафайлы
       const photos = [];
       const videos = [];
       const urlsToSkip = new Set();
       
-      // Ссылки на фото - более надежный поиск
-      const photoExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
-      const photoRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/g;
+      // Универсальный поиск всех ссылок
+      const allUrlsRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/g;
       let match;
+      const allUrls = [];
       
-      while ((match = photoRegex.exec(text)) !== null) {
-        const url = match[0];
+      while ((match = allUrlsRegex.exec(text)) !== null) {
+        allUrls.push(match[0]);
+      }
+      
+      // Классификация ссылок по типам
+      const photoExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+      const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
+      
+      allUrls.forEach(url => {
         const lowerUrl = url.toLowerCase();
-        const hasPhotoExt = photoExtensions.some(ext => lowerUrl.includes(`.${ext}`));
         
-        if (hasPhotoExt && !lowerUrl.includes('youtube') && !lowerUrl.includes('youtu.be')) {
+        // Проверяем YouTube
+        if (lowerUrl.includes('youtube.com/watch?v=') || lowerUrl.includes('youtu.be/')) {
+          const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+          if (youtubeMatch && youtubeMatch[1]) {
+            videos.push(`https://www.youtube.com/embed/${youtubeMatch[1]}`);
+            urlsToSkip.add(url);
+          }
+        }
+        // Проверяем фото по расширению
+        else if (photoExtensions.some(ext => lowerUrl.endsWith(`.${ext}`) || lowerUrl.includes(`.${ext}?`))) {
           photos.push(url);
           urlsToSkip.add(url);
         }
-      }
-      
-      // Ссылки на видео - более надежный поиск
-      const videoExtensions = ['mp4', 'webm', 'ogg', 'mov'];
-      photoRegex.lastIndex = 0;
-      
-      while ((match = photoRegex.exec(text)) !== null) {
-        const url = match[0];
-        const lowerUrl = url.toLowerCase();
-        const hasVideoExt = videoExtensions.some(ext => lowerUrl.includes(`.${ext}`));
-        
-        if (hasVideoExt && !urlsToSkip.has(url)) {
+        // Проверяем видео по расширению
+        else if (videoExtensions.some(ext => lowerUrl.endsWith(`.${ext}`) || lowerUrl.includes(`.${ext}?`))) {
           videos.push(url);
           urlsToSkip.add(url);
         }
-      }
-      
-      // YouTube ссылки - более точный поиск
-      const youtubeRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
-      while ((match = youtubeRegex.exec(text)) !== null) {
-        const videoId = match[1];
-        if (videoId && !urlsToSkip.has(match[0])) {
-          videos.push(`https://www.youtube.com/embed/${videoId}`);
-          urlsToSkip.add(match[0]);
-        }
-      }
+      });
       
       // Удаляем обработанные ссылки из текста
       let cleanText = text;
       urlsToSkip.forEach(url => {
-        cleanText = cleanText.replace(url, '');
+        cleanText = cleanText.split(url).join(' ');
       });
       
       // Рендерим медиа
@@ -722,7 +716,7 @@
         
         photos.forEach(url => {
           const safeUrl = escapeHtml(url);
-          mediaHtml += `<img src="${safeUrl}" alt="фото" loading="lazy" onerror="this.style.display='none'" style="width:100%;height:auto;max-height:300px;border-radius:12px;object-fit:cover;" crossorigin="anonymous" />`;
+          mediaHtml += `<img src="${safeUrl}" alt="фото" loading="lazy" onerror="this.parentElement.removeChild(this)" style="width:100%;height:auto;max-height:300px;border-radius:12px;object-fit:cover;" crossorigin="anonymous" />`;
         });
         
         videos.forEach(url => {
@@ -736,7 +730,9 @@
               'mp4': 'video/mp4',
               'webm': 'video/webm',
               'ogg': 'video/ogg',
-              'mov': 'video/quicktime'
+              'mov': 'video/quicktime',
+              'avi': 'video/x-msvideo',
+              'mkv': 'video/x-matroska'
             }[ext] || 'video/mp4';
             
             mediaHtml += `<video controls style="width:100%;max-height:300px;border-radius:12px;background:#000;"><source src="${safeUrl}" type="${mimeType}">Ваш браузер не поддерживает видео</video>`;
