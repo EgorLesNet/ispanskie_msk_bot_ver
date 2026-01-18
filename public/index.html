@@ -667,31 +667,54 @@
       // Собираем все медиафайлы
       const photos = [];
       const videos = [];
+      const urlsToSkip = new Set();
       
-      // Ссылки на фото (более гибкий поиск)
-      const photoRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]*\.(jpg|jpeg|png|gif|webp|bmp|JPG|JPEG|PNG|GIF|WEBP|BMP))/g;
+      // Ссылки на фото - более надежный поиск
+      const photoExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+      const photoRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/g;
       let match;
+      
       while ((match = photoRegex.exec(text)) !== null) {
-        photos.push(match[1]);
-        textWithoutMedia = textWithoutMedia.replace(match[0], '');
-      }
-      
-      // Ссылки на видео
-      const videoRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]*\.(mp4|webm|ogg|mov|MP4|WEBM|OGG|MOV))/g;
-      while ((match = videoRegex.exec(text)) !== null) {
-        videos.push(match[1]);
-        textWithoutMedia = textWithoutMedia.replace(match[0], '');
-      }
-      
-      // YouTube ссылки
-      const youtubeRegex = /(https?:\/\/(www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)|https?:\/\/youtu\.be\/([a-zA-Z0-9_-]+))/g;
-      while ((match = youtubeRegex.exec(text)) !== null) {
-        const videoId = match[3] || match[4];
-        if (videoId) {
-          videos.push(`https://www.youtube.com/embed/${videoId}`);
-          textWithoutMedia = textWithoutMedia.replace(match[0], '');
+        const url = match[0];
+        const lowerUrl = url.toLowerCase();
+        const hasPhotoExt = photoExtensions.some(ext => lowerUrl.includes(`.${ext}`));
+        
+        if (hasPhotoExt && !lowerUrl.includes('youtube') && !lowerUrl.includes('youtu.be')) {
+          photos.push(url);
+          urlsToSkip.add(url);
         }
       }
+      
+      // Ссылки на видео - более надежный поиск
+      const videoExtensions = ['mp4', 'webm', 'ogg', 'mov'];
+      photoRegex.lastIndex = 0;
+      
+      while ((match = photoRegex.exec(text)) !== null) {
+        const url = match[0];
+        const lowerUrl = url.toLowerCase();
+        const hasVideoExt = videoExtensions.some(ext => lowerUrl.includes(`.${ext}`));
+        
+        if (hasVideoExt && !urlsToSkip.has(url)) {
+          videos.push(url);
+          urlsToSkip.add(url);
+        }
+      }
+      
+      // YouTube ссылки - более точный поиск
+      const youtubeRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
+      while ((match = youtubeRegex.exec(text)) !== null) {
+        const videoId = match[1];
+        if (videoId && !urlsToSkip.has(match[0])) {
+          videos.push(`https://www.youtube.com/embed/${videoId}`);
+          urlsToSkip.add(match[0]);
+        }
+      }
+      
+      // Удаляем обработанные ссылки из текста
+      let cleanText = text;
+      urlsToSkip.forEach(url => {
+        cleanText = cleanText.replace(url, '');
+      });
       
       // Рендерим медиа
       if (photos.length || videos.length) {
@@ -699,25 +722,33 @@
         
         photos.forEach(url => {
           const safeUrl = escapeHtml(url);
-          mediaHtml += `<img src="${safeUrl}" alt="photo" loading="lazy" onerror="this.parentElement.removeChild(this)" style="width:100%;height:auto;max-height:300px;border-radius:12px;object-fit:cover;" crossorigin="anonymous" />`;
+          mediaHtml += `<img src="${safeUrl}" alt="фото" loading="lazy" onerror="this.style.display='none'" style="width:100%;height:auto;max-height:300px;border-radius:12px;object-fit:cover;" crossorigin="anonymous" />`;
         });
         
         videos.forEach(url => {
           if (url.includes('youtube.com/embed')) {
-            mediaHtml += `<iframe width="100%" height="250" src="${escapeHtml(url)}?modestbranding=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px;"></iframe>`;
+            const safeUrl = escapeHtml(url);
+            mediaHtml += `<iframe width="100%" height="250" src="${safeUrl}?rel=0&modestbranding=1&fs=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px;"></iframe>`;
           } else {
             const safeUrl = escapeHtml(url);
-            mediaHtml += `<video controls style="width:100%;max-height:300px;border-radius:12px;background:#000;"><source src="${safeUrl}" type="video/${url.split('.').pop().toLowerCase()}">Ваш браузер не поддерживает видео</video>`;
+            const ext = url.split('.').pop().toLowerCase();
+            const mimeType = {
+              'mp4': 'video/mp4',
+              'webm': 'video/webm',
+              'ogg': 'video/ogg',
+              'mov': 'video/quicktime'
+            }[ext] || 'video/mp4';
+            
+            mediaHtml += `<video controls style="width:100%;max-height:300px;border-radius:12px;background:#000;"><source src="${safeUrl}" type="${mimeType}">Ваш браузер не поддерживает видео</video>`;
           }
         });
         
         mediaHtml += '</div>';
       }
       
-      // Ссылки в тексте (не захватываем уже обработанные медиа)
+      // Форматируем оставшийся текст с ссылками
       const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/g;
-      const finalText = escapeHtml(textWithoutMedia).replace(urlRegex, (url) => {
-        // Не оборачиваем уже обработанные ссылки в ссылки
+      const finalText = escapeHtml(cleanText).replace(urlRegex, (url) => {
         return `<a href="${url}" target="_blank" rel="noopener">${url}</a>`;
       });
       
