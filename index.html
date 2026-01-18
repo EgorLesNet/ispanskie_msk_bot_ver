@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-sca,viewport-fit=coverle=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Агрегатор для района</title>
+
   <!-- Leaflet (карта) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -13,9 +14,9 @@
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
       min-height:100vh;background:#f0f2f5;color:#1a1a1a;
       transition:background 0.3s ease, color 0.3s ease;
-      padding-top:80px;padding-bottom:90px;
+      padding-top:calc(80px + env(safe-area-inset-top));padding-bottom:calc(90px + env(safe-area-inset-bottom))
     }
-    body[data-thpadding-top:calc(80px + env(safe-area-inset-top));padding-bottom:calc(90px + env(safe-area-inset-bottom))
+    body[data-theme="dark"]{ background:#0e0e0e; color:#fff; }
 
     .header{
       position:fixed;top:12px;left:12px;right:12px;z-index:100;
@@ -493,13 +494,6 @@
                           html += '<div class="card-media-scroll">';
                                 mediaItems.forEach(item => {
                                         if (item.type === 'photo') {
-                                                              } else if (item.type === 'video') {
-                        html += `<video src="/api/media/${encodeURIComponent(item.fileId)}" 
-                                        controls 
-                                        loading="lazy" 
-                                        style="max-width:100%;height:auto" 
-                                        alt="Видео"></video>`;
-                    }
                                                   html += `<img src="/api/media/${encodeURIComponent(item.fileId)}" 
                                                                           loading="lazy" 
                                                                                                   alt="Фото"/>`;
@@ -534,8 +528,7 @@
         allNews = next;
 
         // Рендерим только если сейчас открыта лента (не карта)
-        if (render && changed && currentTab !== 'business') 500
-        ();
+        if (render && changed && currentTab !== 'business') renderNews();
         if (!render && changed) hasBackgroundUpdates = true;
       } catch (e) {
         console.error(e);
