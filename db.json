@@ -33,6 +33,10 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAIBlmlspDTRMTb9ZdoIfbr-FcjcjCcVAAJqDmsbI2TpSnkmV6pHO_fkAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIBl2lspDS9eBkAAdPt9MkD6LUswaaLzAACaw5rGyNk6UqaxHHNk39wPwEAAwIAA3kAAzgE"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAIBkWlspDQowPa5Q0mzi_3qmfhorwwKAAJkDmsbI2TpSlUGcaToBtorAQADAgADeQADOAQ",
@@ -42,7 +46,8 @@
         "AgACAgIAAxkBAAIBk2lspDS8iifOalbhwvvrtBDrtYsqAAJmDmsbI2TpSr9igp-hA3k2AQADAgADeQADOAQ",
         "AgACAgIAAxkBAAIBlGlspDQ-D8nNb4yGFlQ9Cbr1-P_4AAJnDmsbI2TpSnsa5ZHd8OA1AQADAgADeQADOAQ",
         "AgACAgIAAxkBAAIBlWlspDSb525gLCP73Y3SdtDbdq1RAAJpDmsbI2TpSmVRLqSM8ISBAQADAgADeQADOAQ",
-        "AgACAgIAAxkBAAIBlmlspDTRMTb9ZdoIfbr-FcjcjCcVAAJqDmsbI2TpSnkmV6pHO_fkAQADAgADeQADOAQ"
+        "AgACAgIAAxkBAAIBlmlspDTRMTb9ZdoIfbr-FcjcjCcVAAJqDmsbI2TpSnkmV6pHO_fkAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAIBl2lspDS9eBkAAdPt9MkD6LUswaaLzAACaw5rGyNk6UqaxHHNk39wPwEAAwIAA3kAAzgE"
       ],
       "source": {
         "title": "ИСПАНСКИЕ КВАРТАЛЫ",
