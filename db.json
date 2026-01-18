@@ -17,9 +17,13 @@
         {
           "type": "video",
           "fileId": "BAACAgIAAxkBAAIB3mlswdUPbJoRzvK2zkC7IHAJU3OtAALXkAACXIJhS25PxJbnghK7OAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIB32lswdU7zYaZNJK03n9uLBuVNg1mAALOD2sbXIJhSxrRfO6AM5l3AQADAgADeQADOAQ"
         }
       ],
-      "photoFileId": null,
+      "photoFileId": "AgACAgIAAxkBAAIB32lswdU7zYaZNJK03n9uLBuVNg1mAALOD2sbXIJhSxrRfO6AM5l3AQADAgADeQADOAQ",
       "source": {
         "title": "ЖК Прокшино | Новости",
         "username": "pro_prokshino",
@@ -30,7 +34,10 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "sourceType": "admin",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIB32lswdU7zYaZNJK03n9uLBuVNg1mAALOD2sbXIJhSxrRfO6AM5l3AQADAgADeQADOAQ"
+      ]
     },
     {
       "id": 7,
