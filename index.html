@@ -65,32 +65,35 @@
 
 /* Медиа-контейнер с горизонтальной прокруткой */
 .card-media-scroll {
-    display: flex;
-      gap: 8px;
-        overflow-x: auto;
-          scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-              margin: 12px -18px;
-                padding: 0 18px;
-                  scrollbar-width: none; /* Firefox */
-                  }
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px -18px;
+  padding: 0 18px;
+  scrollbar-width: none;
+}
 
 .card-media-scroll::-webkit-scrollbar {
-    display: none; /* Chrome, Safari */
-    }
+  display: none;
+}
 
 .card-media-scroll img,
 .card-media-scroll video {
-    flex: 0 0 85%;
-      max-width: 85%;
-        height: auto;
-          max-height: 400px;
-            border-radius: 12px;
-              object-fit: cover;
-                scroll-snap-align: center;
-                  scroll-snap-stop: always;
-                  }
-
+  flex-shrink: 0;
+  width: 80vw;
+  max-width: 400px;
+  height: auto;
+  max-height: 400px;
+  border-radius: 12px;
+  object-fit: cover;
+  scroll-snap-align: center;
+  display: block;
+}
 /* Для десктопа - сетка вместо горизонтального скролла */
 @media (min-width: 768px) {
     .card-media-scroll {
