@@ -63,6 +63,54 @@
     .card-text a:hover{text-decoration:underline;color:#0051d5}
     body[data-theme="dark"] .card-text a{color:#0a84ff}
 
+/* Медиа-контейнер с горизонтальной прокруткой */
+.card-media-scroll {
+    display: flex;
+      gap: 8px;
+        overflow-x: auto;
+          scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+              margin: 12px -18px;
+                padding: 0 18px;
+                  scrollbar-width: none; /* Firefox */
+                  }
+
+.card-media-scroll::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+    }
+
+.card-media-scroll img,
+.card-media-scroll video {
+    flex: 0 0 85%;
+      max-width: 85%;
+        height: auto;
+          max-height: 400px;
+            border-radius: 12px;
+              object-fit: cover;
+                scroll-snap-align: center;
+                  scroll-snap-stop: always;
+                  }
+
+/* Для десктопа - сетка вместо горизонтального скролла */
+@media (min-width: 768px) {
+    .card-media-scroll {
+          display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                  gap: 10px;
+                      overflow-x: visible;
+                          margin: 12px 0;
+                              padding: 0;
+                                  scroll-snap-type: none;
+                                    }
+                                      
+                                      .card-media-scroll img,
+                                        .card-media-scroll video {
+                                              flex: none;
+                                                  max-width: 100%;
+                                                      width: 100%;
+                                                        }
+                                                        }
+
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
 
     .nav{
@@ -434,6 +482,27 @@
         const ts = n.timestamp || n.createdAt || null;
         let html = '<div class="card">';
         html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
+            
+    // Добавляем отображение медиа (фото и видео)
+        const media = n.media || [];
+            const mediaItems = media.filter(m => m && (m.type === 'photo' || m.type === 'video'));
+                
+                    if (mediaItems.length > 0) {
+                          html += '<div class="card-media-scroll">';
+                                mediaItems.forEach(item => {
+                                        if (item.type === 'photo') {
+                                                  html += `<img src="/api/media/${encodeURIComponent(item.fileId)}" 
+                                                                          loading="lazy" 
+                                                                                                  alt="Фото"/>`;
+                                                                                                          } else if (item.type === 'video') {
+                                                                                                                    html += `<video controls preload="metadata">
+                                                                                                                                         <source src="/api/media/${encodeURIComponent(item.fileId)}" type="video/mp4">
+                                                                                                                                                              Ваш браузер не поддерживает видео.
+                                                                                                                                                                                 </video>`;
+                                                                                                                                                                                         }
+                                                                                                                                                                                               });
+                                                                                                                                                                                                     html += '</div>';
+                                                                                                                                                                                                         }
         html += `<div class="card-text">${linkify(n.text || '')}</div>`;
         html += '</div>';
         return html;
