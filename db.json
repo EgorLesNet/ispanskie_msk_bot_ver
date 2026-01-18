@@ -1,5 +1,37 @@
 {
-  "posts": [],
+  "posts": [
+    {
+      "id": 1,
+      "text": "Возможно «легализуют» народную тропу возле ИК2.\n\nУправа прислала ответ по поводу возможности сделать тротуар вместо убитого газона возле остановки Николо-Хованская улица, со стороны ИК2.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-18T09:12:50.480Z",
+      "timestamp": "2026-01-18T09:12:50.480Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIBfGlspBEc6v4xKVkjy1o6ZTbRun5JAAIcEGsbUpxpSLqyziVB8RgbAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIBfGlspBEc6v4xKVkjy1o6ZTbRun5JAAIcEGsbUpxpSLqyziVB8RgbAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIBfGlspBEc6v4xKVkjy1o6ZTbRun5JAAIcEGsbUpxpSLqyziVB8RgbAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 7914,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/7914"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    }
+  ],
   "pending": [],
   "rejected": [],
   "businesses": [
