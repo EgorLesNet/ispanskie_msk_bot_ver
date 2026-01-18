@@ -828,31 +828,42 @@
       }
     }
 
-    function renderNews() {
-      const feed = document.getElementById('feed');
-      const filtered =
-        currentTab === 'reco'
-          ? allNews.filter(n => (n.category || 'all') === 'reco')
-          : allNews;
+function renderNews() {
+  const feed = document.getElementById('feed');
+  const filtered = (currentTab === 'reco')
+    ? allNews.filter(n => (n.category || 'all') === 'reco')
+    : allNews;
 
-      if (!filtered.length) {
-        feed.innerHTML = '<div class="no-news">Нет новостей.</div>';
-        return;
-      }
+  if (!filtered.length) {
+    feed.innerHTML = '<div class="no-news">Нет новостей.</div>';
+    return;
+  }
 
-      feed.innerHTML = filtered
-        .map(n => {
-          const ts = n.timestamp || n.createdAt || null;
-          let html = '<div class="card">';
-          html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(
-            formatDate(ts)
-          )}${buildSourceLine(n)}</div>`;
-          html += `<div class="card-text">${linkify(n.text || '')}</div>`;
-          html += '</div>';
-          return html;
-        })
-        .join('');
+  feed.innerHTML = filtered.map(n => {
+    const ts = n.timestamp || n.createdAt || null;
+    let html = '<div class="card">';
+    html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
+    
+    // Добавляем отображение фотографий
+    const media = n.media || [];
+    const photos = media.filter(m => m && m.type === 'photo');
+    
+    if (photos.length > 0) {
+      html += '<div class="card-media" style="display:grid;gap:8px;margin:12px 0;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">';
+      photos.forEach(photo => {
+        html += `<img src="/api/media/${encodeURIComponent(photo.fileId)}" 
+                      style="width:100%;height:auto;border-radius:12px;object-fit:cover;max-height:300px;" 
+                      loading="lazy" 
+                      alt="Фото"/>`;
+      });
+      html += '</div>';
     }
+    
+    html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+    html += '</div>';
+    return html;
+  }).join('');
+}
 
     setInterval(() => {
       if (document.visibilityState !== 'visible') loadNews({ render: false });
