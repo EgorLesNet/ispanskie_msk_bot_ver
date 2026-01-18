@@ -4,18 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Агрегатор для района</title>
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.Default.css" />
+
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
       min-height:100vh;background:#f0f2f5;color:#1a1a1a;
       transition:background 0.3s ease, color 0.3s ease;
-      padding-top:80px;padding-bottom:20px;
+      padding-top:80px;padding-bottom:100px;
     }
     body[data-theme="dark"]{ background:#0e0e0e; color:#fff; }
+
     .header{
       position:fixed;top:12px;left:12px;right:12px;z-index:100;
       display:flex;justify-content:space-between;align-items:center;
@@ -24,22 +27,24 @@
     .logo-wrap{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
     .logo-img{
       width:40px;height:40px;border-radius:10px;transition:transform 0.3s;cursor:pointer;
-      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);object-fit:cover;
     }
     .logo-img:hover{transform:scale(1.1) rotate(5deg)}
     h3{font-size:17px;font-weight:600;margin:0}
     .subtitle{ font-size:12px;color:#666;margin-top:3px; }
     body[data-theme="dark"] .subtitle{color:#999}
+
     .theme-toggle{
       background:transparent;border:none;font-size:24px;cursor:pointer;padding:8px;
       border-radius:50%;transition:transform 0.3s,background 0.2s;
     }
     .theme-toggle:hover{transform:scale(1.15) rotate(15deg);background:rgba(0,0,0,0.05)}
     body[data-theme="dark"] .theme-toggle:hover{background:rgba(255,255,255,0.08)}
+
     .feed{
       display:grid;gap:16px;
       width:min(680px, 92vw);
-      margin:20px auto 120px auto;
+      margin:20px auto;
     }
     .card{
       padding:18px;border-radius:20px;overflow:hidden;
@@ -58,22 +63,22 @@
     .card-text a{color:#007aff;text-decoration:none;transition:color 0.2s}
     .card-text a:hover{text-decoration:underline;color:#0051d5}
     body[data-theme="dark"] .card-text a{color:#0a84ff}
+
     .card-media{
-      margin-top:12px;
+      margin:12px 0;
       display:grid;
       gap:8px;
-      grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
     }
-    .card-media img, .card-media video{
-      width:100%;
-      border-radius:12px;
-      object-fit:cover;
-      max-height:300px;
+    .card-media img{
+      width:100%;height:auto;max-height:300px;border-radius:12px;object-fit:cover;
     }
-    .card-media.single img, .card-media.single video{
-      max-height:400px;
+    .card-media video{
+      width:100%;max-height:300px;border-radius:12px;background:#000;
     }
+
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
+
     .liquid-glass{
       backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
       -webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
@@ -88,9 +93,11 @@
       border:1px solid rgba(255,255,255,0.2);
       box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
     }
+
+    /* Business view */
     #businessView{
       width:min(900px, 94vw);
-      margin:18px auto 120px auto;
+      margin:18px auto;
       display:none;
       gap:12px;
     }
@@ -147,6 +154,7 @@
       border-color:#0a84ff;
     }
     .chip:hover{transform:scale(1.03)}
+
     .biz-actions{display:flex;gap:8px;align-items:center}
     .btn{
       border:1px solid rgba(0,0,0,0.12);
@@ -163,6 +171,7 @@
       color:#ddd;
     }
     .btn:hover{transform:translateY(-1px)}
+
     .biz-layout{display:grid;gap:12px;}
     #map{
       height: 50vh;
@@ -184,6 +193,7 @@
         max-height: calc(100vh - 320px);
       }
     }
+
     .biz-form{
       display:none;
       padding:14px;
@@ -214,6 +224,8 @@
     .biz-form textarea{min-height:80px;resize:vertical}
     .hint{font-size:12px;color:#777;line-height:1.4}
     body[data-theme="dark"] .hint{color:#aaa}
+
+    /* Modal для отзывов */
     .modal{
       display:none;
       position:fixed;
@@ -252,6 +264,7 @@
       color:inherit;transition:opacity 0.2s;
     }
     .modal-close:hover{opacity:0.6}
+
     .reviews-list{
       display:grid;gap:12px;margin:16px 0;
     }
@@ -274,6 +287,7 @@
     .review-text{font-size:13px;line-height:1.4;margin:8px 0 0 0}
     .review-date{font-size:11px;color:#888;margin-top:8px}
     body[data-theme="dark"] .review-date{color:#aaa}
+
     .review-form{
       padding:12px;border-radius:12px;
       background:rgba(0,0,0,0.03);
@@ -291,4 +305,859 @@
       padding:8px 10px;
       border-radius:10px;
       border:1px solid rgba(0,0,0,0.12);
-      background:rgba(255,255
+      background:rgba(255,255,255,0.9);
+      font-size:13px;
+    }
+    body[data-theme="dark"] .review-form-row input,
+    body[data-theme="dark"] .review-form-row select,
+    body[data-theme="dark"] .review-form-row textarea{
+      border:1px solid rgba(255,255,255,0.15);
+      background:rgba(20,20,20,0.8);
+      color:#fff;
+    }
+    .review-form-row textarea{min-height:70px;resize:vertical}
+
+    .no-reviews{font-size:13px;color:#999;padding:12px 0;text-align:center}
+
+    /* Дисклеймер — минималистичный */
+    .disclaimer{
+      position:fixed;
+      bottom:78px;
+      left:50%;
+      transform:translateX(-50%);
+      background:transparent;
+      padding:6px 12px;
+      font-size:9px;
+      line-height:1.3;
+      color:#999;
+      text-align:center;
+      z-index:60;
+      pointer-events:none;
+      max-width:90vw;
+    }
+    body[data-theme="dark"] .disclaimer{color:#666}
+
+    /* Навигация — Liquid Glass UI */
+    .nav{
+      position:fixed;
+      bottom:12px;
+      left:12px;
+      right:12px;
+      z-index:99;
+      display:flex;
+      justify-content:center;
+      padding:10px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(255,255,255,0.4);
+      box-shadow:0 8px 32px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.5);
+      backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
+      -webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
+    }
+    body[data-theme="dark"] .nav{
+      background:rgba(20,20,20,0.7);
+      border:1px solid rgba(255,255,255,0.2);
+      box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
+    }
+
+    .nav-inner{
+      display:flex;
+      gap:8px;
+      justify-content:center;
+      width:100%;
+      max-width:600px;
+      flex-wrap:wrap;
+    }
+
+    .nav button{
+      background:rgba(255,255,255,0.6);
+      border:1px solid rgba(0,0,0,0.12);
+      padding:11px 24px;
+      border-radius:18px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:500;
+      transition:all 0.3s;
+      color:#333;
+      white-space:nowrap;
+    }
+    body[data-theme="dark"] .nav button{
+      background:rgba(50,50,50,0.6);
+      border:1px solid rgba(255,255,255,0.18);
+      color:#ccc;
+    }
+    .nav button:hover{
+      background:rgba(255,255,255,0.9);
+      transform:translateY(-2px) scale(1.05);
+      box-shadow:0 6px 16px rgba(0,0,0,0.15);
+    }
+    body[data-theme="dark"] .nav button:hover{
+      background:rgba(70,70,70,0.9);
+    }
+    .nav button[aria-current="true"]{
+      background:#007aff;
+      color:#fff;
+      border-color:#007aff;
+      box-shadow:0 4px 12px rgba(0,122,255,0.4);
+    }
+    body[data-theme="dark"] .nav button[aria-current="true"]{
+      background:#0a84ff;
+      border-color:#0a84ff;
+      box-shadow:0 4px 12px rgba(10,132,255,0.4);
+    }
+
+    @media (max-width: 480px) {
+      .nav button{
+        padding:9px 14px;
+        font-size:12px;
+      }
+      .nav-inner{
+        gap:6px;
+      }
+      .disclaimer{
+        font-size:8px;
+        padding:4px 8px;
+        bottom:74px;
+      }
+    }
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+
+<body>
+  <header class="header liquid-glass">
+    <a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener">
+      <img class="logo-img" src="https://raw.githubusercontent.com/EgorLesNet/ispanskie_msk_bot_ver/main/public/logo.png" alt="Лого" />
+      <div>
+        <h3>Агрегатор для района</h3>
+        <div class="subtitle">by Испанские Кварталы | Прокшино</div>
+      </div>
+    </a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
+      <span id="theme-icon">🌙</span>
+    </button>
+  </header>
+
+  <main class="feed" id="feed"></main>
+
+  <section id="businessView">
+    <div class="biz-topbar">
+      <div class="biz-search">
+        <input id="bizSearchInput" type="text" placeholder="🔍 Поиск бизнеса..." />
+      </div>
+      <div class="biz-filters" id="bizFilters"></div>
+
+      <div class="biz-actions">
+        <button class="btn" id="btnSetBizSecret" type="button">🔐</button>
+        <button class="btn" id="btnAddBiz" type="button">➕ Добавить бизнес</button>
+      </div>
+    </div>
+
+    <div class="biz-layout">
+      <div id="map"></div>
+
+      <div class="biz-form" id="bizForm">
+        <div class="hint">
+          1) Нажми на карте точку (координаты подставятся).<br/>
+          2) Заполни поля и нажми "Сохранить".<br/>
+          3) Нужен секретный код (кнопка "🔐").
+        </div>
+
+        <div class="row">
+          <label>Категория</label>
+          <select id="bizCategory">
+            <option value="Кафе/Рестораны">Кафе/Рестораны</option>
+            <option value="Магазины">Магазины</option>
+            <option value="Услуги">Услуги</option>
+            <option value="Красота">Красота</option>
+            <option value="Медицина">Медицина</option>
+            <option value="Спорт">Спорт</option>
+            <option value="Дети">Дети</option>
+            <option value="Другое">Другое</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label>Название</label>
+          <input id="bizName" placeholder="Например: Пекарня «Хлеб»" />
+        </div>
+
+        <div class="row">
+          <label>Описание</label>
+          <textarea id="bizDesc" placeholder="Коротко: что за бизнес, часы, особенности"></textarea>
+        </div>
+
+        <div class="row">
+          <label>Адрес (опционально)</label>
+          <input id="bizAddress" placeholder="Например: ул. ..., дом ..." />
+        </div>
+
+        <div class="row">
+          <label>Ссылка (сайт/телеграм) (опционально)</label>
+          <input id="bizUrl" placeholder="https://t.me/..." />
+        </div>
+
+        <div class="row">
+          <label>Координаты</label>
+          <input id="bizLat" placeholder="lat" />
+          <input id="bizLng" placeholder="lng" />
+          <div class="hint" id="bizPickHint">Кликни по карте, чтобы выбрать точку.</div>
+        </div>
+
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn" id="btnSaveBiz" type="button">✅ Сохранить</button>
+          <button class="btn" id="btnCancelBiz" type="button">✖ Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal для отзывов -->
+  <div class="modal" id="reviewsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Отзывы</h3>
+        <button class="modal-close" onclick="closeReviewsModal()">✕</button>
+      </div>
+
+      <div id="modalBusinessInfo" style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.1)">
+        <!-- вставляется динамически -->
+      </div>
+
+      <div id="reviewsList" class="reviews-list">
+        <!-- вставляются отзывы -->
+      </div>
+
+      <div class="no-reviews" id="noReviews">Нет отзывов. Будьте первым!</div>
+
+      <div class="review-form">
+        <h4 style="margin:0 0 12px 0;font-size:14px">Оставить отзыв</h4>
+        <div class="review-form-row">
+          <label>Ваше имя (опционально)</label>
+          <input id="reviewAuthor" type="text" placeholder="Аноним" />
+        </div>
+        <div class="review-form-row">
+          <label>Оценка</label>
+          <select id="reviewRating">
+            <option value="5">⭐⭐⭐⭐⭐ 5 звёзд</option>
+            <option value="4">⭐⭐⭐⭐ 4 звезды</option>
+            <option value="3">⭐⭐⭐ 3 звезды</option>
+            <option value="2">⭐⭐ 2 звезды</option>
+            <option value="1">⭐ 1 звезда</option>
+          </select>
+        </div>
+        <div class="review-form-row">
+          <label>Текст отзыва</label>
+          <textarea id="reviewText" placeholder="Поделись своим мнением..."></textarea>
+        </div>
+        <button class="btn" id="btnSubmitReview" type="button">✅ Отправить отзыв</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Дисклеймер -->
+  <footer class="disclaimer">
+    Администратор сайта не несёт ответственности за информацию. Сайт — сборник новостей без поддержки позиций авторов.
+  </footer>
+
+  <!-- Навигация -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <button id="btn-all" aria-current="true" onclick="switchTab('all')">📰 Новости</button>
+      <button id="btn-business" onclick="switchTab('business')">💼 Бизнес</button>
+      <button id="btn-reco" onclick="switchTab('reco')">⭐ Рекомендации</button>
+    </div>
+  </nav>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster.js"></script>
+
+  <script>
+    // ============ ИКОНКИ ПО КАТЕГОРИЯМ ============
+    const categoryIcons = {
+      'Кафе/Рестораны': '🍽️',
+      'Магазины': '🛍️',
+      'Услуги': '🔧',
+      'Красота': '💄',
+      'Медицина': '🏥',
+      'Спорт': '⚽',
+      'Дети': '👶',
+      'Другое': '📍'
+    };
+
+    const categoryColors = {
+      'Кафе/Рестораны': '#FF6B6B',
+      'Магазины': '#4ECDC4',
+      'Услуги': '#45B7D1',
+      'Красота': '#F7DC6F',
+      'Медицина': '#BB8FCE',
+      'Спорт': '#52C41A',
+      'Дети': '#FF85C0',
+      'Другое': '#8E8E93'
+    };
+
+    function getCategoryIcon(category) {
+      return categoryIcons[category] || '📍';
+    }
+
+    function getCategoryColor(category) {
+      return categoryColors[category] || '#8E8E93';
+    }
+
+    function createCustomIcon(category) {
+      const icon = getCategoryIcon(category);
+      const color = getCategoryColor(category);
+
+      const html = `
+        <div style="
+          display:flex;align-items:center;justify-content:center;
+          width:40px;height:40px;
+          background:${color};
+          border-radius:50%;
+          font-size:20px;
+          box-shadow:0 2px 8px rgba(0,0,0,0.3);
+          border:3px solid white;
+        ">${icon}</div>
+      `;
+
+      return L.divIcon({
+        html,
+        className: 'custom-marker',
+        iconSize: [40, 40],
+        popupAnchor: [0, -20]
+      });
+    }
+
+    // ============ THEME ============
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById('theme-icon');
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? '' : 'dark');
+      icon.textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const useDark = saved === 'dark' || (!saved && prefersDark);
+      if (useDark) {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').textContent = '☀️';
+      }
+    }
+
+    // ============ HELPERS ============
+    function escapeHtml(s) {
+      return String(s || '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","'");
+    }
+
+    function renderMediaContent(text) {
+      let html = text;
+      
+      // Ссылки на фото
+      const photoRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|bmp))/gi;
+      const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov))/gi;
+      const youtubeRegex = /(https?:\/\/(www\.)?youtube\.com\/watch\?v=([^\s&]+)|https?:\/\/youtu\.be\/([^\s&]+))/gi;
+      
+      let mediaHtml = '';
+      let textWithoutMedia = text;
+      
+      // Собираем все медиафайлы
+      const photos = [];
+      const videos = [];
+      
+      let match;
+      photoRegex.lastIndex = 0;
+      while ((match = photoRegex.exec(text)) !== null) {
+        photos.push(match[0]);
+        textWithoutMedia = textWithoutMedia.replace(match[0], '');
+      }
+      
+      videoRegex.lastIndex = 0;
+      while ((match = videoRegex.exec(text)) !== null) {
+        videos.push(match[0]);
+        textWithoutMedia = textWithoutMedia.replace(match[0], '');
+      }
+      
+      youtubeRegex.lastIndex = 0;
+      while ((match = youtubeRegex.exec(text)) !== null) {
+        const videoId = match[3] || match[4];
+        videos.push(`https://www.youtube.com/embed/${videoId}`);
+        textWithoutMedia = textWithoutMedia.replace(match[0], '');
+      }
+      
+      // Рендерим медиа
+      if (photos.length || videos.length) {
+        mediaHtml = '<div class="card-media">';
+        
+        photos.forEach(url => {
+          mediaHtml += `<img src="${escapeHtml(url)}" alt="photo" loading="lazy" onerror="this.style.display='none'" />`;
+        });
+        
+        videos.forEach(url => {
+          if (url.includes('youtube.com/embed')) {
+            mediaHtml += `<iframe width="100%" height="250" src="${escapeHtml(url)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px;"></iframe>`;
+          } else {
+            mediaHtml += `<video controls style="width:100%;border-radius:12px;"><source src="${escapeHtml(url)}" type="video/mp4"><source src="${escapeHtml(url)}" type="video/webm">Ваш браузер не поддерживает видео</video>`;
+          }
+        });
+        
+        mediaHtml += '</div>';
+      }
+      
+      // Ссылки в тексте
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const finalText = escapeHtml(textWithoutMedia).replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+      
+      return finalText + mediaHtml;
+    }
+
+    function linkify(text) {
+      return renderMediaContent(text);
+    }
+
+    function formatDate(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${day}.${month}.${year}, ${hours}:${minutes}`;
+    }
+
+    function buildSourceLine(n) {
+      const s = n && n.source ? n.source : null;
+      if (!s) return '';
+      const url = s.postUrl || s.chatUrl || '';
+      const title = s.title || (s.username ? '@' + s.username : 'Источник');
+      if (!url) return ` · Источник: ${escapeHtml(title)}`;
+      return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
+    }
+
+    // ============ TABS & NAVIGATION ============
+    let currentTab = 'all';
+    let allNews = [];
+    let bizList = [];
+    let bizCategoryFilter = 'Все';
+    let bizSearchText = '';
+    let hasBackgroundUpdates = false;
+
+    function setNavActive(tab) {
+      document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
+      const btn = document.getElementById('btn-' + tab);
+      if (btn) btn.setAttribute('aria-current', 'true');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      setNavActive(tab);
+      const feed = document.getElementById('feed');
+      const bizView = document.getElementById('businessView');
+      if (tab === 'business') {
+        feed.style.display = 'none';
+        bizView.style.display = 'grid';
+        ensureMap();
+        loadBusinesses({ render: true });
+      } else {
+        bizView.style.display = 'none';
+        feed.style.display = 'grid';
+        renderNews();
+      }
+    }
+
+    // ============ NEWS ============
+    function sameTop(a, b) {
+      const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
+      const b0 = (Array.isArray(b) && b.length) ? b[0] : null;
+      return a0 && b0 && a0.id === b0.id && a.length === b.length;
+    }
+
+    async function loadNews({ render = true } = {}) {
+      try {
+        const res = await fetch('/api/news', { cache: 'no-store' });
+        const data = await res.json();
+        const next = Array.isArray(data.posts) ? data.posts : [];
+        const changed = !sameTop(allNews, next);
+        allNews = next;
+        if (render && changed && currentTab !== 'business') renderNews();
+        if (!render && changed) hasBackgroundUpdates = true;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderNews() {
+      const feed = document.getElementById('feed');
+      const filtered =
+        currentTab === 'reco'
+          ? allNews.filter(n => (n.category || 'all') === 'reco')
+          : allNews;
+
+      if (!filtered.length) {
+        feed.innerHTML = '<div class="no-news">Нет новостей.</div>';
+        return;
+      }
+
+      feed.innerHTML = filtered
+        .map(n => {
+          const ts = n.timestamp || n.createdAt || null;
+          let html = '<div class="card">';
+          html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(
+            formatDate(ts)
+          )}${buildSourceLine(n)}</div>`;
+          html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+          html += '</div>';
+          return html;
+        })
+        .join('');
+    }
+
+    setInterval(() => {
+      if (document.visibilityState !== 'visible') loadNews({ render: false });
+    }, 3000);
+
+    document.addEventListener('visibilitychange', () => {
+      if (
+        document.visibilityState === 'visible' &&
+        hasBackgroundUpdates &&
+        currentTab !== 'business'
+      ) {
+        hasBackgroundUpdates = false;
+        renderNews();
+      }
+    });
+
+    // ============ BUSINESS MAP ============
+    let map = null;
+    let markerClusterGroup = null;
+    let pickMarker = null;
+    let currentBusinessId = null;
+
+    function ensureMap() {
+      if (map) return;
+      const center = [55.57, 37.43];
+
+      map = L.map('map', { zoomControl: true }).setView(center, 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      markerClusterGroup = L.markerClusterGroup();
+      map.addLayer(markerClusterGroup);
+
+      map.on('click', (e) => {
+        const form = document.getElementById('bizForm');
+        if (form.style.display !== 'block') return;
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        document.getElementById('bizLat').value = lat.toFixed(6);
+        document.getElementById('bizLng').value = lng.toFixed(6);
+        if (pickMarker) pickMarker.remove();
+        pickMarker = L.marker([lat, lng]).addTo(map);
+        document.getElementById('bizPickHint').textContent =
+          'Точка выбрана. Можно сохранять.';
+      });
+    }
+
+    function buildBizFilters() {
+      const container = document.getElementById('bizFilters');
+      const cats = new Set(['Все']);
+      bizList.forEach(b => cats.add(b.category || 'Другое'));
+      const items = Array.from(cats);
+      container.innerHTML = items
+        .map(c => {
+          const active = c === bizCategoryFilter ? 'chip active' : 'chip';
+          return `<button class="${active}" type="button" data-cat="${escapeHtml(
+            c
+          )}">${escapeHtml(c)}</button>`;
+        })
+        .join('');
+      container.querySelectorAll('button[data-cat]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          bizCategoryFilter = btn.getAttribute('data-cat') || 'Все';
+          buildBizFilters();
+          renderBusinesses();
+        });
+      });
+    }
+
+    function filterBusinesses() {
+      let filtered = bizList;
+
+      if (bizCategoryFilter !== 'Все') {
+        filtered = filtered.filter(b => (b.category || 'Другое') === bizCategoryFilter);
+      }
+
+      if (bizSearchText.trim()) {
+        const q = bizSearchText.toLowerCase();
+        filtered = filtered.filter(b => {
+          const name = (b.name || '').toLowerCase();
+          const desc = (b.description || '').toLowerCase();
+          const addr = (b.address || '').toLowerCase();
+          return name.includes(q) || desc.includes(q) || addr.includes(q);
+        });
+      }
+
+      return filtered;
+    }
+
+    function renderBusinesses() {
+      if (!map || !markerClusterGroup) return;
+      markerClusterGroup.clearLayers();
+
+      const filtered = filterBusinesses();
+
+      filtered.forEach(b => {
+        const lat = Number(b.lat);
+        const lng = Number(b.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        const title = escapeHtml(b.name || 'Бизнес');
+        const cat = escapeHtml(b.category || 'Другое');
+        const desc = b.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.35;">${escapeHtml(b.description)}</div>` : '';
+        const addr = b.address ? `<div style="margin-top:6px;font-size:12px;opacity:0.85;">${escapeHtml(b.address)}</div>` : '';
+        const link = b.url ? `<div style="margin-top:8px;"><a href="${escapeHtml(b.url)}" target="_blank" rel="noopener">Открыть ссылку</a></div>` : '';
+
+        const avgRating = b.reviews && Array.isArray(b.reviews) && b.reviews.length
+          ? (b.reviews.reduce((s, r) => s + Number(r.rating || 0), 0) / b.reviews.length).toFixed(1)
+          : null;
+        const ratingLine = avgRating ? `<div style="margin-top:8px;color:#ffc107;font-weight:600;">⭐ ${avgRating} (${b.reviews.length} отзывов)</div>` : '';
+
+        const popupHtml = `
+          <div style="font-size:14px;font-weight:600;">${title}</div>
+          <div style="font-size:12px;opacity:0.85;margin-top:2px;">${cat}</div>
+          ${desc}
+          ${addr}
+          ${ratingLine}
+          ${link}
+          <div style="margin-top:12px;"><button onclick="openReviewsModal(${b.id})" style="padding:6px 12px;background:#007aff;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">💬 Отзывы</button></div>
+        `;
+
+        const marker = L.marker([lat, lng], {
+          icon: createCustomIcon(b.category || 'Другое')
+        }).bindPopup(popupHtml);
+
+        markerClusterGroup.addLayer(marker);
+      });
+    }
+
+    async function loadBusinesses({ render = true } = {}) {
+      try {
+        const res = await fetch('/api/businesses', { cache: 'no-store' });
+        const data = await res.json();
+        bizList = Array.isArray(data.businesses) ? data.businesses : [];
+        buildBizFilters();
+        if (render) renderBusinesses();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // ============ BUSINESS CRUD ============
+    function getBizSecret() {
+      return localStorage.getItem('biz_admin_secret') || '';
+    }
+    function setBizSecret() {
+      const cur = getBizSecret();
+      const s = prompt(
+        'Введите секретный код BUSINESS_ADMIN_KEY (сохранится в браузере):',
+        cur || ''
+      );
+      if (s == null) return;
+      localStorage.setItem('biz_admin_secret', s.trim());
+      alert('Секретный код сохранён.');
+    }
+
+    function openBizForm() {
+      document.getElementById('bizForm').style.display = 'block';
+      document.getElementById('bizPickHint').textContent =
+        'Кликни по карте, чтобы выбрать точку.';
+    }
+    function closeBizForm() {
+      document.getElementById('bizForm').style.display = 'none';
+      document.getElementById('bizName').value = '';
+      document.getElementById('bizDesc').value = '';
+      document.getElementById('bizAddress').value = '';
+      document.getElementById('bizUrl').value = '';
+      document.getElementById('bizLat').value = '';
+      document.getElementById('bizLng').value = '';
+      document.getElementById('bizPickHint').textContent =
+        'Кликни по карте, чтобы выбрать точку.';
+      if (pickMarker) {
+        pickMarker.remove();
+        pickMarker = null;
+      }
+    }
+
+    async function saveBusiness() {
+      const secret = getBizSecret();
+      if (!secret) {
+        alert('Сначала задайте секретный код кнопкой "🔐".');
+        return;
+      }
+      const payload = {
+        action: 'add',
+        secret,
+        name: document.getElementById('bizName').value,
+        category: document.getElementById('bizCategory').value,
+        description: document.getElementById('bizDesc').value,
+        address: document.getElementById('bizAddress').value,
+        url: document.getElementById('bizUrl').value,
+        lat: document.getElementById('bizLat').value,
+        lng: document.getElementById('bizLng').value
+      };
+      try {
+        const res = await fetch('/api/businesses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert('Ошибка сохранения: ' + (data.error || res.status));
+          return;
+        }
+        closeBizForm();
+        await loadBusinesses({ render: true });
+        alert('Бизнес добавлен!');
+      } catch (e) {
+        console.error(e);
+        alert('Ошибка сети при сохранении.');
+      }
+    }
+
+    // ============ REVIEWS ============
+    function openReviewsModal(businessId) {
+      currentBusinessId = businessId;
+      const biz = bizList.find(b => b.id === businessId);
+      if (!biz) return;
+
+      document.getElementById('modalTitle').textContent = `Отзывы — ${biz.name}`;
+
+      const infoDiv = document.getElementById('modalBusinessInfo');
+      const reviews = Array.isArray(biz.reviews) ? biz.reviews : [];
+      const avgRating = reviews.length
+        ? (reviews.reduce((s, r) => s + Number(r.rating || 0), 0) / reviews.length).toFixed(1)
+        : 'Нет оценок';
+      infoDiv.innerHTML = `
+        <div>
+          <strong>${escapeHtml(biz.name)}</strong><br/>
+          <small style="color:#888">${escapeHtml(biz.category || 'Другое')}</small><br/>
+          <div style="margin-top:8px;">
+            ${reviews.length ? `⭐ ${avgRating} (${reviews.length} отзывов)` : 'Нет отзывов'}
+          </div>
+        </div>
+      `;
+
+      const listDiv = document.getElementById('reviewsList');
+      const noDiv = document.getElementById('noReviews');
+
+      if (reviews.length) {
+        noDiv.style.display = 'none';
+        listDiv.innerHTML = reviews.map(r => `
+          <div class="review-item">
+            <div class="review-header">
+              <span class="review-author">${escapeHtml(r.author || 'Аноним')}</span>
+              <span class="review-rating">${'⭐'.repeat(Number(r.rating || 0))}</span>
+            </div>
+            <div class="review-text">${escapeHtml(r.text || '')}</div>
+            <div class="review-date">${formatDate(r.createdAt)}</div>
+          </div>
+        `).join('');
+      } else {
+        noDiv.style.display = 'block';
+        listDiv.innerHTML = '';
+      }
+
+      document.getElementById('reviewAuthor').value = '';
+      document.getElementById('reviewRating').value = '5';
+      document.getElementById('reviewText').value = '';
+
+      document.getElementById('reviewsModal').classList.add('show');
+    }
+
+    function closeReviewsModal() {
+      document.getElementById('reviewsModal').classList.remove('show');
+      currentBusinessId = null;
+    }
+
+    async function submitReview() {
+      if (!currentBusinessId) return;
+      const author = document.getElementById('reviewAuthor').value;
+      const rating = Number(document.getElementById('reviewRating').value);
+      const text = document.getElementById('reviewText').value;
+
+      if (!text.trim()) {
+        alert('Напиши отзыв!');
+        return;
+      }
+
+      const payload = {
+        action: 'review',
+        businessId: currentBusinessId,
+        author: author || 'Аноним',
+        rating,
+        text
+      };
+
+      try {
+        const res = await fetch('/api/businesses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert('Ошибка: ' + (data.error || res.status));
+          return;
+        }
+        await loadBusinesses({ render: false });
+        openReviewsModal(currentBusinessId);
+        alert('Отзыв отправлен!');
+      } catch (e) {
+        console.error(e);
+        alert('Ошибка сети.');
+      }
+    }
+
+    // ============ SEARCH ============
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('bizSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          bizSearchText = e.target.value;
+          renderBusinesses();
+        });
+      }
+    });
+
+    // ============ INIT ============
+    initTheme();
+    loadNews({ render: true });
+    renderNews();
+
+    document.getElementById('btnSetBizSecret').addEventListener('click', setBizSecret);
+    document.getElementById('btnAddBiz').addEventListener('click', openBizForm);
+    document.getElementById('btnCancelBiz').addEventListener('click', closeBizForm);
+    document.getElementById('btnSaveBiz').addEventListener('click', saveBusiness);
+    document.getElementById('btnSubmitReview').addEventListener('click', submitReview);
+
+    // Закрытие модалей по клику на фон
+    document.getElementById('reviewsModal').addEventListener('click', (e) => {
+      if (e.target.id === 'reviewsModal') closeReviewsModal();
+    });
+  </script>
+</body>
+</html>
