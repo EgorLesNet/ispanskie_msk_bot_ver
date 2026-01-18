@@ -18,15 +18,32 @@ export default async function handler(req, res) {
     const filePath = fileData.result.file_path;
     const tgUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
 
-    const ext = String(filePath).split('.').pop().toLowerCase();
-    const contentType =
-      ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
-      ext === 'png' ? 'image/png' :
-      ext === 'webp' ? 'image/webp' :
-      ext === 'gif' ? 'image/gif' :
-      ext === 'mp4' ? 'video/mp4' :
-      'application/octet-stream';
-
+      // Определяем content-type на основе расширения и пути
+  const ext = String(filePath).split('.').pop().toLowerCase();
+  const pathLower = String(filePath).toLowerCase();
+  
+  let contentType;
+  
+  // Проверяем расширение
+  if (ext === 'jpg' || ext === 'jpeg') {
+    contentType = 'image/jpeg';
+  } else if (ext === 'png') {
+    contentType = 'image/png';
+  } else if (ext === 'webp') {
+    contentType = 'image/webp';
+  } else if (ext === 'gif') {
+    contentType = 'image/gif';
+  } else if (ext === 'mp4' || ext === 'mpeg4' || ext === 'mov') {
+    contentType = 'video/mp4';
+  } else if (pathLower.includes('video') || pathLower.startsWith('videos/')) {
+    // Если в пути есть "video", считаем это видео
+    contentType = 'video/mp4';
+  } else if (pathLower.includes('photo') || pathLower.startsWith('photos/')) {
+    // Если в пути есть "photo", считаем это фото
+    contentType = 'image/jpeg';
+  } else {
+    contentType = 'application/octet-stream';
+  }
     const tgRes = await fetch(tgUrl);
     if (!tgRes.ok) return res.status(502).json({ error: 'Failed to download from Telegram' });
 
