@@ -33,7 +33,6 @@ export default async function handler(req, res) {
     const buffer = await tgRes.arrayBuffer();
 
     res.setHeader('Content-Type', contentType);
-    // можно кэшировать, т.к. Telegram file_id стабилен
     res.setHeader('Cache-Control', 'public, max-age=86400');
     res.send(Buffer.from(buffer));
   } catch (error) {
