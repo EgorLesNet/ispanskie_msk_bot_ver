@@ -115,6 +115,53 @@ module.exports = async (req, res) => {
   if (req.method === 'POST') {
     try {
       const body = parseBody(req) || {};
+      const action = body.action || 'add'; // 'add' или 'review'
+
+      if (action === 'review') {
+        // добавление отзыва
+        const { businessId, author, text, rating, secret } = body;
+
+        if (!BUSINESS_ADMIN_KEY) {
+          return res.status(500).json({ error: 'BUSINESS_ADMIN_KEY is not set' });
+        }
+        // отзывы может оставлять любой (без секрета), или ограничить?
+        // пока разрешаем всем
+
+        const cleanAuthor = String(author || 'Аноним').trim();
+        const cleanText = String(text || '').trim();
+        const nRating = Number(rating);
+
+        if (!cleanText) return res.status(400).json({ error: 'text is required' });
+        if (!Number.isFinite(nRating) || nRating < 1 || nRating > 5) {
+          return res.status(400).json({ error: 'rating must be 1-5' });
+        }
+
+        const saved = await updateDB(async (db) => {
+          const biz = db.businesses.find(x => x && x.id === Number(businessId));
+          if (!biz) return null;
+
+          const reviews = Array.isArray(biz.reviews) ? biz.reviews : [];
+          const reviewIds = reviews.map(r => r.id).filter(x => typeof x === 'number');
+          const reviewId = reviewIds.length ? Math.max(...reviewIds) + 1 : 1;
+
+          const review = {
+            id: reviewId,
+            author: cleanAuthor,
+            text: cleanText,
+            rating: nRating,
+            createdAt: new Date().toISOString()
+          };
+
+          reviews.unshift(review);
+          biz.reviews = reviews;
+          return review;
+        });
+
+        if (!saved) return res.status(404).json({ error: 'Business not found' });
+        return res.status(200).json({ ok: true, review: saved });
+      }
+
+      // action === 'add' (добавление бизнеса)
       const { secret, name, category, lat, lng, description, address, url } = body;
 
       if (!BUSINESS_ADMIN_KEY) {
@@ -150,6 +197,7 @@ module.exports = async (req, res) => {
           description: cleanDesc || null,
           address: cleanAddr || null,
           url: cleanUrl || null,
+          reviews: [],
           createdAt: new Date().toISOString()
         };
 
