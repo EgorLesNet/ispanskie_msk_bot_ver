@@ -1,5 +1,18 @@
 {
   "posts": [],
   "pending": [],
-  "rejected": []
+  "rejected": [],
+  "businesses": [
+    {
+      "id": 1,
+      "name": "Пятерочка",
+      "category": "Магазины",
+      "lat": 55.592913,
+      "lng": 37.46045,
+      "description": "Магазин продуктов, супермаркет. \n09:00 - 23:00",
+      "address": null,
+      "url": "5ka.ru",
+      "createdAt": "2026-01-18T08:34:10.357Z"
+    }
+  ]
 }
