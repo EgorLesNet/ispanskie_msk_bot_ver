@@ -483,6 +483,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 6,
+      "name": "Школа 547 \"Логика\"",
+      "category": "Дети",
+      "lat": 55.591298,
+      "lng": 37.460301,
+      "description": null,
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:15:43.712Z"
+    },
+    {
       "id": 5,
       "name": "Детский сад 547 \"Солнечная Страна\"",
       "category": "Дети",
