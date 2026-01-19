@@ -483,6 +483,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 8,
+      "name": "Сдэк",
+      "category": "Услуги",
+      "lat": 55.591761,
+      "lng": 37.442796,
+      "description": "Почтовая служба",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:16:44.326Z"
+    },
+    {
       "id": 7,
       "name": "Школа 547 \"Диалектика\"",
       "category": "Дети",
