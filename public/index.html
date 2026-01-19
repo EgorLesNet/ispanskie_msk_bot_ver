@@ -169,6 +169,16 @@
       box-shadow:0 -4px 24px rgba(0,0,0,0.4);
     }
 
+     /* Скрываем текст в кнопках навигации на маленьких экранах */
+     @media (max-width: 400px) {
+        .nav button .nav-text {
+           display: none;
+           }
+        .nav button {
+           padding: 11px 16px;
+           }
+        }
+
     /* ---- Business view ---- */
     #businessView{
       width:min(900px, 94vw);
@@ -374,9 +384,9 @@
 
   <nav class="nav liquid-glass">
     <div class="nav-inner">
-      <button id="btn-all" aria-current="true" onclick="switchTab('all')">📰 Новости</button>
-      <button id="btn-business" onclick="switchTab('business')">💼 Бизнес</button>
-      <button id="btn-reco" onclick="switchTab('reco')">⭐ Рекомендации</button>
+      <button id="btn-all" aria-current="true" onclick="switchTab('all')">📰 📰<span class="nav-text"> Новости</span></button>
+      <button id="btn-business" onclick="switchTab('business')">💼 💼<span class="nav-text"> Бизнес</span></button>
+      <button id="btn-reco" onclick="switchTab('reco')">⭐ ⭐<span class="nav-text"> Рекомендации</span></button>
     </div>
   </nav>
 
