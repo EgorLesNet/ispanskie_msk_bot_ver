@@ -497,13 +497,12 @@
                                                   html += `<img src="/api/media/${encodeURIComponent(item.fileId)}" 
                                                                           loading="lazy" 
                                                                                                   alt="Фото"/>`;
-                                                                                                          } else if (item.type === 'video') {
-                                                                                                                    html += `<video controls preload="metadata">
-                                                                                                                                         <source src="/api/media/${encodeURIComponent(item.fileId)}" type="video/mp4">
-                                                                                                                                                              Ваш браузер не поддерживает видео.
-                                                                                                                                                                                 </video>`;
-                                                                                                                                                                                         }
-                                                                                                                                                                                               });
+                                                                                                                  } else if (item.type === 'video') {
+                html += `<video controls preload="metadata">
+                  <source src="/api/media/${encodeURIComponent(item.fileId)}" type="video/mp4">
+                  Ваш браузер не поддерживает видео.
+                </video>`;
+              }                                                                                           });
                                                                                                                                                                                                      html += '</div>';
                                                                                                                                                                                                          }
         html += `<div class="card-text">${linkify(n.text || '')}</div>`;
