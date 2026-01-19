@@ -483,6 +483,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 5,
+      "name": "Детский сад 547 \"Солнечная Страна\"",
+      "category": "Дети",
+      "lat": 55.590712,
+      "lng": 37.453836,
+      "description": null,
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:15:23.705Z"
+    },
+    {
       "id": 4,
       "name": "Вкусвилл",
       "category": "Магазины",
