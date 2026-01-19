@@ -2,12 +2,11 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Агрегатор для района</title>
 
+  <!-- Leaflet (карта) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.Default.css" />
 
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -15,19 +14,19 @@
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
       min-height:100vh;background:#f0f2f5;color:#1a1a1a;
       transition:background 0.3s ease, color 0.3s ease;
-      padding-top:80px;padding-bottom:100px;
+      padding-top:calc(80px + env(safe-area-inset-top));padding-bottom:calc(90px + env(safe-area-inset-bottom))
     }
     body[data-theme="dark"]{ background:#0e0e0e; color:#fff; }
 
     .header{
-      position:fixed;top:12px;left:12px;right:12px;z-index:100;
+    position:fixed;top:calc(12px + env(safe-area-inset-top));left:12px;right:12px;z-index:100;
       display:flex;justify-content:space-between;align-items:center;
       padding:14px 18px;border-radius:20px;
     }
     .logo-wrap{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
     .logo-img{
       width:40px;height:40px;border-radius:10px;transition:transform 0.3s;cursor:pointer;
-      box-shadow:0 4px 12px rgba(0,0,0,0.15);object-fit:cover;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
     }
     .logo-img:hover{transform:scale(1.1) rotate(5deg)}
     h3{font-size:17px;font-weight:600;margin:0}
@@ -64,20 +63,86 @@
     .card-text a:hover{text-decoration:underline;color:#0051d5}
     body[data-theme="dark"] .card-text a{color:#0a84ff}
 
-    .card-media{
-      margin:12px 0;
-      display:grid;
-      gap:8px;
-      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    }
-    .card-media img{
-      width:100%;height:auto;max-height:300px;border-radius:12px;object-fit:cover;
-    }
-    .card-media video{
-      width:100%;max-height:300px;border-radius:12px;background:#000;
-    }
+/* Медиа-контейнер с горизонтальной прокруткой */
+.card-media-scroll {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px -18px;
+  padding: 0 18px;
+  scrollbar-width: none;
+}
+
+.card-media-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.card-media-scroll img,
+.card-media-scroll video {
+  flex-shrink: 0;
+  width: 80vw;
+  max-width: 400px;
+  height: auto;
+  max-height: 400px;
+  border-radius: 12px;
+  object-fit: cover;
+  scroll-snap-align: center;
+  display: block;
+}
+/* Для десктопа - сетка вместо горизонтального скролла */
+@media (min-width: 768px) {
+    .card-media-scroll {
+          display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                  gap: 10px;
+                      overflow-x: visible;
+                          margin: 12px 0;
+                              padding: 0;
+                                  scroll-snap-type: none;
+                                    }
+                                      
+                                      .card-media-scroll img,
+                                        .card-media-scroll video {
+                                              flex: none;
+                                                  max-width: 100%;
+                                                      width: 100%;
+                                                        }
+                                                        }
 
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
+
+    .nav{
+      position:fixed;bottom:12px;left:12px;right:12px;z-index:100;
+      display:flex;justify-content:center;
+      padding:10px;border-radius:22px;
+    }
+    .nav-inner{display:flex;gap:8px;justify-content:center;width:100%;max-width:600px;}
+    .nav button{
+      background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.12);
+      padding:11px 24px;border-radius:18px;cursor:pointer;font-size:14px;font-weight:500;
+      transition:all 0.3s;color:#333;white-space:nowrap;
+    }
+    body[data-theme="dark"] .nav button{
+      background:rgba(50,50,50,0.6);border:1px solid rgba(255,255,255,0.18);color:#ccc;
+    }
+    .nav button:hover{
+      background:rgba(255,255,255,0.9);transform:translateY(-2px) scale(1.05);
+      box-shadow:0 6px 16px rgba(0,0,0,0.15);
+    }
+    body[data-theme="dark"] .nav button:hover{background:rgba(70,70,70,0.9);}
+    .nav button[aria-current="true"]{
+      background:#007aff;color:#fff;border-color:#007aff;
+      box-shadow:0 4px 12px rgba(0,122,255,0.4);
+    }
+    body[data-theme="dark"] .nav button[aria-current="true"]{
+      background:#0a84ff;border-color:#0a84ff;
+      box-shadow:0 4px 12px rgba(10,132,255,0.4);
+    }
 
     .liquid-glass{
       backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
@@ -93,8 +158,18 @@
       border:1px solid rgba(255,255,255,0.2);
       box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
     }
+    .nav.liquid-glass{
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(255,255,255,0.4);
+      box-shadow:0 -4px 24px rgba(0,0,0,0.12);
+    }
+    body[data-theme="dark"] .nav.liquid-glass{
+      background:rgba(20,20,20,0.7);
+      border:1px solid rgba(255,255,255,0.2);
+      box-shadow:0 -4px 24px rgba(0,0,0,0.4);
+    }
 
-    /* Business view */
+    /* ---- Business view ---- */
     #businessView{
       width:min(900px, 94vw);
       margin:18px auto;
@@ -107,22 +182,6 @@
       gap:10px;
       align-items:center;
       justify-content:space-between;
-    }
-    .biz-search{
-      flex:1;min-width:200px;
-    }
-    .biz-search input{
-      width:100%;
-      padding:10px 14px;
-      border-radius:14px;
-      border:1px solid rgba(0,0,0,0.12);
-      background:rgba(255,255,255,0.75);
-      font-size:14px;
-    }
-    body[data-theme="dark"] .biz-search input{
-      border:1px solid rgba(255,255,255,0.15);
-      background:rgba(50,50,50,0.75);
-      color:#fff;
     }
     .biz-filters{
       display:flex;
@@ -172,11 +231,14 @@
     }
     .btn:hover{transform:translateY(-1px)}
 
-    .biz-layout{display:grid;gap:12px;}
+    .biz-layout{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
     #map{
-      height: 50vh;
-      min-height: 350px;
-      max-height: calc(100vh - 280px);
+      height: 62vh;
+      min-height: 420px;
       border-radius:20px;
       overflow:hidden;
       border:1px solid rgba(0,0,0,0.1);
@@ -185,13 +247,6 @@
     body[data-theme="dark"] #map{
       border:1px solid rgba(255,255,255,0.12);
       box-shadow:0 10px 28px rgba(0,0,0,0.45);
-    }
-    @media (max-height: 600px) {
-      #map{
-        height: 40vh;
-        min-height: 280px;
-        max-height: calc(100vh - 320px);
-      }
     }
 
     .biz-form{
@@ -225,204 +280,7 @@
     .hint{font-size:12px;color:#777;line-height:1.4}
     body[data-theme="dark"] .hint{color:#aaa}
 
-    /* Modal для отзывов */
-    .modal{
-      display:none;
-      position:fixed;
-      top:0;left:0;right:0;bottom:0;
-      background:rgba(0,0,0,0.5);
-      z-index:1000;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-    }
-    .modal.show{display:flex}
-    .modal-content{
-      background:rgba(255,255,255,0.95);
-      border-radius:20px;
-      max-width:600px;
-      width:100%;
-      max-height:85vh;
-      overflow-y:auto;
-      padding:20px;
-      animation:slideUp 0.3s ease-out;
-    }
-    body[data-theme="dark"] .modal-content{
-      background:rgba(30,30,30,0.95);
-      border:1px solid rgba(255,255,255,0.1);
-    }
-    .modal-header{
-      display:flex;justify-content:space-between;align-items:center;
-      margin-bottom:16px;border-bottom:1px solid rgba(0,0,0,0.1);
-      padding-bottom:12px;
-    }
-    body[data-theme="dark"] .modal-header{
-      border-bottom:1px solid rgba(255,255,255,0.1);
-    }
-    .modal-close{
-      background:none;border:none;font-size:24px;cursor:pointer;padding:0;
-      color:inherit;transition:opacity 0.2s;
-    }
-    .modal-close:hover{opacity:0.6}
-
-    .reviews-list{
-      display:grid;gap:12px;margin:16px 0;
-    }
-    .review-item{
-      padding:12px;
-      border-radius:12px;
-      background:rgba(0,0,0,0.03);
-      border-left:3px solid #007aff;
-    }
-    body[data-theme="dark"] .review-item{
-      background:rgba(255,255,255,0.05);
-      border-left-color:#0a84ff;
-    }
-    .review-header{
-      display:flex;justify-content:space-between;align-items:center;
-      margin-bottom:6px;font-size:13px;
-    }
-    .review-author{font-weight:600}
-    .review-rating{font-weight:600;color:#ffc107}
-    .review-text{font-size:13px;line-height:1.4;margin:8px 0 0 0}
-    .review-date{font-size:11px;color:#888;margin-top:8px}
-    body[data-theme="dark"] .review-date{color:#aaa}
-
-    .review-form{
-      padding:12px;border-radius:12px;
-      background:rgba(0,0,0,0.03);
-      margin-top:16px;
-    }
-    body[data-theme="dark"] .review-form{
-      background:rgba(255,255,255,0.05);
-    }
-    .review-form-row{margin:10px 0}
-    .review-form-row label{
-      display:block;font-size:13px;font-weight:600;margin-bottom:4px;
-    }
-    .review-form-row input, .review-form-row select, .review-form-row textarea{
-      width:100%;
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid rgba(0,0,0,0.12);
-      background:rgba(255,255,255,0.9);
-      font-size:13px;
-    }
-    body[data-theme="dark"] .review-form-row input,
-    body[data-theme="dark"] .review-form-row select,
-    body[data-theme="dark"] .review-form-row textarea{
-      border:1px solid rgba(255,255,255,0.15);
-      background:rgba(20,20,20,0.8);
-      color:#fff;
-    }
-    .review-form-row textarea{min-height:70px;resize:vertical}
-
-    .no-reviews{font-size:13px;color:#999;padding:12px 0;text-align:center}
-
-    /* Дисклеймер — минималистичный */
-    .disclaimer{
-      position:fixed;
-      bottom:78px;
-      left:50%;
-      transform:translateX(-50%);
-      background:transparent;
-      padding:6px 12px;
-      font-size:9px;
-      line-height:1.3;
-      color:#999;
-      text-align:center;
-      z-index:60;
-      pointer-events:none;
-      max-width:90vw;
-    }
-    body[data-theme="dark"] .disclaimer{color:#666}
-
-    /* Навигация — Liquid Glass UI */
-    .nav{
-      position:fixed;
-      bottom:12px;
-      left:12px;
-      right:12px;
-      z-index:99;
-      display:flex;
-      justify-content:center;
-      padding:10px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.7);
-      border:1px solid rgba(255,255,255,0.4);
-      box-shadow:0 8px 32px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.5);
-      backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
-      -webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.1);
-    }
-    body[data-theme="dark"] .nav{
-      background:rgba(20,20,20,0.7);
-      border:1px solid rgba(255,255,255,0.2);
-      box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
-    }
-
-    .nav-inner{
-      display:flex;
-      gap:8px;
-      justify-content:center;
-      width:100%;
-      max-width:600px;
-      flex-wrap:wrap;
-    }
-
-    .nav button{
-      background:rgba(255,255,255,0.6);
-      border:1px solid rgba(0,0,0,0.12);
-      padding:11px 24px;
-      border-radius:18px;
-      cursor:pointer;
-      font-size:14px;
-      font-weight:500;
-      transition:all 0.3s;
-      color:#333;
-      white-space:nowrap;
-    }
-    body[data-theme="dark"] .nav button{
-      background:rgba(50,50,50,0.6);
-      border:1px solid rgba(255,255,255,0.18);
-      color:#ccc;
-    }
-    .nav button:hover{
-      background:rgba(255,255,255,0.9);
-      transform:translateY(-2px) scale(1.05);
-      box-shadow:0 6px 16px rgba(0,0,0,0.15);
-    }
-    body[data-theme="dark"] .nav button:hover{
-      background:rgba(70,70,70,0.9);
-    }
-    .nav button[aria-current="true"]{
-      background:#007aff;
-      color:#fff;
-      border-color:#007aff;
-      box-shadow:0 4px 12px rgba(0,122,255,0.4);
-    }
-    body[data-theme="dark"] .nav button[aria-current="true"]{
-      background:#0a84ff;
-      border-color:#0a84ff;
-      box-shadow:0 4px 12px rgba(10,132,255,0.4);
-    }
-
-    @media (max-width: 480px) {
-      .nav button{
-        padding:9px 14px;
-        font-size:12px;
-      }
-      .nav-inner{
-        gap:6px;
-      }
-      .disclaimer{
-        font-size:8px;
-        padding:4px 8px;
-        bottom:74px;
-      }
-    }
-
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 
@@ -441,17 +299,16 @@
     </button>
   </header>
 
+  <!-- NEWS VIEW -->
   <main class="feed" id="feed"></main>
 
+  <!-- BUSINESS VIEW -->
   <section id="businessView">
     <div class="biz-topbar">
-      <div class="biz-search">
-        <input id="bizSearchInput" type="text" placeholder="🔍 Поиск бизнеса..." />
-      </div>
       <div class="biz-filters" id="bizFilters"></div>
 
       <div class="biz-actions">
-        <button class="btn" id="btnSetBizSecret" type="button">🔐</button>
+        <button class="btn" id="btnSetBizSecret" type="button">🔐 Секрет</button>
         <button class="btn" id="btnAddBiz" type="button">➕ Добавить бизнес</button>
       </div>
     </div>
@@ -462,8 +319,8 @@
       <div class="biz-form" id="bizForm">
         <div class="hint">
           1) Нажми на карте точку (координаты подставятся).<br/>
-          2) Заполни поля и нажми "Сохранить".<br/>
-          3) Нужен секретный код (кнопка "🔐").
+          2) Заполни поля и нажми “Сохранить”.<br/>
+          3) Нужен секрет (кнопка “🔐 Секрет”).
         </div>
 
         <div class="row">
@@ -482,7 +339,7 @@
 
         <div class="row">
           <label>Название</label>
-          <input id="bizName" placeholder="Например: Пекарня «Хлеб»" />
+          <input id="bizName" placeholder="Например: Пекарня ‘Хлеб’" />
         </div>
 
         <div class="row">
@@ -515,56 +372,7 @@
     </div>
   </section>
 
-  <!-- Modal для отзывов -->
-  <div class="modal" id="reviewsModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="modalTitle">Отзывы</h3>
-        <button class="modal-close" onclick="closeReviewsModal()">✕</button>
-      </div>
-
-      <div id="modalBusinessInfo" style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.1)">
-        <!-- вставляется динамически -->
-      </div>
-
-      <div id="reviewsList" class="reviews-list">
-        <!-- вставляются отзывы -->
-      </div>
-
-      <div class="no-reviews" id="noReviews">Нет отзывов. Будьте первым!</div>
-
-      <div class="review-form">
-        <h4 style="margin:0 0 12px 0;font-size:14px">Оставить отзыв</h4>
-        <div class="review-form-row">
-          <label>Ваше имя (опционально)</label>
-          <input id="reviewAuthor" type="text" placeholder="Аноним" />
-        </div>
-        <div class="review-form-row">
-          <label>Оценка</label>
-          <select id="reviewRating">
-            <option value="5">⭐⭐⭐⭐⭐ 5 звёзд</option>
-            <option value="4">⭐⭐⭐⭐ 4 звезды</option>
-            <option value="3">⭐⭐⭐ 3 звезды</option>
-            <option value="2">⭐⭐ 2 звезды</option>
-            <option value="1">⭐ 1 звезда</option>
-          </select>
-        </div>
-        <div class="review-form-row">
-          <label>Текст отзыва</label>
-          <textarea id="reviewText" placeholder="Поделись своим мнением..."></textarea>
-        </div>
-        <button class="btn" id="btnSubmitReview" type="button">✅ Отправить отзыв</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Дисклеймер -->
-  <footer class="disclaimer">
-    Администратор сайта не несёт ответственности за информацию. Сайт — сборник новостей без поддержки позиций авторов.
-  </footer>
-
-  <!-- Навигация -->
-  <nav class="nav">
+  <nav class="nav liquid-glass">
     <div class="nav-inner">
       <button id="btn-all" aria-current="true" onclick="switchTab('all')">📰 Новости</button>
       <button id="btn-business" onclick="switchTab('business')">💼 Бизнес</button>
@@ -573,65 +381,9 @@
   </nav>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster.js"></script>
 
   <script>
-    // ============ ИКОНКИ ПО КАТЕГОРИЯМ ============
-    const categoryIcons = {
-      'Кафе/Рестораны': '🍽️',
-      'Магазины': '🛍️',
-      'Услуги': '🔧',
-      'Красота': '💄',
-      'Медицина': '🏥',
-      'Спорт': '⚽',
-      'Дети': '👶',
-      'Другое': '📍'
-    };
-
-    const categoryColors = {
-      'Кафе/Рестораны': '#FF6B6B',
-      'Магазины': '#4ECDC4',
-      'Услуги': '#45B7D1',
-      'Красота': '#F7DC6F',
-      'Медицина': '#BB8FCE',
-      'Спорт': '#52C41A',
-      'Дети': '#FF85C0',
-      'Другое': '#8E8E93'
-    };
-
-    function getCategoryIcon(category) {
-      return categoryIcons[category] || '📍';
-    }
-
-    function getCategoryColor(category) {
-      return categoryColors[category] || '#8E8E93';
-    }
-
-    function createCustomIcon(category) {
-      const icon = getCategoryIcon(category);
-      const color = getCategoryColor(category);
-
-      const html = `
-        <div style="
-          display:flex;align-items:center;justify-content:center;
-          width:40px;height:40px;
-          background:${color};
-          border-radius:50%;
-          font-size:20px;
-          box-shadow:0 2px 8px rgba(0,0,0,0.3);
-          border:3px solid white;
-        ">${icon}</div>
-      `;
-
-      return L.divIcon({
-        html,
-        className: 'custom-marker',
-        iconSize: [40, 40],
-        popupAnchor: [0, -20]
-      });
-    }
-
-    // ============ THEME ============
+    // ---------------- theme ----------------
     function toggleTheme() {
       const body = document.body;
       const icon = document.getElementById('theme-icon');
@@ -650,112 +402,20 @@
       }
     }
 
-    // ============ HELPERS ============
+    // ---------------- shared helpers ----------------
     function escapeHtml(s) {
       return String(s || '')
         .replaceAll('&','&amp;')
         .replaceAll('<','&lt;')
         .replaceAll('>','&gt;')
         .replaceAll('"','&quot;')
-        .replaceAll("'","'");
+        .replaceAll("'","&#039;");
     }
-
-    function renderMediaContent(text) {
-      let mediaHtml = '';
-      
-      // Собираем все медиафайлы
-      const photos = [];
-      const videos = [];
-      const urlsToSkip = new Set();
-      
-      // Универсальный поиск всех ссылок (БЕЗ экранирования на этом этапе!)
-      const allUrlsRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/g;
-      let match;
-      const allUrls = [];
-      
-      while ((match = allUrlsRegex.exec(text)) !== null) {
-        allUrls.push(match[0]);
-      }
-      
-      // Классификация ссылок по типам
-      const photoExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
-      const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
-      
-      allUrls.forEach(url => {
-        const lowerUrl = url.toLowerCase();
-        
-        // Проверяем YouTube
-        if (lowerUrl.includes('youtube.com/watch?v=') || lowerUrl.includes('youtu.be/')) {
-          const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-          if (youtubeMatch && youtubeMatch[1]) {
-            videos.push(`https://www.youtube.com/embed/${youtubeMatch[1]}`);
-            urlsToSkip.add(url);
-          }
-        }
-        // Проверяем фото по расширению
-        else if (photoExtensions.some(ext => lowerUrl.endsWith(`.${ext}`) || lowerUrl.includes(`.${ext}?`))) {
-          photos.push(url);
-          urlsToSkip.add(url);
-        }
-        // Проверяем видео по расширению
-        else if (videoExtensions.some(ext => lowerUrl.endsWith(`.${ext}`) || lowerUrl.includes(`.${ext}?`))) {
-          videos.push(url);
-          urlsToSkip.add(url);
-        }
-      });
-      
-      // Удаляем обработанные ссылки из текста
-      let cleanText = text;
-      urlsToSkip.forEach(url => {
-        cleanText = cleanText.split(url).join(' ');
-      });
-      
-      // Рендерим медиа (БЕЗ escapeHtml для URLs в атрибутах!)
-      if (photos.length || videos.length) {
-        mediaHtml = '<div class="card-media">';
-        
-        photos.forEach(url => {
-          // ⚠️ НЕ экранируем URL! Браузер не сможет загрузить escapeHtml URL
-          mediaHtml += `<img src="${url}" alt="фото" loading="lazy" onerror="this.parentElement.removeChild(this)" style="width:100%;height:auto;max-height:300px;border-radius:12px;object-fit:cover;" crossorigin="anonymous" />`;
-        });
-        
-        videos.forEach(url => {
-          if (url.includes('youtube.com/embed')) {
-            // YouTube URL безопасен
-            mediaHtml += `<iframe width="100%" height="250" src="${url}?rel=0&modestbranding=1&fs=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px;"></iframe>`;
-          } else {
-            // Видео URL без экранирования
-            const ext = url.split('.').pop().toLowerCase();
-            const mimeType = {
-              'mp4': 'video/mp4',
-              'webm': 'video/webm',
-              'ogg': 'video/ogg',
-              'mov': 'video/quicktime',
-              'avi': 'video/x-msvideo',
-              'mkv': 'video/x-matroska'
-            }[ext] || 'video/mp4';
-            
-            mediaHtml += `<video controls style="width:100%;max-height:300px;border-radius:12px;background:#000;"><source src="${url}" type="${mimeType}">Ваш браузер не поддерживает видео</video>`;
-          }
-        });
-        
-        mediaHtml += '</div>';
-      }
-      
-      // Форматируем оставшийся текст с ссылками
-      const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/g;
-      const finalText = escapeHtml(cleanText).replace(urlRegex, (url) => {
-        // Экранируем только для отображения текста ссылки
-        return `<a href="${url}" target="_blank" rel="noopener">${escapeHtml(url)}</a>`;
-      });
-      
-      return finalText + mediaHtml;
-    }
-
     function linkify(text) {
-      return renderMediaContent(text);
+      const safe = escapeHtml(text);
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
     }
-
     function formatDate(ts) {
       if (!ts) return '';
       const d = new Date(ts);
@@ -766,7 +426,6 @@
       const minutes = String(d.getMinutes()).padStart(2, '0');
       return `${day}.${month}.${year}, ${hours}:${minutes}`;
     }
-
     function buildSourceLine(n) {
       const s = n && n.source ? n.source : null;
       if (!s) return '';
@@ -776,38 +435,82 @@
       return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
     }
 
-    // ============ TABS & NAVIGATION ============
-    let currentTab = 'all';
-    let allNews = [];
-    let bizList = [];
-    let bizCategoryFilter = 'Все';
-    let bizSearchText = '';
-    let hasBackgroundUpdates = false;
+    // ---------------- tabs ----------------
+    let currentTab = 'all'; // all | business | reco
 
-    function setNavActive(tab) {
+    function setNavActive(id) {
       document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
-      const btn = document.getElementById('btn-' + tab);
+      const btn = document.getElementById('btn-' + id);
       if (btn) btn.setAttribute('aria-current', 'true');
     }
 
     function switchTab(tab) {
       currentTab = tab;
       setNavActive(tab);
+
       const feed = document.getElementById('feed');
-      const bizView = document.getElementById('businessView');
+      const businessView = document.getElementById('businessView');
+
       if (tab === 'business') {
         feed.style.display = 'none';
-        bizView.style.display = 'grid';
+        businessView.style.display = 'grid';
         ensureMap();
         loadBusinesses({ render: true });
-      } else {
-        bizView.style.display = 'none';
-        feed.style.display = 'grid';
-        renderNews();
+        return;
       }
+
+      businessView.style.display = 'none';
+      feed.style.display = 'grid';
+
+      renderNews();
     }
 
-    // ============ NEWS ============
+    // ---------------- news ----------------
+    let allNews = [];
+    let hasBackgroundUpdates = false;
+
+    function renderNews() {
+      const feed = document.getElementById('feed');
+
+      const filtered = (currentTab === 'reco')
+        ? allNews.filter(n => (n.category || 'all') === 'reco')
+        : allNews;
+
+      if (!filtered.length) {
+        feed.innerHTML = '<div class="no-news">Нет новостей.</div>';
+        return;
+      }
+
+      feed.innerHTML = filtered.map(n => {
+        const ts = n.timestamp || n.createdAt || null;
+        let html = '<div class="card">';
+        html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
+            
+    // Добавляем отображение медиа (фото и видео)
+        const media = n.media || [];
+            const mediaItems = media.filter(m => m && (m.type === 'photo' || m.type === 'video'));
+                
+                    if (mediaItems.length > 0) {
+                          html += '<div class="card-media-scroll">';
+                                mediaItems.forEach(item => {
+                                        if (item.type === 'photo') {
+                                                  html += `<img src="/api/media/${encodeURIComponent(item.fileId)}" 
+                                                                          loading="lazy" 
+                                                                                                  alt="Фото"/>`;
+                                                                                                                  } else if (item.type === 'video') {
+                html += `<video controls preload="metadata">
+                  <source src="/api/media/${encodeURIComponent(item.fileId)}" type="video/mp4">
+                  Ваш браузер не поддерживает видео.
+                </video>`;
+              }                                                                                           });
+                                                                                                                                                                                                     html += '</div>';
+                                                                                                                                                                                                         }
+        html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+        html += '</div>';
+        return html;
+      }).join('');
+    }
+
     function sameTop(a, b) {
       const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
       const b0 = (Array.isArray(b) && b.length) ? b[0] : null;
@@ -819,8 +522,11 @@
         const res = await fetch('/api/news', { cache: 'no-store' });
         const data = await res.json();
         const next = Array.isArray(data.posts) ? data.posts : [];
+
         const changed = !sameTop(allNews, next);
         allNews = next;
+
+        // Рендерим только если сейчас открыта лента (не карта)
         if (render && changed && currentTab !== 'business') renderNews();
         if (!render && changed) hasBackgroundUpdates = true;
       } catch (e) {
@@ -828,104 +534,70 @@
       }
     }
 
-function renderNews() {
-  const feed = document.getElementById('feed');
-  const filtered = (currentTab === 'reco')
-    ? allNews.filter(n => (n.category || 'all') === 'reco')
-    : allNews;
-
-  if (!filtered.length) {
-    feed.innerHTML = '<div class="no-news">Нет новостей.</div>';
-    return;
-  }
-
-  feed.innerHTML = filtered.map(n => {
-    const ts = n.timestamp || n.createdAt || null;
-    let html = '<div class="card">';
-    html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
-    
-    // Добавляем отображение фотографий
-    const media = n.media || [];
-    const photos = media.filter(m => m && m.type === 'photo');
-    
-    if (photos.length > 0) {
-      html += '<div class="card-media" style="display:grid;gap:8px;margin:12px 0;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">';
-      photos.forEach(photo => {
-        html += `<img src="/api/media/${encodeURIComponent(photo.fileId)}" 
-                      style="width:100%;height:auto;border-radius:12px;object-fit:cover;max-height:300px;" 
-                      loading="lazy" 
-                      alt="Фото"/>`;
-      });
-      html += '</div>';
-    }
-    
-    html += `<div class="card-text">${linkify(n.text || '')}</div>`;
-    html += '</div>';
-    return html;
-  }).join('');
-}
-
+    // обновляем новости в фоне только когда вкладка скрыта
     setInterval(() => {
       if (document.visibilityState !== 'visible') loadNews({ render: false });
     }, 3000);
 
     document.addEventListener('visibilitychange', () => {
-      if (
-        document.visibilityState === 'visible' &&
-        hasBackgroundUpdates &&
-        currentTab !== 'business'
-      ) {
+      if (document.visibilityState === 'visible' && hasBackgroundUpdates && currentTab !== 'business') {
         hasBackgroundUpdates = false;
         renderNews();
       }
     });
 
-    // ============ BUSINESS MAP ============
+    // ---------------- business map ----------------
+    let bizList = [];
+    let bizCategoryFilter = 'Все';
+
     let map = null;
-    let markerClusterGroup = null;
+    let markersLayer = null;
     let pickMarker = null;
-    let currentBusinessId = null;
 
     function ensureMap() {
       if (map) return;
+
+      // Центр района: можно потом поправить точнее
       const center = [55.57, 37.43];
 
       map = L.map('map', { zoomControl: true }).setView(center, 14);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
-      markerClusterGroup = L.markerClusterGroup();
-      map.addLayer(markerClusterGroup);
+      markersLayer = L.layerGroup().addTo(map);
 
       map.on('click', (e) => {
         const form = document.getElementById('bizForm');
         if (form.style.display !== 'block') return;
+
         const lat = e.latlng.lat;
         const lng = e.latlng.lng;
+
         document.getElementById('bizLat').value = lat.toFixed(6);
         document.getElementById('bizLng').value = lng.toFixed(6);
+
         if (pickMarker) pickMarker.remove();
         pickMarker = L.marker([lat, lng]).addTo(map);
-        document.getElementById('bizPickHint').textContent =
-          'Точка выбрана. Можно сохранять.';
+        document.getElementById('bizPickHint').textContent = 'Точка выбрана. Можно сохранять.';
       });
     }
 
     function buildBizFilters() {
       const container = document.getElementById('bizFilters');
+
       const cats = new Set(['Все']);
       bizList.forEach(b => cats.add(b.category || 'Другое'));
+
       const items = Array.from(cats);
-      container.innerHTML = items
-        .map(c => {
-          const active = c === bizCategoryFilter ? 'chip active' : 'chip';
-          return `<button class="${active}" type="button" data-cat="${escapeHtml(
-            c
-          )}">${escapeHtml(c)}</button>`;
-        })
-        .join('');
+
+      container.innerHTML = items.map(c => {
+        const active = c === bizCategoryFilter ? 'chip active' : 'chip';
+        return `<button class="${active}" type="button" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`;
+      }).join('');
+
       container.querySelectorAll('button[data-cat]').forEach(btn => {
         btn.addEventListener('click', () => {
           bizCategoryFilter = btn.getAttribute('data-cat') || 'Все';
@@ -935,31 +607,14 @@ function renderNews() {
       });
     }
 
-    function filterBusinesses() {
-      let filtered = bizList;
-
-      if (bizCategoryFilter !== 'Все') {
-        filtered = filtered.filter(b => (b.category || 'Другое') === bizCategoryFilter);
-      }
-
-      if (bizSearchText.trim()) {
-        const q = bizSearchText.toLowerCase();
-        filtered = filtered.filter(b => {
-          const name = (b.name || '').toLowerCase();
-          const desc = (b.description || '').toLowerCase();
-          const addr = (b.address || '').toLowerCase();
-          return name.includes(q) || desc.includes(q) || addr.includes(q);
-        });
-      }
-
-      return filtered;
-    }
-
     function renderBusinesses() {
-      if (!map || !markerClusterGroup) return;
-      markerClusterGroup.clearLayers();
+      if (!map || !markersLayer) return;
 
-      const filtered = filterBusinesses();
+      markersLayer.clearLayers();
+
+      const filtered = (bizCategoryFilter === 'Все')
+        ? bizList
+        : bizList.filter(b => (b.category || 'Другое') === bizCategoryFilter);
 
       filtered.forEach(b => {
         const lat = Number(b.lat);
@@ -972,26 +627,15 @@ function renderNews() {
         const addr = b.address ? `<div style="margin-top:6px;font-size:12px;opacity:0.85;">${escapeHtml(b.address)}</div>` : '';
         const link = b.url ? `<div style="margin-top:8px;"><a href="${escapeHtml(b.url)}" target="_blank" rel="noopener">Открыть ссылку</a></div>` : '';
 
-        const avgRating = b.reviews && Array.isArray(b.reviews) && b.reviews.length
-          ? (b.reviews.reduce((s, r) => s + Number(r.rating || 0), 0) / b.reviews.length).toFixed(1)
-          : null;
-        const ratingLine = avgRating ? `<div style="margin-top:8px;color:#ffc107;font-weight:600;">⭐ ${avgRating} (${b.reviews.length} отзывов)</div>` : '';
-
         const popupHtml = `
           <div style="font-size:14px;font-weight:600;">${title}</div>
           <div style="font-size:12px;opacity:0.85;margin-top:2px;">${cat}</div>
           ${desc}
           ${addr}
-          ${ratingLine}
           ${link}
-          <div style="margin-top:12px;"><button onclick="openReviewsModal(${b.id})" style="padding:6px 12px;background:#007aff;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">💬 Отзывы</button></div>
         `;
 
-        const marker = L.marker([lat, lng], {
-          icon: createCustomIcon(b.category || 'Другое')
-        }).bindPopup(popupHtml);
-
-        markerClusterGroup.addLayer(marker);
+        L.marker([lat, lng]).addTo(markersLayer).bindPopup(popupHtml);
       });
     }
 
@@ -1007,25 +651,20 @@ function renderNews() {
       }
     }
 
-    // ============ BUSINESS CRUD ============
     function getBizSecret() {
       return localStorage.getItem('biz_admin_secret') || '';
     }
     function setBizSecret() {
       const cur = getBizSecret();
-      const s = prompt(
-        'Введите секретный код BUSINESS_ADMIN_KEY (сохранится в браузере):',
-        cur || ''
-      );
+      const s = prompt('Введите секрет BUSINESS_ADMIN_KEY (сохранится в браузере):', cur || '');
       if (s == null) return;
       localStorage.setItem('biz_admin_secret', s.trim());
-      alert('Секретный код сохранён.');
+      alert('Секрет сохранён.');
     }
 
     function openBizForm() {
       document.getElementById('bizForm').style.display = 'block';
-      document.getElementById('bizPickHint').textContent =
-        'Кликни по карте, чтобы выбрать точку.';
+      document.getElementById('bizPickHint').textContent = 'Кликни по карте, чтобы выбрать точку.';
     }
     function closeBizForm() {
       document.getElementById('bizForm').style.display = 'none';
@@ -1035,22 +674,18 @@ function renderNews() {
       document.getElementById('bizUrl').value = '';
       document.getElementById('bizLat').value = '';
       document.getElementById('bizLng').value = '';
-      document.getElementById('bizPickHint').textContent =
-        'Кликни по карте, чтобы выбрать точку.';
-      if (pickMarker) {
-        pickMarker.remove();
-        pickMarker = null;
-      }
+      document.getElementById('bizPickHint').textContent = 'Кликни по карте, чтобы выбрать точку.';
+      if (pickMarker) { pickMarker.remove(); pickMarker = null; }
     }
 
     async function saveBusiness() {
       const secret = getBizSecret();
       if (!secret) {
-        alert('Сначала задайте секретный код кнопкой "🔐".');
+        alert('Сначала задай секрет кнопкой “🔐 Секрет”.');
         return;
       }
+
       const payload = {
-        action: 'add',
         secret,
         name: document.getElementById('bizName').value,
         category: document.getElementById('bizCategory').value,
@@ -1060,132 +695,31 @@ function renderNews() {
         lat: document.getElementById('bizLat').value,
         lng: document.getElementById('bizLng').value
       };
+
       try {
         const res = await fetch('/api/businesses', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+
         const data = await res.json().catch(() => ({}));
+
         if (!res.ok) {
           alert('Ошибка сохранения: ' + (data.error || res.status));
           return;
         }
+
         closeBizForm();
         await loadBusinesses({ render: true });
         alert('Бизнес добавлен!');
       } catch (e) {
         console.error(e);
-        alert('Ошибка сети при сохранении.');
+        alert('Ошибка сети при сохранении.')
       }
     }
 
-    // ============ REVIEWS ============
-    function openReviewsModal(businessId) {
-      currentBusinessId = businessId;
-      const biz = bizList.find(b => b.id === businessId);
-      if (!biz) return;
-
-      document.getElementById('modalTitle').textContent = `Отзывы — ${biz.name}`;
-
-      const infoDiv = document.getElementById('modalBusinessInfo');
-      const reviews = Array.isArray(biz.reviews) ? biz.reviews : [];
-      const avgRating = reviews.length
-        ? (reviews.reduce((s, r) => s + Number(r.rating || 0), 0) / reviews.length).toFixed(1)
-        : 'Нет оценок';
-      infoDiv.innerHTML = `
-        <div>
-          <strong>${escapeHtml(biz.name)}</strong><br/>
-          <small style="color:#888">${escapeHtml(biz.category || 'Другое')}</small><br/>
-          <div style="margin-top:8px;">
-            ${reviews.length ? `⭐ ${avgRating} (${reviews.length} отзывов)` : 'Нет отзывов'}
-          </div>
-        </div>
-      `;
-
-      const listDiv = document.getElementById('reviewsList');
-      const noDiv = document.getElementById('noReviews');
-
-      if (reviews.length) {
-        noDiv.style.display = 'none';
-        listDiv.innerHTML = reviews.map(r => `
-          <div class="review-item">
-            <div class="review-header">
-              <span class="review-author">${escapeHtml(r.author || 'Аноним')}</span>
-              <span class="review-rating">${'⭐'.repeat(Number(r.rating || 0))}</span>
-            </div>
-            <div class="review-text">${escapeHtml(r.text || '')}</div>
-            <div class="review-date">${formatDate(r.createdAt)}</div>
-          </div>
-        `).join('');
-      } else {
-        noDiv.style.display = 'block';
-        listDiv.innerHTML = '';
-      }
-
-      document.getElementById('reviewAuthor').value = '';
-      document.getElementById('reviewRating').value = '5';
-      document.getElementById('reviewText').value = '';
-
-      document.getElementById('reviewsModal').classList.add('show');
-    }
-
-    function closeReviewsModal() {
-      document.getElementById('reviewsModal').classList.remove('show');
-      currentBusinessId = null;
-    }
-
-    async function submitReview() {
-      if (!currentBusinessId) return;
-      const author = document.getElementById('reviewAuthor').value;
-      const rating = Number(document.getElementById('reviewRating').value);
-      const text = document.getElementById('reviewText').value;
-
-      if (!text.trim()) {
-        alert('Напиши отзыв!');
-        return;
-      }
-
-      const payload = {
-        action: 'review',
-        businessId: currentBusinessId,
-        author: author || 'Аноним',
-        rating,
-        text
-      };
-
-      try {
-        const res = await fetch('/api/businesses', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          alert('Ошибка: ' + (data.error || res.status));
-          return;
-        }
-        await loadBusinesses({ render: false });
-        openReviewsModal(currentBusinessId);
-        alert('Отзыв отправлен!');
-      } catch (e) {
-        console.error(e);
-        alert('Ошибка сети.');
-      }
-    }
-
-    // ============ SEARCH ============
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchInput = document.getElementById('bizSearchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-          bizSearchText = e.target.value;
-          renderBusinesses();
-        });
-      }
-    });
-
-    // ============ INIT ============
+    // ---------------- init ----------------
     initTheme();
     loadNews({ render: true });
     renderNews();
@@ -1194,12 +728,6 @@ function renderNews() {
     document.getElementById('btnAddBiz').addEventListener('click', openBizForm);
     document.getElementById('btnCancelBiz').addEventListener('click', closeBizForm);
     document.getElementById('btnSaveBiz').addEventListener('click', saveBusiness);
-    document.getElementById('btnSubmitReview').addEventListener('click', submitReview);
-
-    // Закрытие модалей по клику на фон
-    document.getElementById('reviewsModal').addEventListener('click', (e) => {
-      if (e.target.id === 'reviewsModal') closeReviewsModal();
-    });
   </script>
 </body>
 </html>
