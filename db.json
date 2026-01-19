@@ -1,30 +1,6 @@
 {
   "posts": [
     {
-      "id": 13,
-      "text": "Как же хорошо всё-таки, что у нас в ИК-2 есть свой локальный каток. Его повторно залили 15 числа, и сейчас на морозе лёд встал, скорее всего, отличный.\n\nКатались уже? Хоккеисты и фигуристы на месте? ⛸",
-      "authorId": 273473755,
-      "authorName": "fusuges",
-      "authorUsername": "fusuges",
-      "createdAt": "2026-01-19T09:23:52.374Z",
-      "timestamp": "2026-01-19T09:23:52.374Z",
-      "category": "all",
-      "media": [
-        {
-          "type": "photo",
-          "fileId": "AgACAgIAAxkBAAIB72lt-CblQau3BIrBrvFeuKobH7HCAAJID2sbxRdwS7FYE54VWHSpAQADAgADeQADOAQ"
-        }
-      ],
-      "photoFileId": "AgACAgIAAxkBAAIB72lt-CblQau3BIrBrvFeuKobH7HCAAJID2sbxRdwS7FYE54VWHSpAQADAgADeQADOAQ",
-      "photoFileIds": [
-        "AgACAgIAAxkBAAIB72lt-CblQau3BIrBrvFeuKobH7HCAAJID2sbxRdwS7FYE54VWHSpAQADAgADeQADOAQ"
-      ],
-      "source": null,
-      "moderationMessage": null,
-      "status": "approved",
-      "sourceType": "admin"
-    },
-    {
       "id": 12,
       "text": "Нов",
       "authorId": 273473755,
