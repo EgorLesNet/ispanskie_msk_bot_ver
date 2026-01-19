@@ -36,7 +36,7 @@ function normalizePost(p) {
 
   const media = Array.isArray(p.media) && p.media.length
     ? p.media
-    : photoIds.map(id => ({ type: 'photo', fileId: id }));
+        : p.media || [];
 
   return {
     ...p,
