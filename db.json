@@ -1,6 +1,34 @@
 {
   "posts": [
     {
+      "id": 6,
+      "text": "Кусок единственной пешеходной дорожки до метро не чистили с 20х чисел декабря, как пошел снег.\n\nКто-нибудь может назвать место в Новой Москве, где единственная дорога возле метро не почищена?",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T18:10:18.667Z",
+      "timestamp": "2026-01-19T18:10:18.667Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICMGluc4lg4w9-PQu79sG2U6__a47FAALelAACjxVxS8OQvA4hLYUcOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8907,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8907"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 5,
       "text": "На 982 наконец-то чаще стали проверять билеты вместо рейдов на конечной.\n\n📷 @RoMiSe1979",
       "authorId": 273473755,
