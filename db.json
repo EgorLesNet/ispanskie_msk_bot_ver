@@ -1,6 +1,27 @@
 {
   "posts": [
     {
+      "id": 14,
+      "text": "Нов",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T09:25:04.396Z",
+      "timestamp": "2026-01-19T09:25:04.396Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAIB5WlsyMWj5V1IST7y1MJDIRe1dp17AAL5lwACZa9oS-du5-Vxpm4QOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": null,
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 13,
       "text": "Как же хорошо всё-таки, что у нас в ИК-2 есть свой локальный каток. Его повторно залили 15 числа, и сейчас на морозе лёд встал, скорее всего, отличный.\n\nКатались уже? Хоккеисты и фигуристы на месте? ⛸",
       "authorId": 273473755,
