@@ -1,27 +1,6 @@
 {
   "posts": [
     {
-      "id": 11,
-      "text": "Нов",
-      "authorId": 273473755,
-      "authorName": "fusuges",
-      "authorUsername": "fusuges",
-      "createdAt": "2026-01-18T12:06:59.148Z",
-      "timestamp": "2026-01-18T12:06:59.148Z",
-      "category": "all",
-      "media": [
-        {
-          "type": "video",
-          "fileId": "BAACAgIAAxkBAAIB5WlsyMWj5V1IST7y1MJDIRe1dp17AAL5lwACZa9oS-du5-Vxpm4QOAQ"
-        }
-      ],
-      "photoFileId": null,
-      "source": null,
-      "moderationMessage": null,
-      "status": "approved",
-      "sourceType": "admin"
-    },
-    {
       "id": 10,
       "text": "Нов",
       "authorId": 273473755,
