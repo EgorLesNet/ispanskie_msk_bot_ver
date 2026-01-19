@@ -1,6 +1,34 @@
 {
   "posts": [
     {
+      "id": 2,
+      "text": "На переходе из ИК1 в ИК2\n\nТротуар в одном месте вообще завалили снегом…",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T17:58:55.507Z",
+      "timestamp": "2026-01-19T17:58:55.507Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICIWlucN524sdp_HauJURV0TU1KJUEAALjlwACpOMoS3iQGHv6bAwdOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8840,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8840"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 1,
       "text": "Возможно «легализуют» народную тропу возле ИК2.\n\nУправа прислала ответ по поводу возможности сделать тротуар вместо убитого газона возле остановки Николо-Хованская улица, со стороны ИК2.",
       "authorId": 273473755,
