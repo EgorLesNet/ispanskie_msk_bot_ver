@@ -117,7 +117,11 @@
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
 
     .nav{
-      position:fixed;bottom:12px;left:12px;right:12px;z-index:100;
+      position:fixed;
+    bottom:calc(12px + env(safe-area-inset-bottom));
+    left:calc(12px + env(safe-area-inset-left));
+    right:calc(12px + env(safe-area-inset-right));
+    z-index:100;
       display:flex;justify-content:center;
       padding:10px;border-radius:22px;
     }
@@ -170,11 +174,10 @@
     }
 
      /* Скрываем текст в кнопках навигации на маленьких экранах */
-     @media (max-width: 400px) {
-        .nav button .nav-text {
+ @media (max-width: 550px) {        .nav button .nav-text {
            display: none;
            }
-        .nav button {
+        .nav button 550
            padding: 11px 16px;
            }
         }
