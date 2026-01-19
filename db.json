@@ -483,6 +483,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 4,
+      "name": "Вкусвилл",
+      "category": "Магазины",
+      "lat": 55.591227,
+      "lng": 37.454812,
+      "description": "Супермаркет, полезное питание\n07:00 - 23:00",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:14:19.912Z"
+    },
+    {
       "id": 3,
       "name": "Сдэк",
       "category": "Услуги",
