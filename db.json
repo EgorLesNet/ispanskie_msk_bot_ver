@@ -483,6 +483,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 9,
+      "name": "OZON",
+      "category": "Услуги",
+      "lat": 55.592152,
+      "lng": 37.461917,
+      "description": "Маркетплейс \n09:00 - 21:00",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:18:30.115Z"
+    },
+    {
       "id": 8,
       "name": "Сдэк",
       "category": "Услуги",
