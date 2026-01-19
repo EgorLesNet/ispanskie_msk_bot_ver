@@ -483,6 +483,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 7,
+      "name": "Школа 547 \"Диалектика\"",
+      "category": "Дети",
+      "lat": 55.590319,
+      "lng": 37.441864,
+      "description": null,
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:16:08.266Z"
+    },
+    {
       "id": 6,
       "name": "Школа 547 \"Логика\"",
       "category": "Дети",
