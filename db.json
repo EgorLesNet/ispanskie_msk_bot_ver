@@ -483,6 +483,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 10,
+      "name": "Пекарня \"Хлебник\"",
+      "category": "Кафе/Рестораны",
+      "lat": 55.591971,
+      "lng": 37.456011,
+      "description": "Пекарня\n08:00 - 21:00",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:19:24.075Z"
+    },
+    {
       "id": 9,
       "name": "OZON",
       "category": "Услуги",
