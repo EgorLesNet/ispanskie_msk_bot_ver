@@ -512,6 +512,7 @@
                                                                                                   alt="Фото"/>`;
                                                                                                                   } else if (item.type === 'video') {
                 html += `<video controls preload="metadata">
+              playsinline
                   <source src="/api/media/${encodeURIComponent(item.fileId)}" type="video/mp4">
                   Ваш браузер не поддерживает видео.
                 </video>`;
