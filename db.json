@@ -1,6 +1,37 @@
 {
   "posts": [
     {
+      "id": 3,
+      "text": "Департамент ЖКХ оперативно реагирует на ситуацию со снегом. \n\nНадеюсь, что в ближайшее время нашу дорогу до метро почистят. \n\nЯ написал обращения по этим вопросам во все возможные инстанции, но, возможно, придется, как в прошлом году, выходить и чистить часть дороги самим. \n\nВы можете зайти в чат Департамента ЖКХ и прислать свои фото / видео с просьбой как-то повлиять. Кажется, это быстрее обычных обращений. \n\nСсылка на чат",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T17:58:58.857Z",
+      "timestamp": "2026-01-19T17:58:58.857Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICI2lucOKExGzytePMLf8wmDpP_pKPAAIcDGsbpOMoSwSl4pcAAUcnogEAAwIAA3kAAzgE"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICI2lucOKExGzytePMLf8wmDpP_pKPAAIcDGsbpOMoSwSl4pcAAUcnogEAAwIAA3kAAzgE",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICI2lucOKExGzytePMLf8wmDpP_pKPAAIcDGsbpOMoSwSl4pcAAUcnogEAAwIAA3kAAzgE"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8839,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8839"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 2,
       "text": "На переходе из ИК1 в ИК2\n\nТротуар в одном месте вообще завалили снегом…",
       "authorId": 273473755,
