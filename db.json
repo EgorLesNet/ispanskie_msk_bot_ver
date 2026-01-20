@@ -274,6 +274,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 13,
+      "name": "Вкусно -- и точка",
+      "category": "Кафе/Рестораны",
+      "lat": 55.589505,
+      "lng": 37.451009,
+      "description": "Ресторан быстрого питания. Бывший McDonald’s.\n\n24/7",
+      "address": null,
+      "url": "https://vkusnoitochka.ru/",
+      "reviews": [],
+      "createdAt": "2026-01-20T13:44:53.462Z"
+    },
+    {
       "id": 12,
       "name": "ТРЦ \"МЕГА Тёплый Стан\"",
       "category": "Магазины",
