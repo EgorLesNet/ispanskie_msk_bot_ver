@@ -186,6 +186,8 @@
     #businessView{
       width:min(900px, 94vw);
       margin:18px auto;
+  padding-left:12px;
+  padding-right:12px;
       display:none;
   margin-top:calc(76px + env(safe-area-inset-top));  
       gap:12px;
@@ -508,13 +510,13 @@
                           html += '<div class="card-media-scroll">';
                                 mediaItems.forEach(item => {
                                         if (item.type === 'photo') {
-                                                  html += `<img src="/api/media/${encodeURIComponent(item.fileId)}" 
+                                                  html += '<img src="/api/media/' + encodeURIComponent(item.fileId) + '"'
                                                                           loading="lazy" 
                                                                                                   alt="Фото"/>`;
                                                                                                                   } else if (item.type === 'video') {
                 html += `<video controls preload="metadata">
               playsinline
-                  <source src="/api/media/${encodeURIComponent(item.fileId)}" type="video/mp4">
+                  <source src="/api/media/' + encodeURIComponent(item.fileId) + '" type="video/mp4">
                   Ваш браузер не поддерживает видео.
                 </video>`;
               }                                                                                           });
@@ -652,6 +654,7 @@
 
         L.marker([lat, lng]).addTo(markersLayer).bindPopup(popupHtml);
       });
+    <div style="margin-top:10px;"><button onclick="showReviews(${b.id || 0})" style="padding:6px 12px;background:#007aff;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">💬 Отзывы</button></div>
     }
 
     async function loadBusinesses({ render = true } = {}) {
@@ -737,6 +740,84 @@
     // ---------------- init ----------------
     initTheme();
     loadNews({ render: true });
+
+    // ---------------- reviews ----------------
+function showReviews(bizId) {
+  if (!bizId) return;
+  const biz = bizList.find(b => b.id === bizId);
+  if (!biz) return;
+  
+  const modal = document.getElementById('reviewModal');
+  const modalTitle = document.getElementById('reviewModalTitle');
+  const reviewsList = document.getElementById('reviewsList');
+  
+  modalTitle.textContent = `Отзывы: ${biz.name || 'Бизнес'}`;
+  
+  const reviews = biz.reviews || [];
+  if (reviews.length === 0) {
+    reviewsList.innerHTML = '<div style="text-align:center;color:#999;padding:20px;">Пока нет отзывов. Будьте первым!</div>';
+  } else {
+    reviewsList.innerHTML = reviews.map(r => `
+      <div style="padding:12px;border-bottom:1px solid rgba(0,0,0,0.1);">
+        <div style="font-weight:600;font-size:14px;">${escapeHtml(r.author || 'Аноним')}</div>
+        <div style="color:#ffa500;font-size:13px;margin:4px 0;">Rating: ${r.rating || 0}/5</div>
+        <div style="font-size:13px;line-height:1.4;">${escapeHtml(r.text || '')}</div>
+        <div style="font-size:11px;color:#999;margin-top:4px;">${formatDate(r.timestamp)}</div>
+      </div>
+    `).join('');
+  }
+  
+  document.getElementById('reviewBizId').value = bizId;
+  modal.style.display = 'flex';
+}
+
+function closeReviewModal() {
+  document.getElementById('reviewModal').style.display = 'none';
+  document.getElementById('reviewText').value = '';
+  document.getElementById('reviewRating').value = '5';
+  document.getElementById('reviewAuthor').value = '';
+}
+
+async function submitReview() {
+  const bizId = Number(document.getElementById('reviewBizId').value);
+  const text = document.getElementById('reviewText').value.trim();
+  const rating = Number(document.getElementById('reviewRating').value);
+  const author = document.getElementById('reviewAuthor').value.trim() || 'Аноним';
+  
+  if (!text) {
+    alert('Напишите отзыв!');
+    return;
+  }
+  
+  const review = { author, rating, text, timestamp: new Date().toISOString() };
+  
+  try {
+    const secret = getBizSecret();
+    const res = await fetch('/api/businesses/review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, bizId, review })
+    });
+    
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert('Ошибка: ' + (data.error || res.status));
+      return;
+    }
+    
+    await loadBusinesses({ render: true });
+    showReviews(bizId);
+    
+    document.getElementById('reviewText').value = '';
+    document.getElementById('reviewRating').value = '5';
+    document.getElementById('reviewAuthor').value = '';
+    
+    alert('Отзыв добавлен!');
+  } catch (e) {
+    console.error(e);
+    alert('Ошибка сети');
+  }
+}
     renderNews();
 
     document.getElementById('btnSetBizSecret').addEventListener('click', setBizSecret);
