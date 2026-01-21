@@ -627,13 +627,34 @@
         const addr = b.address ? `<div style="margin-top:6px;font-size:12px;opacity:0.85;">${escapeHtml(b.address)}</div>` : '';
         const link = b.url ? `<div style="margin-top:8px;"><a href="${escapeHtml(b.url)}" target="_blank" rel="noopener">Открыть ссылку</a></div>` : '';
 
+            // Отзывы
+    const reviews = b.reviews || []
+    const avgRating = b.avgRating || null
+    const reviewCount = b.reviewCount || 0
+    
+    let reviewsHtml = ''
+    if (avgRating && reviewCount > 0) {
+      reviewsHtml += `<div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.05);border-radius:8px;">`
+      reviewsHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:4px;">⭐️ ${avgRating} (${reviewCount} отзывов)</div>`
+      const lastReviews = reviews.slice(0, 3)
+      lastReviews.forEach(r => {
+        const stars = '⭐'.repeat(r.rating)
+        reviewsHtml += `<div style="margin:4px 0;font-size:12px;border-bottom:1px solid rgba(0,0,0,0.1);padding-bottom:4px;">`
+        reviewsHtml += `<div style="font-weight:500;">${escapeHtml(r.userName)} ${stars}</div>`
+        reviewsHtml += `<div style="opacity:0.85;">${escapeHtml(r.text)}</div>`
+        reviewsHtml += `</div>`
+      })
+      reviewsHtml += `</div>`
+    }
+
         const popupHtml = `
           <div style="font-size:14px;font-weight:600;">${title}</div>
           <div style="font-size:12px;opacity:0.85;margin-top:2px;">${cat}</div>
           ${desc}
           ${addr}
           ${link}
-        `;
+        
+              ${reviewsHtml}`;
 
         L.marker([lat, lng]).addTo(markersLayer).bindPopup(popupHtml);
       });
