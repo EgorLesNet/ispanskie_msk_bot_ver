@@ -70,6 +70,18 @@ app.use('/api/', rateLimit)
 // In-memory хранилище для Vercel serverless
 let newsDB = { posts: [], seq: 1 }
 
+// Загрузка начальных данных из db.json
+const fs = require('fs')
+const path = require('path')
+try {
+  const dbPath = path.join(__dirname, 'db.json')
+  if (fs.existsSync(dbPath)) {
+    newsDB = JSON.parse(fs.readFileSync(dbPath, 'utf8'))
+  }
+} catch (err) {
+  console.error('Error loading db.json:', err)
+}
+
 function readNewsDB() { return newsDB }
 function writeNewsDB(db) { newsDB = db }
 
