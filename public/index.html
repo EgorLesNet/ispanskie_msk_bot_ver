@@ -117,11 +117,7 @@
     .no-news{text-align:center;color:#999;padding:40px 20px;font-size:15px}
 
     .nav{
-      position:fixed;
-    bottom:calc(12px + env(safe-area-inset-bottom));
-    left:calc(12px + env(safe-area-inset-left));
-    right:calc(12px + env(safe-area-inset-right));
-    z-index:100;
+      position:fixed;bottom:12px;left:12px;right:12px;z-index:100;
       display:flex;justify-content:center;
       padding:10px;border-radius:22px;
     }
@@ -173,30 +169,17 @@
       box-shadow:0 -4px 24px rgba(0,0,0,0.4);
     }
 
-     /* Скрываем текст в кнопках навигации на маленьких экранах */
- @media (max-width: 550px) {        .nav button .nav-text {
-           display: none;
-           }
-        .nav button 550
-           padding: 11px 16px;
-           }
-        }
-
     /* ---- Business view ---- */
     #businessView{
       width:min(900px, 94vw);
       margin:18px auto;
       display:none;
-  margin-top:calc(76px + env(safe-area-inset-top));  
       gap:12px;
     }
     .biz-topbar{
       display:flex;
-  padding-top:16px;
-        padding-left:18px; padding-right:18px;
       flex-wrap:wrap;
       gap:10px;
-  padding-bottom:12px;
       align-items:center;
       justify-content:space-between;
     }
@@ -206,26 +189,6 @@
       gap:8px;
       align-items:center;
     }
-      .biz-search{
-    width:100%;
-    padding:10px 14px;
-    border-radius:14px;
-    border:1px solid rgba(0,0,0,0.12);
-    background:rgba(255,255,255,0.9);
-    font-size:14px;
-    margin-top:8px;
-    transition:all .2s ease;
-  }
-  .biz-search:focus{
-    outline:none;
-    border-color:#007aff;
-    box-shadow:0 0 0 3px rgba(0,122,255,0.15);
-  }
-  body[data-theme="dark"] .biz-search{
-    border:1px solid rgba(255,255,255,0.15);
-    background:rgba(20,20,20,0.8);
-    color:#fff;
-  }
     .chip{
       border:1px solid rgba(0,0,0,0.12);
       background:rgba(255,255,255,0.6);
@@ -272,10 +235,11 @@
       display:grid;
       grid-template-columns: 1fr;
       gap:12px;
-        padding-left:18px; padding-right:18px;
     }
     #map{
-    min-height: 300px;      border-radius:20px;
+      height: 62vh;
+      min-height: 420px;
+      border-radius:20px;
       overflow:hidden;
       border:1px solid rgba(0,0,0,0.1);
       box-shadow:0 10px 28px rgba(0,0,0,0.12);
@@ -316,50 +280,6 @@
     .hint{font-size:12px;color:#777;line-height:1.4}
     body[data-theme="dark"] .hint{color:#aaa}
 
-      /* Стили для модального окна отзывов */
-  .modal{
-    position:fixed;
-    z-index:10000;
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.6);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .modal-content{
-    background:#fff;
-    padding:24px;
-    border-radius:16px;
-    width:min(500px,90vw);
-    max-height:80vh;
-    overflow-y:auto;
-    box-shadow:0 8px 32px rgba(0,0,0,0.2);
-  }
-  body[data-theme="dark"] .modal-content{
-    background:#1a1a1a;
-    color:#fff;
-  }
-  .close{
-    float:right;
-    font-size:28px;
-    font-weight:bold;
-    cursor:pointer;
-  }
-  .close:hover{color:#f00;}
-  .review-form input, .review-form select, .review-form textarea{
-    width:100%;
-    padding:10px;
-    margin:8px 0;
-    border-radius:8px;
-    border:1px solid #ccc;
-  }
-  .review-form textarea{
-    min-height:100px;
-    resize:vertical;
-  }
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
@@ -386,7 +306,6 @@
   <section id="businessView">
     <div class="biz-topbar">
       <div class="biz-filters" id="bizFilters"></div>
-            <input type="text" id="bizSearch" class="biz-search" placeholder="🔍 Поиск по названию бизнеса...">
 
       <div class="biz-actions">
         <button class="btn" id="btnSetBizSecret" type="button">🔐 Секрет</button>
@@ -414,17 +333,6 @@
             <option value="Медицина">Медицина</option>
             <option value="Спорт">Спорт</option>
             <option value="Дети">Дети</option>
-                      <option value="Образование">Образование</option>
-          <option value="Ремонт/Строительство">Ремонт/Строительство</option>
-          <option value="Доставка">Доставка</option>
-          <option value="Авто">Авто</option>
-          <option value="Развлечения">Развлечения</option>
-          <option value="Фото/Видео">Фото/Видео</option>
-          <option value="Юридические услуги">Юридические услуги</option>
-          <option value="Недвижимость">Недвижимость</option>
-          <option value="Химчистка/Прачечная">Химчистка/Прачечная</option>
-          <option value="Зоомагазины/Вет">Зоомагазины/Вет</option>
-          <option value="Финансы/Банки">Финансы/Банки</option>
             <option value="Другое">Другое</option>
           </select>
         </div>
@@ -466,9 +374,9 @@
 
   <nav class="nav liquid-glass">
     <div class="nav-inner">
-      <button id="btn-all" aria-current="true" onclick="switchTab('all')">📰<span class="nav-text"> Новости</span></button>
-      <button id="btn-business" onclick="switchTab('business')">💼<span class="nav-text"> Бизнес</span></button>
-      <button id="btn-reco" onclick="switchTab('reco')">⭐<span class="nav-text"> Рекомендации</span></button>
+      <button id="btn-all" aria-current="true" onclick="switchTab('all')">📰 Новости</button>
+      <button id="btn-business" onclick="switchTab('business')">💼 Бизнес</button>
+      <button id="btn-reco" onclick="switchTab('reco')">⭐ Рекомендации</button>
     </div>
   </nav>
 
@@ -569,7 +477,7 @@
         : allNews;
 
       if (!filtered.length) {
-        feed.innerHTML = '<div class="no-news">Раздел в разработке!</div>';
+        feed.innerHTML = '<div class="no-news">Нет новостей.</div>';
         return;
       }
 
@@ -591,7 +499,6 @@
                                                                                                   alt="Фото"/>`;
                                                                                                                   } else if (item.type === 'video') {
                 html += `<video controls preload="metadata">
-              playsinline
                   <source src="/api/media/${encodeURIComponent(item.fileId)}" type="video/mp4">
                   Ваш браузер не поддерживает видео.
                 </video>`;
@@ -720,14 +627,37 @@
         const addr = b.address ? `<div style="margin-top:6px;font-size:12px;opacity:0.85;">${escapeHtml(b.address)}</div>` : '';
         const link = b.url ? `<div style="margin-top:8px;"><a href="${escapeHtml(b.url)}" target="_blank" rel="noopener">Открыть ссылку</a></div>` : '';
 
+            // Отзывы
+    const reviews = b.reviews || []
+    const avgRating = b.avgRating || null
+    const reviewCount = b.reviewCount || 0
+    
+    let reviewsHtml = ''
+    if (avgRating && reviewCount > 0) {
+      reviewsHtml += `<div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.05);border-radius:8px;">`
+      reviewsHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:4px;">⭐️ ${avgRating} (${reviewCount} отзывов)</div>`
+      const lastReviews = reviews.slice(0, 3)
+      lastReviews.forEach(r => {
+        const stars = '⭐'.repeat(r.rating)
+        reviewsHtml += `<div style="margin:4px 0;font-size:12px;border-bottom:1px solid rgba(0,0,0,0.1);padding-bottom:4px;">`
+        reviewsHtml += `<div style="font-weight:500;">${escapeHtml(r.userName)} ${stars}</div>`
+        reviewsHtml += `<div style="opacity:0.85;">${escapeHtml(r.text)}</div>`
+        reviewsHtml += `</div>`
+      })
+      reviewsHtml += `</div>`
+    }
+
         const popupHtml = `
           <div style="font-size:14px;font-weight:600;">${title}</div>
           <div style="font-size:12px;opacity:0.85;margin-top:2px;">${cat}</div>
           ${desc}
           ${addr}
           ${link}
-        `;
-
+        
+              ${reviewsHtm      <div style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;">
+        <button onclick="openReviewForm(${b.id}, '${escapeHtml(b.name)}')" style="background:#007aff;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;">✍️ Оставить отзыв</button>
+      </div>
+        
         L.marker([lat, lng]).addTo(markersLayer).bindPopup(popupHtml);
       });
     }
@@ -739,7 +669,7 @@
         bizList = Array.isArray(data.businesses) ? data.businesses : [];
         buildBizFilters();
         if (render) renderBusinesses();
-      } catch (e) {
+      } catc;h (e) {
         console.error(e);
       }
     }
@@ -821,29 +751,67 @@
     document.getElementById('btnAddBiz').addEventListener('click', openBizForm);
     document.getElementById('btnCancelBiz').addEventListener('click', closeBizForm);
     document.getElementById('btnSaveBiz').addEventListener('click', saveBusiness);
-  </script>
+  
+  
+  // ============== Reviews functionality ==============
+function openReviewForm(businessId, businessName) {
+  const userName = prompt(`Оставьте отзыв о "${businessName}"\n\nВведите ваше имя:`)
+  if (!userName || !userName.trim()) return
+  
+  const ratingStr = prompt(`Оцените от 1 до 5 звёзд (введите цифру):`)
+  const rating = Number(ratingStr)
+  if (!rating || rating < 1 || rating > 5) {
+    alert('Некорректная оценка. Должно быть от 1 до 5.')
+    return
+  }
+  
+  const text = prompt(`Напишите ваш отзыв:`)
+  if (!text || !text.trim()) {
+    alert('Отзыв не может быть пустым')
+    return
+  }
+  
+  if (text.length > 500) {
+    alert('Отзыв слишком длинный. Максимум 500 символов.')
+    return
+  }
+  
+  submitReview(businessId, {
+    userId: Date.now(), // Используем timestamp как userId
+    userName: userName.trim(),
+    rating: rating,
+    text: text.trim()
+  })
+}
 
-    <!-- Модальное окно для отзывов -->
-  <div id="reviewsModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <span class="close" onclick="document.getElementById('reviewsModal').style.display='none'">&times;</span>
-      <h3>Отзывы</h3>
-      <div id="reviewsList"></div>
-      <h4>Оставить отзыв</h4>
-      <form id="reviewForm" class="review-form">
-        <input type="text" id="reviewName" placeholder="Ваше имя" required>
-        <select id="reviewRating" required>
-          <option value="">--Оценка--</option>
-          <option value="5">⭐⭐⭐⭐⭐</option>
-          <option value="4">⭐⭐⭐⭐</option>
-          <option value="3">⭐⭐⭐</option>
-          <option value="2">⭐⭐</option>
-          <option value="1">⭐</option>
-        </select>
-        <textarea id="reviewText" placeholder="Ваш отзыв..." required></textarea>
-        <button type="submit" class="btn">Отправить</button>
-      </form>
-    </div>
-  </div>
+async function submitReview(businessId, review) {
+  try {
+    const res = await fetch(`/api/businesses/${businessId}/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(review)
+    })
+    
+    const data = await res.json().catch(() => ({}))
+    
+    if (!res.ok) {
+      if (res.status === 429) {
+        alert('Вы можете оставить только 1 отзыв в минуту. Подождите немного.')
+      } else {
+        alert('Ошибка при отправке отзыва: ' + (data.error || res.status))
+      }
+      return
+    }
+    
+    alert('✅ Отзыв успешно добавлен!')
+    
+    // Обновляем карту
+    await loadBusinesses({ render: true })
+  } catch (e) {
+    console.error(e)
+    alert('Ошибка сети при отправке отзыва')
+  }
+}
+</script>
 </body>
 </html>
