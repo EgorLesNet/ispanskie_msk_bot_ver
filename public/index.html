@@ -282,9 +282,7 @@
 
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   </style>
-305
-
-  
+</head>
 
 <body>
   <header class="header liquid-glass">
@@ -309,61 +307,6 @@
     <div class="biz-topbar">
       <div class="biz-filters" id="bizFilters"></div>
 
-            <div class="biz-actions">
-        <button class="btn" id="btnSetBizSecret">🔐 Секрет</button>
-        <button class="btn" id="btnAddBiz">➕ Добавить бизнес</button>
-      </div>
-    </div>
-    <div class="biz-layout">
-      <div id="map"></div>
-    </div>
-    <div class="biz-form" id="bizForm">
-      <p style="margin:0 0 10px 0;line-height:1.5">
-        1) Нажми на карте точку (координаты подставятся).<br>
-        2) Заполни поля и нажми "Сохранить".<br>
-        3) Нужен секрет (кнопка "🔐 Секрет").
-      </p>
-      <div class="row">
-        <label>Категория</label>
-        <select id="bizCategory">
-          <option value="Кафе/Рестораны">Кафе/Рестораны</option>
-          <option value="Магазины">Магазины</option>
-          <option value="Услуги">Услуги</option>
-          <option value="Красота">Красота</option>
-          <option value="Медицина">Медицина</option>
-          <option value="Спорт">Спорт</option>
-          <option value="Дети">Дети</option>
-          <option value="Другое">Другое</option>
-        </select>
-      </div>
-      <div class="row">
-        <label>Название</label>
-        <input id="bizName" placeholder="Например: Пекарня 'Хлеб'">
-      </div>
-      <div class="row">
-        <label>Описание</label>
-        <textarea id="bizDesc"></textarea>
-      </div>
-      <div class="row">
-        <label>Адрес (опционально)</label>
-        <input id="bizAddress" placeholder="Например: ул. ..., дом ...">
-      </div>
-      <div class="row">
-        <label>Ссылка (сайт/телеграм) (опционально)</label>
-        <input id="bizUrl" placeholder="https://t.me/...">
-      </div>
-      <div class="row">
-        <label>Координаты</label>
-        <input id="bizLat" placeholder="lat">
-        <input id="bizLng" placeholder="lng">
-      </div>
-      <p class="hint" id="bizPickHint">Кликни по карте, чтобы выбрать точку.</p>
-      <div class="row">
-        <button class="btn" id="btnSaveBiz">✅ Сохранить</button>
-        <button class="btn" id="btnCancelBiz">✖ Закрыть</button>
-      </div>
-    </div>
-  </section>
       <div class="biz-actions">
         <button class="btn" id="btnSetBizSecret" type="button">🔐 Секрет</button>
         <button class="btn" id="btnAddBiz" type="button">➕ Добавить бизнес</button>
@@ -711,10 +654,7 @@
           ${addr}
           ${link}
         
-              672
-              656
-              
-              tm      <div style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;">
+              ${reviewsHtm      <div style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;">
         <button onclick="openReviewForm(${b.id}, '${escapeHtml(b.name)}')" style="background:#007aff;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;">✍️ Оставить отзыв</button>
       </div>
         
@@ -836,7 +776,7 @@ function openReviewForm(businessId, businessName) {
     return
   }
   
-  submitReview(businessId, { 
+  submitReview(businessId, {
     userId: Date.now(), // Используем timestamp как userId
     userName: userName.trim(),
     rating: rating,
