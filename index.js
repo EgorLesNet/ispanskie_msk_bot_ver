@@ -12,6 +12,61 @@ const app = express()
 app.use(express.json())
 app.use(express.static('public'))
 
+// ============== Security middleware ==============
+// CORS - разрешаем только с нашего домена (в production)
+const ALLOWED_ORIGINS = [
+  'https://ispanskiemskbotver.vercel.app',
+  'http://localhost:3000'
+]
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin
+  if (ALLOWED_ORIGINS.includes(origin) || !origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    res.setHeader('Access-Control-Max-Age', '86400')
+  }
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204)
+  }
+  next()
+})
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+  res.setHeader('X-Frame-Options', 'DENY')
+  res.setHeader('X-XSS-Protection', '1; mode=block')
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' unpkg.com; style-src 'self' 'unsafe-inline' unpkg.com; img-src 'self' data: https:; connect-src 'self'")
+  next()
+})
+
+// Rate limiter для API
+const apiRateLimits = new Map()
+function rateLimit(req, res, next) {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress
+  const now = Date.now()
+  const key = `${ip}:${req.path}`
+  const limit = apiRateLimits.get(key)
+  
+  if (limit && (now - limit.timestamp) < 1000) { // 1 секунда между запросами
+    limit.count++
+    if (limit.count > 10) {
+      return res.status(429).json({ error: 'Too many requests' })
+    }
+  } else {
+    apiRateLimits.set(key, { timestamp: now, count: 1 })
+  }
+  
+  next()
+}
+
+// Применяем rate limit к API endpoints
+app.use('/api/', rateLimit)
+
+
 // In-memory хранилище для Vercel serverless
 let newsDB = { posts: [], seq: 1 }
 
@@ -194,7 +249,156 @@ app.delete('/api/news/:id', (req, res) => {
   res.json({ success: true, deleted })
 })
 
-app.get('/api/photo/:fileId', async (req, res) => {
+
+
+// ============== Reviews API ==============
+// Функция для добавления отзыва
+function addReview(businessId, review) {
+  const db = readNewsDB()
+  const business = db.businesses?.find(b => b.id === businessId)
+  if (!business) return null
+  if (!business.reviews) business.reviews = []
+  const newReview = {
+    id: Date.now(),
+    userId: review.userId,
+    userName: review.userName,
+    rating: review.rating,
+    text: review.text,
+    createdAt: new Date().toISOString()
+  }
+  business.reviews.unshift(newReview)
+  writeNewsDB(db)
+  return newReview
+}
+
+// Rate limiter (простой in-memory)
+const reviewRateLimits = new Map()
+function canAddReview(userId) {
+  const now = Date.now()
+  const lastReview = reviewRateLimits.get(userId)
+  if (lastReview && (now - lastReview) < 60000) { // 1 минута
+    return false
+  }
+  reviewRateLimits.set(userId, now)
+  return true
+}
+
+// Валидация и санитизация
+function sanitizeText(text) {
+  if (!text) return ''
+  return String(text)
+    .trim()
+    .slice(0, 500)
+    .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
+}
+
+// API endpoint: GET /api/businesses/:id/reviews
+app.get('/api/businesses/:id/reviews', (req, res) => {
+  const businessId = Number(req.params.id)
+  const db = readNewsDB()
+  const business = db.businesses?.find(b => b.id === businessId)
+  if (!business) return res.status(404).json({ error: 'Business not found' })
+  res.json({ reviews: business.reviews || [] })
+})
+
+// API endpoint: POST /api/businesses/:id/reviews
+app.post('/api/businesses/:id/reviews', (req, res) => {
+  const businessId = Number(req.params.id)
+  const { userId, userName, rating, text } = req.body
+  
+  // Валидация
+  if (!userId || !userName) {
+    return res.status(400).json({ error: 'userId and userName required' })
+  }
+  
+  const numRating = Number(rating)
+  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+    return res.status(400).json({ error: 'rating must be 1-5' })
+  }
+  
+  const cleanText = sanitizeText(text)
+  if (cleanText.length < 1 || cleanText.length > 500) {
+    return res.status(400).json({ error: 'text must be 1-500 characters' })
+  }
+  
+  // Rate limiting
+  if (!canAddReview(userId)) {
+    return res.status(429).json({ error: 'Too many reviews. Wait 1 minute.' })
+  }
+  
+  const review = addReview(businessId, {
+    userId,
+    userName: sanitizeText(userName),
+    rating: numRating,
+    text: cleanText
+  })
+  
+  if (!review) {
+    return res.status(404).json({ error: 'Business not found' })
+  }
+  
+  res.json({ success: true, review })
+})
+
+// API endpoint: GET /api/businesses
+app.get('/api/businesses', (req, res) => {
+  const db = readNewsDB()
+  const businesses = db.businesses || []
+  // Добавляем средний рейтинг
+  const enriched = businesses.map(b => {
+    const reviews = b.reviews || []
+    const avgRating = reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      : null
+    return { ...b, avgRating, reviewCount: reviews.length }
+  })
+  res.json({ businesses: enriched })
+})
+
+// API endpoint: POST /api/businesses (с улучшенной безопасностью)
+app.post('/api/businesses', (req, res) => {
+  const { secret, name, category, description, address, url, lat, lng } = req.body
+  const BUSINESS_ADMIN_KEY = process.env.BUSINESS_ADMIN_KEY || 'demo_secret'
+  
+  if (secret !== BUSINESS_ADMIN_KEY) {
+    return res.status(403).json({ error: 'Invalid secret' })
+  }
+  
+  // Валидация
+  if (!name || !category) {
+    return res.status(400).json({ error: 'name and category required' })
+  }
+  
+  const numLat = Number(lat)
+  const numLng = Number(lng)
+  if (!Number.isFinite(numLat) || !Number.isFinite(numLng)) {
+    return res.status(400).json({ error: 'Invalid coordinates' })
+  }
+  
+  const db = readNewsDB()
+  if (!db.businesses) db.businesses = []
+  
+  const newBiz = {
+    id: db.businesses.length > 0 ? Math.max(...db.businesses.map(b => b.id)) + 1 : 1,
+    name: sanitizeText(name),
+    category: sanitizeText(category),
+    lat: numLat,
+    lng: numLng,
+    description: sanitizeText(description),
+    address: sanitizeText(address),
+    url: url ? String(url).trim().slice(0, 500) : null,
+    reviews: [],
+    createdAt: new Date().toISOString()
+  }
+  
+  db.businesses.push(newBiz)
+  writeNewsDB(db)
+  res.json({ success: true, business: newBiz })
+})
+
+// API endpoint: GET /api/media/:fileId (переименован с /api/photo)
+app.get('/api/media/:fileId', async (req, res) => {
   if (!bot) return res.status(503).json({ error: 'Bot not available' })
   const fileId = req.params.fileId
   try {
@@ -204,10 +408,9 @@ app.get('/api/photo/:fileId', async (req, res) => {
     res.set('Content-Type', response.headers.get('content-type'))
     res.send(buffer)
   } catch (err) {
-    console.error('Failed to get photo:', err)
-    res.status(500).json({ error: 'Failed to get photo' })
+    console.error('Failed to get media:', err)
+    res.status(500).json({ error: 'Failed to get media' })
   }
 })
-
 // hi!
 module.exports = app
