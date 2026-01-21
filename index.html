@@ -776,7 +776,7 @@ function openReviewForm(businessId, businessName) {
     return
   }
   
-  submitReview(businessId, {
+  submitReview(businessId, { 
     userId: Date.now(), // Используем timestamp как userId
     userName: userName.trim(),
     rating: rating,
