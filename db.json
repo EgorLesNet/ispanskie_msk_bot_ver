@@ -1,6 +1,37 @@
 {
   "posts": [
     {
+      "id": 10,
+      "text": "С 24 января автобусы с999 пойдут до метро «Новомосковская». \n\nЭто связано с открытием новой дороги в Коммунарке.\n\nДобираться до Троицкой линии и социальных объектов станет удобнее.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-21T10:12:50.608Z",
+      "timestamp": "2026-01-21T10:12:50.608Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICOGlwpqCAENsUMEKxSGABunI24DIbAAKqD2sb2JN5S9uGOloa8_KAAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICOGlwpqCAENsUMEKxSGABunI24DIbAAKqD2sb2JN5S9uGOloa8_KAAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICOGlwpqCAENsUMEKxSGABunI24DIbAAKqD2sb2JN5S9uGOloa8_KAAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "Дептранс. Оперативно",
+        "username": "DtOperativno",
+        "chatId": -1001031559169,
+        "messageId": 24624,
+        "chatUrl": "https://t.me/DtOperativno",
+        "postUrl": "https://t.me/DtOperativno/24624"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 9,
       "text": "🚱 Отключение водоснабжения\n\n📍ул. Сервантеса, дом 1, к. 3, п. 1\n\nУважаемые жители, наблюдаются перебои в подаче  водоснабжения по указанному адресу. \nАварийная бригада уже приступила к восстановительным работам.\n\nПриносим извинения за возможные неудобства.\nС заботой, А101-Комфорт.",
       "authorId": 273473755,
