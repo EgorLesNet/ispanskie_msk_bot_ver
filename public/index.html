@@ -654,7 +654,7 @@
           ${addr}
           ${link}
         
-              ${reviewsHtm      <div style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;">
+              ${reviewsHtml      <div style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;">
         <button onclick="openReviewForm(${b.id}, '${escapeHtml(b.name)}')" style="background:#007aff;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;">✍️ Оставить отзыв</button>
       </div>
         
@@ -669,7 +669,7 @@
         bizList = Array.isArray(data.businesses) ? data.businesses : [];
         buildBizFilters();
         if (render) renderBusinesses();
-      } catc;h (e) {
+      } catch (e) {
         console.error(e);
       }
     }
