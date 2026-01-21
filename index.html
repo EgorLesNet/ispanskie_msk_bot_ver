@@ -655,6 +655,9 @@
           ${link}
         
               ${reviewsHtml}`;
+              <div style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;">
+        <button onclick="openReviewForm(${b.id}, '${escapeHtml(b.name)}')" style="background:#007aff;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;">✍️ Оставить отзыв</button>
+      </div>
 
         L.marker([lat, lng]).addTo(markersLayer).bindPopup(popupHtml);
       });
@@ -749,6 +752,67 @@
     document.getElementById('btnAddBiz').addEventListener('click', openBizForm);
     document.getElementById('btnCancelBiz').addEventListener('click', closeBizForm);
     document.getElementById('btnSaveBiz').addEventListener('click', saveBusiness);
-  </script>
+  
+  
+  // ============== Reviews functionality ==============
+function openReviewForm(businessId, businessName) {
+  const userName = prompt(`Оставьте отзыв о "${businessName}"\n\nВведите ваше имя:`)
+  if (!userName || !userName.trim()) return
+  
+  const ratingStr = prompt(`Оцените от 1 до 5 звёзд (введите цифру):`)
+  const rating = Number(ratingStr)
+  if (!rating || rating < 1 || rating > 5) {
+    alert('Некорректная оценка. Должно быть от 1 до 5.')
+    return
+  }
+  
+  const text = prompt(`Напишите ваш отзыв:`)
+  if (!text || !text.trim()) {
+    alert('Отзыв не может быть пустым')
+    return
+  }
+  
+  if (text.length > 500) {
+    alert('Отзыв слишком длинный. Максимум 500 символов.')
+    return
+  }
+  
+  submitReview(businessId, {
+    userId: Date.now(), // Используем timestamp как userId
+    userName: userName.trim(),
+    rating: rating,
+    text: text.trim()
+  })
+}
+
+async function submitReview(businessId, review) {
+  try {
+    const res = await fetch(`/api/businesses/${businessId}/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(review)
+    })
+    
+    const data = await res.json().catch(() => ({}))
+    
+    if (!res.ok) {
+      if (res.status === 429) {
+        alert('Вы можете оставить только 1 отзыв в минуту. Подождите немного.')
+      } else {
+        alert('Ошибка при отправке отзыва: ' + (data.error || res.status))
+      }
+      return
+    }
+    
+    alert('✅ Отзыв успешно добавлен!')
+    
+    // Обновляем карту
+    await loadBusinesses({ render: true })
+  } catch (e) {
+    console.error(e)
+    alert('Ошибка сети при отправке отзыва')
+  }
+}
+</script>
 </body>
 </html>
