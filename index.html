@@ -282,9 +282,7 @@
 
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   </style>
-305
-
-  
+</head>
 
 <body>
   <header class="header liquid-glass">
@@ -309,61 +307,6 @@
     <div class="biz-topbar">
       <div class="biz-filters" id="bizFilters"></div>
 
-            <div class="biz-actions">
-        <button class="btn" id="btnSetBizSecret">🔐 Секрет</button>
-        <button class="btn" id="btnAddBiz">➕ Добавить бизнес</button>
-      </div>
-    </div>
-    <div class="biz-layout">
-      <div id="map"></div>
-    </div>
-    <div class="biz-form" id="bizForm">
-      <p style="margin:0 0 10px 0;line-height:1.5">
-        1) Нажми на карте точку (координаты подставятся).<br>
-        2) Заполни поля и нажми "Сохранить".<br>
-        3) Нужен секрет (кнопка "🔐 Секрет").
-      </p>
-      <div class="row">
-        <label>Категория</label>
-        <select id="bizCategory">
-          <option value="Кафе/Рестораны">Кафе/Рестораны</option>
-          <option value="Магазины">Магазины</option>
-          <option value="Услуги">Услуги</option>
-          <option value="Красота">Красота</option>
-          <option value="Медицина">Медицина</option>
-          <option value="Спорт">Спорт</option>
-          <option value="Дети">Дети</option>
-          <option value="Другое">Другое</option>
-        </select>
-      </div>
-      <div class="row">
-        <label>Название</label>
-        <input id="bizName" placeholder="Например: Пекарня 'Хлеб'">
-      </div>
-      <div class="row">
-        <label>Описание</label>
-        <textarea id="bizDesc"></textarea>
-      </div>
-      <div class="row">
-        <label>Адрес (опционально)</label>
-        <input id="bizAddress" placeholder="Например: ул. ..., дом ...">
-      </div>
-      <div class="row">
-        <label>Ссылка (сайт/телеграм) (опционально)</label>
-        <input id="bizUrl" placeholder="https://t.me/...">
-      </div>
-      <div class="row">
-        <label>Координаты</label>
-        <input id="bizLat" placeholder="lat">
-        <input id="bizLng" placeholder="lng">
-      </div>
-      <p class="hint" id="bizPickHint">Кликни по карте, чтобы выбрать точку.</p>
-      <div class="row">
-        <button class="btn" id="btnSaveBiz">✅ Сохранить</button>
-        <button class="btn" id="btnCancelBiz">✖ Закрыть</button>
-      </div>
-    </div>
-  </section>
       <div class="biz-actions">
         <button class="btn" id="btnSetBizSecret" type="button">🔐 Секрет</button>
         <button class="btn" id="btnAddBiz" type="button">➕ Добавить бизнес</button>
@@ -684,40 +627,14 @@
         const addr = b.address ? `<div style="margin-top:6px;font-size:12px;opacity:0.85;">${escapeHtml(b.address)}</div>` : '';
         const link = b.url ? `<div style="margin-top:8px;"><a href="${escapeHtml(b.url)}" target="_blank" rel="noopener">Открыть ссылку</a></div>` : '';
 
-            // Отзывы
-    const reviews = b.reviews || []
-    const avgRating = b.avgRating || null
-    const reviewCount = b.reviewCount || 0
-    
-    let reviewsHtml = ''
-    if (avgRating && reviewCount > 0) {
-      reviewsHtml += `<div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.05);border-radius:8px;">`
-      reviewsHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:4px;">⭐️ ${avgRating} (${reviewCount} отзывов)</div>`
-      const lastReviews = reviews.slice(0, 3)
-      lastReviews.forEach(r => {
-        const stars = '⭐'.repeat(r.rating)
-        reviewsHtml += `<div style="margin:4px 0;font-size:12px;border-bottom:1px solid rgba(0,0,0,0.1);padding-bottom:4px;">`
-        reviewsHtml += `<div style="font-weight:500;">${escapeHtml(r.userName)} ${stars}</div>`
-        reviewsHtml += `<div style="opacity:0.85;">${escapeHtml(r.text)}</div>`
-        reviewsHtml += `</div>`
-      })
-      reviewsHtml += `</div>`
-    }
-
         const popupHtml = `
           <div style="font-size:14px;font-weight:600;">${title}</div>
           <div style="font-size:12px;opacity:0.85;margin-top:2px;">${cat}</div>
           ${desc}
           ${addr}
           ${link}
-        
-              672
-              656
-              
-              tm      <div style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;">
-        <button onclick="openReviewForm(${b.id}, '${escapeHtml(b.name)}')" style="background:#007aff;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;">✍️ Оставить отзыв</button>
-      </div>
-        
+        `;
+
         L.marker([lat, lng]).addTo(markersLayer).bindPopup(popupHtml);
       });
     }
@@ -729,7 +646,7 @@
         bizList = Array.isArray(data.businesses) ? data.businesses : [];
         buildBizFilters();
         if (render) renderBusinesses();
-      } catc;h (e) {
+      } catch (e) {
         console.error(e);
       }
     }
@@ -811,67 +728,6 @@
     document.getElementById('btnAddBiz').addEventListener('click', openBizForm);
     document.getElementById('btnCancelBiz').addEventListener('click', closeBizForm);
     document.getElementById('btnSaveBiz').addEventListener('click', saveBusiness);
-  
-  
-  // ============== Reviews functionality ==============
-function openReviewForm(businessId, businessName) {
-  const userName = prompt(`Оставьте отзыв о "${businessName}"\n\nВведите ваше имя:`)
-  if (!userName || !userName.trim()) return
-  
-  const ratingStr = prompt(`Оцените от 1 до 5 звёзд (введите цифру):`)
-  const rating = Number(ratingStr)
-  if (!rating || rating < 1 || rating > 5) {
-    alert('Некорректная оценка. Должно быть от 1 до 5.')
-    return
-  }
-  
-  const text = prompt(`Напишите ваш отзыв:`)
-  if (!text || !text.trim()) {
-    alert('Отзыв не может быть пустым')
-    return
-  }
-  
-  if (text.length > 500) {
-    alert('Отзыв слишком длинный. Максимум 500 символов.')
-    return
-  }
-  
-  submitReview(businessId, { 
-    userId: Date.now(), // Используем timestamp как userId
-    userName: userName.trim(),
-    rating: rating,
-    text: text.trim()
-  })
-}
-
-async function submitReview(businessId, review) {
-  try {
-    const res = await fetch(`/api/businesses/${businessId}/reviews`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(review)
-    })
-    
-    const data = await res.json().catch(() => ({}))
-    
-    if (!res.ok) {
-      if (res.status === 429) {
-        alert('Вы можете оставить только 1 отзыв в минуту. Подождите немного.')
-      } else {
-        alert('Ошибка при отправке отзыва: ' + (data.error || res.status))
-      }
-      return
-    }
-    
-    alert('✅ Отзыв успешно добавлен!')
-    
-    // Обновляем карту
-    await loadBusinesses({ render: true })
-  } catch (e) {
-    console.error(e)
-    alert('Ошибка сети при отправке отзыва')
-  }
-}
-</script>
+  </script>
 </body>
 </html>
