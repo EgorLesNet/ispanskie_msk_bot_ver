@@ -305,6 +305,18 @@
   "rejected": [],
   "businesses": [
     {
+      "id": 17,
+      "name": "тест",
+      "category": "Кафе/Рестораны",
+      "lat": 55.566626,
+      "lng": 37.419519,
+      "description": "тест",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-21T15:54:49.231Z"
+    },
+    {
       "id": 16,
       "name": "ТРЦ \"Саларис\"",
       "category": "Магазины",
