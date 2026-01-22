@@ -1,6 +1,37 @@
 {
   "posts": [
     {
+      "id": 15,
+      "text": "Опять авария на нашем перекрестке…",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-22T20:27:05.006Z",
+      "timestamp": "2026-01-22T20:27:05.006Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICRWlyiBj5CSfGhgHglzQjiiZf6GXkAAITE2sbyN-QS2rkCK43I22DAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICRWlyiBj5CSfGhgHglzQjiiZf6GXkAAITE2sbyN-QS2rkCK43I22DAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICRWlyiBj5CSfGhgHglzQjiiZf6GXkAAITE2sbyN-QS2rkCK43I22DAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8929,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8929"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 14,
       "text": "Соседи пишут, что кто-то второй день разжигает костер в клумбах на набережной 🫣\n\nДобрый день, соседи прислали в чате дома на Магеллана 4. Жгут костер в клумбах на набережной, которые дети делали..\n\nЕсть у кого-то возможность сходить и проверить?",
       "authorId": 273473755,
