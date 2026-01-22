@@ -1,6 +1,37 @@
 {
   "posts": [
     {
+      "id": 16,
+      "text": "Похоже реально кто-то что-то готовил в клумбе….\n\nТам росли многолетние цветы :(",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-22T20:27:10.702Z",
+      "timestamp": "2026-01-22T20:27:10.702Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICR2lyiB4N8v18qIYdGS7JSF7OP54hAALpE2sbyN-QS4kzRaD3CSYyAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICR2lyiB4N8v18qIYdGS7JSF7OP54hAALpE2sbyN-QS4kzRaD3CSYyAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICR2lyiB4N8v18qIYdGS7JSF7OP54hAALpE2sbyN-QS4kzRaD3CSYyAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8930,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8930"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 15,
       "text": "Опять авария на нашем перекрестке…",
       "authorId": 273473755,
