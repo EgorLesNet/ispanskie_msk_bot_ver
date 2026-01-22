@@ -244,6 +244,27 @@ app.get('/api/news', (req, res) => {
   res.json({ posts: approved })
 })
 
+// Лайки и дизлайки
+app.post('/api/news/:id/like', (req, res) => {
+  const postId = Number(req.params.id)
+  const db = readNewsDB()
+  const post = db.posts.find(p => p.id === postId)
+  if (!post) return res.status(404).json({ error: 'Not found' })
+  post.likes = (post.likes || 0) + 1
+  writeNewsDB(db)
+  res.json({ success: true, likes: post.likes })
+})
+
+app.post('/api/news/:id/dislike', (req, res) => {
+  const postId = Number(req.params.id)
+  const db = readNewsDB()
+  const post = db.posts.find(p => p.id === postId)
+  if (!post) return res.status(404).json({ error: 'Not found' })
+  post.dislikes = (post.dislikes || 0) + 1
+  writeNewsDB(db)
+  res.json({ success: true, dislikes: post.dislikes })
+})
+
 app.delete('/api/news/:id', (req, res) => {
   const postId = Number(req.params.id)
   const adminUsername = req.query.admin
