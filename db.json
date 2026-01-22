@@ -1,6 +1,37 @@
 {
   "posts": [
     {
+      "id": 14,
+      "text": "Соседи пишут, что кто-то второй день разжигает костер в клумбах на набережной 🫣\n\nДобрый день, соседи прислали в чате дома на Магеллана 4. Жгут костер в клумбах на набережной, которые дети делали..\n\nЕсть у кого-то возможность сходить и проверить?",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-22T20:27:00.808Z",
+      "timestamp": "2026-01-22T20:27:00.808Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICQ2lyiBOR8utvTypksAczynMVB33zAAKpEGsbyN-QS4whhb_mLrToAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICQ2lyiBOR8utvTypksAczynMVB33zAAKpEGsbyN-QS4whhb_mLrToAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICQ2lyiBOR8utvTypksAczynMVB33zAAKpEGsbyN-QS4whhb_mLrToAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8928,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8928"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 13,
       "text": "📍Строительство канализационно-насосной станции «Прокшино» завершилось в Коммунарке\n\nСпециалисты возвели техническое сооружение, установили оборудование и завершили пусконаладочные мероприятия. Новый объект позволит перекачивать 30 тысяч кубометров в сутки.\n\nПосле подключения канализационно-насосной станции «Прокшино» к центральным сетям жилые дома районов Коммунарка и Филимонковский будут обеспечены бесперебойным водоотведением. Сейчас рабочие разрабатывают схемы интегрирования объекта с городскими системами.\n\n«Строители установили аварийно-регулирующие резервуары и оборудование закрытого типа с автоматизированным управлением. Комплекс инженерных сооружений позволит распределять нагрузку на насосные станции и в случае нештатной ситуации сможет принять объем сточных вод. Для нейтрализации запахов на резервуарах специалисты установили фильтрационные системы», — отметил депутат Коммунарки Николай Садов.\n\nℹ️На территории канализационно-насосной станции провели благоустройство. Строители создали проезды для техники и установили ограждения.\n\n🧩 Подписаться на канал «Префектура ТиНАО» в MAX.",
       "authorId": 273473755,
@@ -39,7 +70,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 41,       "dislikes": 5,       "sourceType": "admin"
+      "likes": 41,
+      "dislikes": 5,
+      "sourceType": "admin"
     },
     {
       "id": 12,
@@ -70,7 +103,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 12,       "dislikes": 0,       "sourceType": "admin"
+      "likes": 12,
+      "dislikes": 0,
+      "sourceType": "admin"
     },
     {
       "id": 11,
@@ -98,7 +133,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 3,       "dislikes": 53,       "sourceType": "admin"
+      "likes": 3,
+      "dislikes": 53,
+      "sourceType": "admin"
     },
     {
       "id": 10,
@@ -129,7 +166,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 22,       "dislikes": 19,       "sourceType": "admin"
+      "likes": 22,
+      "dislikes": 19,
+      "sourceType": "admin"
     },
     {
       "id": 9,
@@ -152,7 +191,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 0,       "dislikes": 5,       "sourceType": "admin"
+      "likes": 0,
+      "dislikes": 5,
+      "sourceType": "admin"
     },
     {
       "id": 8,
@@ -180,7 +221,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 52,       "dislikes": 1,       "sourceType": "admin"
+      "likes": 52,
+      "dislikes": 1,
+      "sourceType": "admin"
     },
     {
       "id": 7,
@@ -208,7 +251,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 11,       "dislikes": 21,       "sourceType": "admin"
+      "likes": 11,
+      "dislikes": 21,
+      "sourceType": "admin"
     },
     {
       "id": 6,
@@ -236,7 +281,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 56,       "dislikes": 12,       "sourceType": "admin"
+      "likes": 56,
+      "dislikes": 12,
+      "sourceType": "admin"
     },
     {
       "id": 5,
@@ -267,7 +314,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 41,       "dislikes": 23,       "sourceType": "admin"
+      "likes": 41,
+      "dislikes": 23,
+      "sourceType": "admin"
     },
     {
       "id": 4,
@@ -308,7 +357,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 17,       "dislikes": 40,       "sourceType": "admin"
+      "likes": 17,
+      "dislikes": 40,
+      "sourceType": "admin"
     },
     {
       "id": 3,
@@ -339,7 +390,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 33,       "dislikes": 2,       "sourceType": "admin"
+      "likes": 33,
+      "dislikes": 2,
+      "sourceType": "admin"
     },
     {
       "id": 2,
@@ -367,7 +420,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 6,       "dislikes": 15,       "sourceType": "admin"
+      "likes": 6,
+      "dislikes": 15,
+      "sourceType": "admin"
     },
     {
       "id": 1,
@@ -398,7 +453,9 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "likes": 38,       "dislikes": 0,       "sourceType": "admin"
+      "likes": 38,
+      "dislikes": 0,
+      "sourceType": "admin"
     }
   ],
   "pending": [],
