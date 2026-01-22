@@ -39,7 +39,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 12,
@@ -70,7 +70,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 11,
@@ -98,7 +98,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 10,
@@ -129,7 +129,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 9,
@@ -152,7 +152,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 8,
@@ -180,7 +180,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 7,
@@ -208,7 +208,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 6,
@@ -236,7 +236,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 5,
@@ -267,7 +267,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 4,
@@ -308,7 +308,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 3,
@@ -339,7 +339,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 2,
@@ -367,7 +367,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     },
     {
       "id": 1,
@@ -398,7 +398,7 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "likes": 0,       "dislikes": 0,       "sourceType": "admin"
     }
   ],
   "pending": [],
