@@ -605,6 +605,18 @@
         return html;
       }).join('');
     }
+          // Кнопки лайк/дизлайк и поделиться
+      html += `<div style="display:flex;gap:12px;margin-top:12px;align-items:center;">
+        <button class="reaction-btn like-btn" data-id="${n.id}" style="background:rgba(0,122,255,0.1);border:1px solid rgba(0,122,255,0.3);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s;">
+          👍 <span class="like-count">${n.likes || 0}</span>
+        </button>
+        <button class="reaction-btn dislike-btn" data-id="${n.id}" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s;">
+          👎 <span class="dislike-count">${n.dislikes || 0}</span>
+        </button>
+        <button class="reaction-btn share-btn" data-id="${n.id}" style="background:rgba(52,199,89,0.1);border:1px solid rgba(52,199,89,0.3);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s;margin-left:auto;">
+          🔗 Поделиться
+        </button>
+      </div>`;
 
     function sameTop(a, b) {
       const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
@@ -820,6 +832,45 @@
     renderNews();
 
     document.getElementById('btnSetBizSecret').addEventListener('click', setBizSecret);
+
+    // Обработчики для лайков, дизлайков и кнопки "поделиться"
+document.addEventListener('click', async (e) => {
+  const likeBtn = e.target.closest('.like-btn');
+  const dislikeBtn = e.target.closest('.dislike-btn');
+  const shareBtn = e.target.closest('.share-btn');
+
+  if (likeBtn) {
+    const id = likeBtn.dataset.id;
+    try {
+      const res = await fetch(`/api/news/${id}/like`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        likeBtn.querySelector('.like-count').textContent = data.likes;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  if (dislikeBtn) {
+    const id = dislikeBtn.dataset.id;
+    try {
+      const res = await fetch(`/api/news/${id}/dislike`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        dislikeBtn.querySelector('.dislike-count').textContent = data.dislikes;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  if (shareBtn) {
+    const id = shareBtn.dataset.id;
+    const url = `https://t.me/ispanskie_msk_bot?start=news_${id}`;
+    window.open(url, '_blank');
+  }
+});
     document.getElementById('btnAddBiz').addEventListener('click', openBizForm);
     document.getElementById('btnCancelBiz').addEventListener('click', closeBizForm);
     document.getElementById('btnSaveBiz').addEventListener('click', saveBusiness);
