@@ -17,12 +17,17 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAICQGlyDkS-iMJ0s5Pe6DCm-oc6EOBmAALpDWsbh8uQSwd5PXtuexPmAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICQWlyDkT936qXZV_UIEmcLKz3fFxBAALqDWsbh8uQS-sB9DQjFdNTAQADAgADeQADOAQ"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAICP2lyDkRxrpFSJYFc_XZ8VaEUvK7ZAALoDWsbh8uQS1rOIYOaH_NCAQADAgADeQADOAQ",
       "photoFileIds": [
         "AgACAgIAAxkBAAICP2lyDkRxrpFSJYFc_XZ8VaEUvK7ZAALoDWsbh8uQS1rOIYOaH_NCAQADAgADeQADOAQ",
-        "AgACAgIAAxkBAAICQGlyDkS-iMJ0s5Pe6DCm-oc6EOBmAALpDWsbh8uQSwd5PXtuexPmAQADAgADeQADOAQ"
+        "AgACAgIAAxkBAAICQGlyDkS-iMJ0s5Pe6DCm-oc6EOBmAALpDWsbh8uQSwd5PXtuexPmAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAICQWlyDkT936qXZV_UIEmcLKz3fFxBAALqDWsbh8uQS-sB9DQjFdNTAQADAgADeQADOAQ"
       ],
       "source": {
         "title": "Префектура ТиНАО",
