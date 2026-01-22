@@ -241,7 +241,12 @@ if (BOT_TOKEN && WEBAPP_URL) {
 app.get('/api/news', (req, res) => {
   const db = readNewsDB()
   const approved = db.posts.filter(p => p.status === 'approved')
-  res.json({ posts: approved })
+  const postsWithLikes = approved.map(post => ({
+        ...post,
+        likes: post.likes || 0,
+        dislikes: post.dislikes || 0
+            }))
+  res.json({ posts: postsWithLikes })  
 })
 
 // Лайки и дизлайки
