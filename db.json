@@ -13,11 +13,16 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAICTmlzYzhA9e6OfRVceXSU7yTZU-CKAAL-D2sbnhSYS83eh7G6O7vnAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICT2lzYzhGkcndwRVA9qAuwuby94ySAAL_D2sbnhSYS_cnO7fDcyfRAQADAgADeQADOAQ"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAICTmlzYzhA9e6OfRVceXSU7yTZU-CKAAL-D2sbnhSYS83eh7G6O7vnAQADAgADeQADOAQ",
       "photoFileIds": [
-        "AgACAgIAAxkBAAICTmlzYzhA9e6OfRVceXSU7yTZU-CKAAL-D2sbnhSYS83eh7G6O7vnAQADAgADeQADOAQ"
+        "AgACAgIAAxkBAAICTmlzYzhA9e6OfRVceXSU7yTZU-CKAAL-D2sbnhSYS83eh7G6O7vnAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAICT2lzYzhGkcndwRVA9qAuwuby94ySAAL_D2sbnhSYS_cnO7fDcyfRAQADAgADeQADOAQ"
       ],
       "source": {
         "title": "Николай Садов",
