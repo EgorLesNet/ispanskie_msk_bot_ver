@@ -13,11 +13,16 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAICVWlzwLsGhp06ndRUGT7cVoXo93cPAAK_E2sbyN-YSxXD9FZVepEsAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICVmlzwLt-WzKKq6xufNG0E92jSBF-AALAE2sbyN-YSwg6pd6Qg7LfAQADAgADeQADOAQ"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAICVWlzwLsGhp06ndRUGT7cVoXo93cPAAK_E2sbyN-YSxXD9FZVepEsAQADAgADeQADOAQ",
       "photoFileIds": [
-        "AgACAgIAAxkBAAICVWlzwLsGhp06ndRUGT7cVoXo93cPAAK_E2sbyN-YSxXD9FZVepEsAQADAgADeQADOAQ"
+        "AgACAgIAAxkBAAICVWlzwLsGhp06ndRUGT7cVoXo93cPAAK_E2sbyN-YSxXD9FZVepEsAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAICVmlzwLt-WzKKq6xufNG0E92jSBF-AALAE2sbyN-YSwg6pd6Qg7LfAQADAgADeQADOAQ"
       ],
       "source": {
         "title": "ИСПАНСКИЕ КВАРТАЛЫ",
