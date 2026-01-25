@@ -1,3 +1,4 @@
+// api/news.js
 const https = require('https');
 
 const GITHUB_REPO = 'EgorLesNet/ispanskie_msk_bot_ver';
@@ -20,7 +21,7 @@ function httpsGet(url) {
   });
 }
 
-async function readDbViaGithubRaw() {
+async function readDBViaGitHubRaw() {
   try {
     const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${DB_BRANCH}/${DB_FILE_PATH}`;
     const text = await httpsGet(rawUrl);
@@ -33,42 +34,54 @@ async function readDbViaGithubRaw() {
       businesses: Array.isArray(data.businesses) ? data.businesses : []
     };
   } catch (e) {
-    console.error('readDbViaGithubRaw error:', e);
+    console.error('readDBViaGitHubRaw error:', e);
     return { posts: [], pending: [], rejected: [], businesses: [] };
   }
 }
 
 function normalizePost(p) {
-  const photoIds = Array.isArray(p.photoFileIds)
-    ? p.photoFileIds
-    : (p.photoFileId ? [p.photoFileId] : []);
-
-  const media = Array.isArray(p.media) ? p.media : [];
-
   return {
-    ...p,
-    timestamp: p.timestamp || p.createdAt || null,
-    category: p.category || 'all',
-    photoFileIds: photoIds,
-    media
+    id: p.id,
+    text: p.text || '',
+    authorId: p.authorId,
+    authorName: p.authorName,
+    authorUsername: p.authorUsername,
+    createdAt: p.createdAt,
+    timestamp: p.timestamp,
+    category: p.category || null,
+    media: p.media || [],
+    photoFileId: p.photoFileId || null,
+    source: p.source || null,
+    moderationMessage: p.moderationMessage || null,
+    status: p.status || 'approved',
+    sourceType: p.sourceType || 'admin',
+    likes: p.likes || 0,
+    dislikes: p.dislikes || 0
   };
 }
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 'no-store');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-
-  try {
-    const db = await readDbViaGithubRaw();
-    const posts = (db.posts || []).map(normalizePost);
-    return res.status(200).json({ posts, businesses: db.businesses || [] });
-  } catch (e) {
-    console.error('api/news error:', e);
-    return res.status(500).json({ error: 'Failed to load news', message: e.message });
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
+
+  if (req.method === 'GET') {
+    const db = await readDBViaGitHubRaw();
+    
+    // Возвращаем только одобренные новости
+    const approvedPosts = (db.posts || [])
+      .filter(p => p.status === 'approved')
+      .map(normalizePost)
+      .sort((a, b) => b.id - a.id); // Сначала новые
+    
+    console.log(`[API/NEWS] Returning ${approvedPosts.length} posts`);
+    return res.json({ posts: approvedPosts });
+  }
+  
+  res.status(405).json({ error: 'Method not allowed' });
 };
