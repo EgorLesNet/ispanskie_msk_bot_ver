@@ -16,11 +16,11 @@
       "dest": "/index.js"
     },
     {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg))",
+      "src": "/(.+\.(js|css|png|jpg|jpeg|gif|ico|svg))",
       "dest": "/public/$1"
     },
     {
-      "src": "/(.*\\.html)",
+      "src": "/(.+\.html)",
       "dest": "/public/$1"
     },
     {
