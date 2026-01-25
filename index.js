@@ -494,38 +494,6 @@ app.post('/api/businesses/:id/reviews', (req, res) => {
 })
 
 // Media API - теперь обрабатывается в api/media.js
-// Оставляем для локальной разработки
-if (!process.env.VERCEL) {
-  app.get('/api/media/:fileId', async (req, res) => {
-    if (!bot) return res.status(503).json({ error: 'Bot not available' })
-    const fileId = req.params.fileId
-    try {
-      const file = await bot.telegram.getFile(fileId)
-      const fileSize = file.file_size || 0
-      
-      // Проверка размера
-      if (fileSize > 20 * 1024 * 1024) {
-        return res.status(413).json({ 
-          error: 'File too large (max 20MB for Bot API)' 
-        })
-      }
-      
-      const fileUrl = await bot.telegram.getFileLink(fileId)
-      const fetch = require('node-fetch')
-      const response = await fetch(fileUrl.href)
-      
-      res.set('Content-Type', response.headers.get('content-type') || 'application/octet-stream')
-      res.set('Cache-Control', 'public, max-age=31536000')
-      
-      // Потоковая передача
-      response.body.pipe(res)
-      
-    } catch (err) {
-      console.error('Failed to get media:', err)
-      res.status(500).json({ error: err.message })
-    }
-  })
-}
 
 
 // Запуск сервера только локально
