@@ -12,6 +12,9 @@ const app = express()
 app.use(express.json())
 app.use(express.static('public'))
 
+// Root redirect
+app.get('/', (req, res) => res.redirect('/public/news.html'))
+
 // ============== Security middleware ==============
 // CORS - разрешаем только с нашего домена (в production)
 const ALLOWED_ORIGINS = [
