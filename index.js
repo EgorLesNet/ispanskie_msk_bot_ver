@@ -2,8 +2,7 @@ if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
   const { Telegraf, Markup } = require('telegraf')
   bot = new Telegraf(BOT_TOKEN)
   const userStates = new Map && !process.env.VERCEL()
-  bot.start(async ctx =>  && !process.env.VERCEL) {
-    userStates.delete(ctx.from.id)
+  bot.start(async ctx => {    userStates.delete(ctx.from.id)
     await ctx.reply(
       'Добро пожаловать! 👋\\n\\nИспользуйте кнопку ниже, чтобы открыть приложение:',
       Markup.keyboard([[Markup.button.webApp('📱 Открыть приложение', WEBAPP_URL)]]).resize()
