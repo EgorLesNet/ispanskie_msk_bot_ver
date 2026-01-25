@@ -1,6 +1,7 @@
 // api/media.js
 require('dotenv/config');
 const { Telegraf } = require('telegraf');
+const https = require('https');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const bot = BOT_TOKEN ? new Telegraf(BOT_TOKEN) : null;
@@ -16,39 +17,35 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Получаем информацию о файле
-    const file = await bot.telegram.getFile(fileId);
+    // 1. Сначала получаем ИНФО о файле (не скачивая)
+    const fileInfo = await bot.telegram.getFile(fileId);
+    const fileSize = fileInfo.file_size || 0;
+    const MAX_SIZE = 20 * 1024 * 1024; // 20MB - лимит Telegram Bot API
     
-    // Проверяем размер (Telegram Bot API лимит: 20MB)
-    const fileSize = file.file_size || 0;
-    const MAX_SIZE = 20 * 1024 * 1024; // 20MB
-    
+    // 2. Проверяем размер
     if (fileSize > MAX_SIZE) {
+      console.error(`File too large: ${fileSize} bytes (max ${MAX_SIZE})`);
       return res.status(413).json({ 
         error: 'File too large',
-        message: 'Файл превышает 20MB. Telegram Bot API не поддерживает такие файлы.',
+        message: `Файл ${(fileSize/1024/1024).toFixed(1)} MB превышает лимит 20 MB`,
         fileSize,
         maxSize: MAX_SIZE
       });
     }
-
-    // Получаем ссылку на файл
-    const fileUrl = await bot.telegram.getFileLink(fileId);
     
-    // Потоковая передача вместо загрузки в память
-    const fetch = require('node-fetch');
-    const response = await fetch(fileUrl.href);
+    // 3. Получаем ссылку
+    const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileInfo.file_path}`;
     
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file: ${response.statusText}`);
-    }
-
-    // Устанавливаем заголовки
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/octet-stream');
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    
-    // Потоковая передача файла
-    response.body.pipe(res);
+    // 4. Потоковая передача (НЕ загружаем в память!)
+    return new Promise((resolve, reject) => {
+      https.get(fileUrl, (stream) => {
+        res.setHeader('Content-Type', stream.headers['content-type'] || 'application/octet-stream');
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        stream.pipe(res);
+        stream.on('end', resolve);
+        stream.on('error', reject);
+      }).on('error', reject);
+    });
     
   } catch (error) {
     console.error('Media proxy error:', error);
@@ -56,7 +53,7 @@ module.exports = async (req, res) => {
     if (error.message?.includes('file is too big')) {
       return res.status(413).json({ 
         error: 'File too large for Bot API',
-        message: 'Используйте файлы до 20MB или настройте локальный Bot API сервер'
+        message: 'Telegram Bot API поддерживает файлы до 20MB'
       });
     }
     
