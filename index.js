@@ -1,3 +1,24 @@
+require('dotenv/config')
+const express = require('express')
+const fetch = require('node-fetch')
+
+const BOT_TOKEN = process.env.BOT_TOKEN
+const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'fusuges').toLowerCase()
+const WEBAPP_URL = process.env.WEBAPP_URL
+const PORT = Number(process.env.PORT || 3000)
+
+// Express сервер
+const app = express()
+app.use(express.json())
+app.use(express.static('public'))
+
+// ============== Security middleware ==============
+// CORS - разрешаем только с нашего домена (в production)
+const ALLOWED_ORIGINS = [
+  'https://ispanskiemskbotver.vercel.app',
+  'http://localhost:3000'
+]
+
 if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
   const { Telegraf, Markup } = require('telegraf')
   bot = new Telegraf(BOT_TOKEN)
