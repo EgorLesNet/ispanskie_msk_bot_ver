@@ -3,6 +3,14 @@
     {
       "source": "/api/:path*",
       "destination": "/index.js"
+    },
+    {
+      "source": "/",
+      "destination": "/public/news.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/public/:path*"
     }
   ]
 }
