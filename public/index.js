@@ -20,7 +20,6 @@ function readNewsDB() {
   } catch (err) {
     console.error('Error reading db.json:', err)
   }
-  // Если файл не существует или ошибка, вернём начальную структуру
   return {
     posts: [],
     pending: [],
@@ -86,17 +85,14 @@ function addNews({ text, author, isAdmin, photoFileId, media }) {
 function setNewsStatus(postId, newStatus) {
   const db = readNewsDB()
   
-  // Ищем в pending
   const pendingIndex = (db.pending || []).findIndex(p => p.id === postId)
   if (pendingIndex === -1) return null
   
   const post = db.pending[pendingIndex]
   post.status = newStatus
   
-  // Удаляем из pending
   db.pending.splice(pendingIndex, 1)
   
-  // Перемещаем в соответствующий массив
   if (newStatus === 'approved') {
     db.posts.unshift(post)
   } else if (newStatus === 'rejected') {
@@ -111,7 +107,6 @@ function setNewsStatus(postId, newStatus) {
 function deleteNews(postId) {
   const db = readNewsDB()
   
-  // Ищем во всех массивах
   const lists = ['posts', 'pending', 'rejected']
   for (const listName of lists) {
     const list = db[listName] || []
@@ -126,6 +121,33 @@ function deleteNews(postId) {
   return null
 }
 
+function addReview(businessId, review) {
+  const db = readNewsDB()
+  const business = db.businesses?.find(b => b.id === businessId)
+  if (!business) return null
+  if (!business.reviews) business.reviews = []
+  const newReview = {
+    id: Date.now(),
+    userId: review.userId,
+    userName: review.userName,
+    rating: review.rating,
+    text: review.text,
+    createdAt: new Date().toISOString()
+  }
+  business.reviews.unshift(newReview)
+  writeNewsDB(db)
+  return newReview
+}
+
+function sanitizeText(text) {
+  if (!text) return ''
+  return String(text)
+    .trim()
+    .slice(0, 500)
+    .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
+}
+
 // Express сервер
 const app = express()
 app.use(express.json())
@@ -134,15 +156,9 @@ app.use(express.static('public'))
 // Root redirect
 app.get('/', (req, res) => res.redirect('/news.html'))
 
-// ============== Security middleware ==============
-const ALLOWED_ORIGINS = [
-  'https://ispanskiemskbotver.vercel.app',
-  'http://localhost:3000'
-]
-
 let bot = null
 
-if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
+if (BOT_TOKEN && WEBAPP_URL) {
   const { Telegraf, Markup } = require('telegraf')
   bot = new Telegraf(BOT_TOKEN)
   const userStates = new Map()
@@ -264,7 +280,9 @@ if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
   console.log('Bot not started (missing BOT_TOKEN or WEBAPP_URL). Web server only.')
 }
 
-// API endpoints
+// ============== API endpoints ==============
+
+// News API
 app.get('/api/news', (req, res) => {
   const db = readNewsDB()
   const approved = db.posts.filter(p => p.status === 'approved')
@@ -276,7 +294,6 @@ app.get('/api/news', (req, res) => {
   res.json({ posts: postsWithLikes })
 })
 
-// Лайки и дизлайки
 app.post('/api/news/:id/like', (req, res) => {
   const postId = Number(req.params.id)
   const db = readNewsDB()
@@ -308,89 +325,7 @@ app.delete('/api/news/:id', (req, res) => {
   res.json({ success: true, deleted })
 })
 
-// ============== Reviews API ==============
-function addReview(businessId, review) {
-  const db = readNewsDB()
-  const business = db.businesses?.find(b => b.id === businessId)
-  if (!business) return null
-  if (!business.reviews) business.reviews = []
-  const newReview = {
-    id: Date.now(),
-    userId: review.userId,
-    userName: review.userName,
-    rating: review.rating,
-    text: review.text,
-    createdAt: new Date().toISOString()
-  }
-  business.reviews.unshift(newReview)
-  writeNewsDB(db)
-  return newReview
-}
-
-const reviewRateLimits = new Map()
-function canAddReview(userId) {
-  const now = Date.now()
-  const lastReview = reviewRateLimits.get(userId)
-  if (lastReview && (now - lastReview) < 60000) {
-    return false
-  }
-  reviewRateLimits.set(userId, now)
-  return true
-}
-
-function sanitizeText(text) {
-  if (!text) return ''
-  return String(text)
-    .trim()
-    .slice(0, 500)
-    .replace(/<[^>]*>/g, '')
-    .replace(/[<>]/g, '')
-}
-
-app.get('/api/businesses/:id/reviews', (req, res) => {
-  const businessId = Number(req.params.id)
-  const db = readNewsDB()
-  const business = db.businesses?.find(b => b.id === businessId)
-  if (!business) return res.status(404).json({ error: 'Business not found' })
-  res.json({ reviews: business.reviews || [] })
-})
-
-app.post('/api/businesses/:id/reviews', (req, res) => {
-  const businessId = Number(req.params.id)
-  const { userId, userName, rating, text } = req.body
-  
-  if (!userId || !userName) {
-    return res.status(400).json({ error: 'userId and userName required' })
-  }
-  
-  const numRating = Number(rating)
-  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
-    return res.status(400).json({ error: 'rating must be 1-5' })
-  }
-  
-  const cleanText = sanitizeText(text)
-  if (cleanText.length < 1 || cleanText.length > 500) {
-    return res.status(400).json({ error: 'text must be 1-500 characters' })
-  }
-  
-  if (!canAddReview(userId)) {
-    return res.status(429).json({ error: 'Too many reviews. Wait 1 minute.' })
-  }
-  
-  const review = addReview(businessId, {
-    userId,
-    userName: sanitizeText(userName),
-    rating: numRating,
-    text: cleanText
-  })
-  
-  if (!review) {
-    return res.status(404).json({ error: 'Business not found' })
-  }
-  
-  res.json({ success: true, review })
-})
-
+// Business API
 app.get('/api/businesses', (req, res) => {
   const db = readNewsDB()
   const businesses = db.businesses || []
@@ -443,6 +378,63 @@ app.post('/api/businesses', (req, res) => {
   res.json({ success: true, business: newBiz })
 })
 
+// Reviews API
+const reviewRateLimits = new Map()
+function canAddReview(userId) {
+  const now = Date.now()
+  const lastReview = reviewRateLimits.get(userId)
+  if (lastReview && (now - lastReview) < 60000) {
+    return false
+  }
+  reviewRateLimits.set(userId, now)
+  return true
+}
+
+app.get('/api/businesses/:id/reviews', (req, res) => {
+  const businessId = Number(req.params.id)
+  const db = readNewsDB()
+  const business = db.businesses?.find(b => b.id === businessId)
+  if (!business) return res.status(404).json({ error: 'Business not found' })
+  res.json({ reviews: business.reviews || [] })
+})
+
+app.post('/api/businesses/:id/reviews', (req, res) => {
+  const businessId = Number(req.params.id)
+  const { userId, userName, rating, text } = req.body
+  
+  if (!userId || !userName) {
+    return res.status(400).json({ error: 'userId and userName required' })
+  }
+  
+  const numRating = Number(rating)
+  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+    return res.status(400).json({ error: 'rating must be 1-5' })
+  }
+  
+  const cleanText = sanitizeText(text)
+  if (cleanText.length < 1 || cleanText.length > 500) {
+    return res.status(400).json({ error: 'text must be 1-500 characters' })
+  }
+  
+  if (!canAddReview(userId)) {
+    return res.status(429).json({ error: 'Too many reviews. Wait 1 minute.' })
+  }
+  
+  const review = addReview(businessId, {
+    userId,
+    userName: sanitizeText(userName),
+    rating: numRating,
+    text: cleanText
+  })
+  
+  if (!review) {
+    return res.status(404).json({ error: 'Business not found' })
+  }
+  
+  res.json({ success: true, review })
+})
+
+// Media API
 app.get('/api/media/:fileId', async (req, res) => {
   if (!bot) return res.status(503).json({ error: 'Bot not available' })
   const fileId = req.params.fileId
@@ -458,7 +450,7 @@ app.get('/api/media/:fileId', async (req, res) => {
   }
 })
 
-// Запуск сервера только локально (не на Vercel)
+// Запуск сервера только локально
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`)
