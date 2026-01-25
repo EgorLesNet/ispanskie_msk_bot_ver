@@ -310,15 +310,15 @@
 
   <nav class="nav liquid-glass">
     <div class="nav-inner">
-      <a href="/news.html" class="nav-btn active">
+      <a href="news.html" class="nav-btn active">
         <span>📰</span>
         <span class="nav-text"> Новости</span>
       </a>
-      <a href="/business.html" class="nav-btn">
+      <a href="business.html" class="nav-btn">
         <span>💼</span>
         <span class="nav-text"> Бизнес</span>
       </a>
-      <a href="/recommendations.html" class="nav-btn">
+      <a href="recommendations.html" class="nav-btn">
         <span>⭐</span>
         <span class="nav-text"> Рекомендации</span>
       </a>
@@ -429,7 +429,7 @@ function sameTop(a, b) {
 
 async function loadNews({ render = true } = {}) {
   try {
-    const res = await fetch('/api/news', { cache: 'no-store' });
+    const res = await fetch('../api/news', { cache: 'no-store' });
     const data = await res.json();
     const next = Array.isArray(data.posts) ? data.posts : [];
     const changed = !sameTop(allNews, next);
