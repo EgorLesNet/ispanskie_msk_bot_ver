@@ -1,25 +1,9 @@
 const GITHUB_REPO = 'EgorLesNet/ispanskie_msk_bot_ver';
-const DB_FILE_PATH = 'db.json'; // у тебя в корне репо
+const DB_FILE_PATH = 'db.json';
 const DB_BRANCH = process.env.DB_BRANCH || 'main';
 
-function normalizePost(p) {
-  const photoIds = Array.isArray(p.photoFileIds)
-    ? p.photoFileIds
-    : (p.photoFileId ? [p.photoFileId] : []);
-
-  const media = Array.isArray(p.media) ? p.media : [];
-
-  return {
-    ...p,
-    timestamp: p.timestamp || p.createdAt || null,
-    category: p.category || 'all',
-    photoFileIds: photoIds,
-    media
-  };
-}
-
 async function readDbViaGithubRaw() {
-  const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${encodeURIComponent(DB_BRANCH)}/${DB_FILE_PATH}`;
+  const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${DB_BRANCH}/${DB_FILE_PATH}`;
   const resp = await fetch(rawUrl, { cache: 'no-store' });
 
   if (!resp.ok) {
@@ -34,6 +18,22 @@ async function readDbViaGithubRaw() {
     pending: Array.isArray(data.pending) ? data.pending : [],
     rejected: Array.isArray(data.rejected) ? data.rejected : [],
     businesses: Array.isArray(data.businesses) ? data.businesses : []
+  };
+}
+
+function normalizePost(p) {
+  const photoIds = Array.isArray(p.photoFileIds)
+    ? p.photoFileIds
+    : (p.photoFileId ? [p.photoFileId] : []);
+
+  const media = Array.isArray(p.media) ? p.media : [];
+
+  return {
+    ...p,
+    timestamp: p.timestamp || p.createdAt || null,
+    category: p.category || 'all',
+    photoFileIds: photoIds,
+    media
   };
 }
 
@@ -52,6 +52,6 @@ module.exports = async (req, res) => {
     return res.status(200).json({ posts, businesses: db.businesses || [] });
   } catch (e) {
     console.error('api/news error:', e);
-    return res.status(500).json({ error: 'Failed to load news' });
+    return res.status(500).json({ error: 'Failed to load news', message: e.message });
   }
 };
