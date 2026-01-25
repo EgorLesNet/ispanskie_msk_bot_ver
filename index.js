@@ -8,13 +8,22 @@ const BOT_TOKEN = process.env.BOT_TOKEN
 const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'fusuges').toLowerCase()
 const WEBAPP_URL = process.env.WEBAPP_URL
 const PORT = Number(process.env.PORT || 3000)
-const DB_PATH = path.join(__dirname, 'db.json')
+
+// Use /tmp for Vercel serverless (writable), otherwise local path
+const DB_PATH = process.env.VERCEL ? '/tmp/db.json' : path.join(__dirname, 'db.json')
+const PUBLIC_DB_PATH = path.join(__dirname, 'public', 'db.json')
 
 // ============== Database Functions ==============
 function readNewsDB() {
   try {
+    // Try to read from /tmp first (Vercel)
     if (fs.existsSync(DB_PATH)) {
       const data = fs.readFileSync(DB_PATH, 'utf8')
+      return JSON.parse(data)
+    }
+    // Fallback to public/db.json if exists
+    if (fs.existsSync(PUBLIC_DB_PATH)) {
+      const data = fs.readFileSync(PUBLIC_DB_PATH, 'utf8')
       return JSON.parse(data)
     }
   } catch (err) {
@@ -31,7 +40,15 @@ function readNewsDB() {
 
 function writeNewsDB(db) {
   try {
+    // Write to /tmp (Vercel writable)
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8')
+    
+    // Also try to write to public for static access (may fail on Vercel)
+    try {
+      fs.writeFileSync(PUBLIC_DB_PATH, JSON.stringify(db, null, 2), 'utf8')
+    } catch (e) {
+      // Ignore - Vercel doesn't allow writing to public
+    }
     return true
   } catch (err) {
     console.error('Error writing db.json:', err)
@@ -155,6 +172,12 @@ app.use(express.static('public'))
 
 // Root redirect
 app.get('/', (req, res) => res.redirect('/news.html'))
+
+// Serve db.json dynamically from /tmp
+app.get('/db.json', (req, res) => {
+  const db = readNewsDB()
+  res.json(db)
+})
 
 let bot = null
 
@@ -374,7 +397,12 @@ app.post('/api/businesses', (req, res) => {
   }
   
   db.businesses.push(newBiz)
-  writeNewsDB(db)
+  const success = writeNewsDB(db)
+  
+  if (!success) {
+    return res.status(500).json({ error: 'Failed to save business' })
+  }
+  
   res.json({ success: true, business: newBiz })
 })
 
