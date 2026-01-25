@@ -2,6 +2,7 @@
   "name": "ispanskie_msk_bot",
   "version": "2.0.0",
   "scripts": {
+    "build": "echo 'Static files ready'"
     "start": "node index.js"
   },
   "engines": {
@@ -11,10 +12,4 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.2",    "telegraf": "^4.16.3",
     "node-fetch": "^2.7.0"  }
-}
-
-{
-  "scripts": {
-    "build": "echo 'Static files ready'"
-  }
 }
