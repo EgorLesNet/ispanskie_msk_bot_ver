@@ -39,7 +39,44 @@
     </div>
   </nav>
 
-  <script src="/recommendations.js"></script>
-  <script src="/theme.js"></script>
-</body>
-</html>
+  <script>
+// ---------------- theme ----------------
+function toggleTheme() {
+  const body = document.body;
+  const icon = document.getElementById('theme-icon');
+  const isDark = body.getAttribute('data-theme') === 'dark';
+  body.setAttribute('data-theme', isDark ? '' : 'dark');
+  icon.textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const useDark = saved === 'dark' || (!saved && prefersDark);
+  if (useDark) {
+    document.body.setAttribute('data-theme', 'dark');
+    document.getElementById('theme-icon').textContent = '☀️';
+  }
+}
+
+// ---------------- helpers ----------------
+function escapeHtml(s) {
+  return String(s || '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+function linkify(text) {
+  const safe = escapeHtml(text);
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
