@@ -13,61 +13,53 @@ const PORT = Number(process.env.PORT || 3000)
 const TMP_DB_PATH = '/tmp/db.json'
 const PUBLIC_DB_PATH = path.join(__dirname, 'public', 'db.json')
 const LOCAL_DB_PATH = path.join(__dirname, 'db.json')
+const DB_PATH = path.join('/tmp', 'db.json')
+const INITIAL_DB_PATH = path.join(__dirname, 'public', 'db.json')
+
 
 // ============== Database Functions ==============
+
 function readNewsDB() {
-  let baseData = {
+  try {
+    // Сначала пытаемся прочитать из /tmp
+    if (fs.existsSync(DB_PATH)) {
+      const data = fs.readFileSync(DB_PATH, 'utf8')
+      return JSON.parse(data)
+    }
+    
+    // Если нет в /tmp, берем из public/db.json (начальные данные)
+    if (fs.existsSync(INITIAL_DB_PATH)) {
+      console.log('Loading initial data from public/db.json')
+      const data = fs.readFileSync(INITIAL_DB_PATH, 'utf8')
+      const db = JSON.parse(data)
+      // Сохраняем в /tmp для последующих запросов
+      writeNewsDB(db)
+      return db
+    }
+  } catch (err) {
+    console.error('Error reading db.json:', err)
+  }
+  
+  // Если ничего нет - возвращаем пустую структуру
+  return {
     posts: [],
     pending: [],
     rejected: [],
     businesses: [],
     seq: 0
   }
-  
-  // 1. Try to read initial data from public/db.json (static data)
-  try {
-    if (fs.existsSync(PUBLIC_DB_PATH)) {
-      const data = fs.readFileSync(PUBLIC_DB_PATH, 'utf8')
-      baseData = JSON.parse(data)
-    }
-  } catch (err) {
-    console.error('Error reading public/db.json:', err)
-  }
-  
-  // 2. If Vercel, try to merge with /tmp/db.json (runtime updates)
-  if (process.env.VERCEL) {
-    try {
-      if (fs.existsSync(TMP_DB_PATH)) {
-        const tmpData = fs.readFileSync(TMP_DB_PATH, 'utf8')
-        const parsed = JSON.parse(tmpData)
-        // Merge: prefer tmp data if it has content
-        if (parsed.posts && parsed.posts.length > 0) {
-          baseData.posts = parsed.posts
-        }
-        if (parsed.businesses && parsed.businesses.length > 0) {
-          baseData.businesses = parsed.businesses
-        }
-        if (parsed.pending) baseData.pending = parsed.pending
-        if (parsed.rejected) baseData.rejected = parsed.rejected
-        if (parsed.seq) baseData.seq = parsed.seq
-      }
-    } catch (err) {
-      console.error('Error reading /tmp/db.json:', err)
-    }
-  } else {
-    // Local: use local db.json if exists
-    try {
-      if (fs.existsSync(LOCAL_DB_PATH)) {
-        const data = fs.readFileSync(LOCAL_DB_PATH, 'utf8')
-        baseData = JSON.parse(data)
-      }
-    } catch (err) {
-      console.error('Error reading db.json:', err)
-    }
-  }
-  
-  return baseData
 }
+
+function writeNewsDB(db) {
+  try {
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8')
+    return true
+  } catch (err) {
+    console.error('Error writing db.json:', err)
+    return false
+  }
+}
+
 
 function writeNewsDB(db) {
   try {
