@@ -1,413 +1,245 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Бизнес — Агрегатор для района</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-      min-height:100vh;background:#f0f2f5;color:#1a1a1a;
-      transition:background 0.3s ease, color 0.3s ease;
-      padding-top:calc(80px + env(safe-area-inset-top));
-      padding-bottom:calc(90px + env(safe-area-inset-bottom))
-    }
-    body[data-theme="dark"]{background:#0e0e0e;color:#fff;}
-    .header{
-      position:fixed;top:calc(12px + env(safe-area-inset-top));left:12px;right:12px;z-index:100;
-      display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-radius:20px;
-    }
-    .logo-wrap{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
-    .logo-img{width:40px;height:40px;border-radius:10px;transition:transform 0.3s;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
-    .logo-img:hover{transform:scale(1.1) rotate(5deg)}
-    h3{font-size:17px;font-weight:600;margin:0}
-    .subtitle{font-size:12px;color:#666;margin-top:3px;}
-    body[data-theme="dark"] .subtitle{color:#999}
-    .theme-toggle{background:transparent;border:none;font-size:24px;cursor:pointer;padding:8px;border-radius:50%;transition:transform 0.3s,background 0.2s;}
-    .theme-toggle:hover{transform:scale(1.15) rotate(15deg);background:rgba(0,0,0,0.05)}
-    body[data-theme="dark"] .theme-toggle:hover{background:rgba(255,255,255,0.08)}
-    .liquid-glass{backdrop-filter:blur(20px) saturate(180%) brightness(1.1);-webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.1);}
-    .header.liquid-glass{background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.4);box-shadow:0 8px 32px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.5);}
-    body[data-theme="dark"] .header.liquid-glass{background:rgba(20,20,20,0.7);border:1px solid rgba(255,255,255,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);}
-    #businessView{width:min(900px,94vw);margin:18px auto;margin-top:calc(76px + env(safe-area-inset-top));display:grid;gap:12px;}
-    .biz-topbar{display:flex;padding:16px 18px 12px;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;}
-    .biz-filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-    .biz-search{width:100%;padding:10px 14px;border-radius:14px;border:1px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.9);font-size:14px;margin-top:8px;transition:all .2s ease;}
-    .biz-search:focus{outline:none;border-color:#007aff;box-shadow:0 0 0 3px rgba(0,122,255,0.15);}
-    body[data-theme="dark"] .biz-search{border:1px solid rgba(255,255,255,0.15);background:rgba(20,20,20,0.8);color:#fff;}
-    .chip{border:1px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.6);padding:8px 12px;border-radius:999px;cursor:pointer;font-size:13px;transition:transform .15s ease, background .2s ease;}
-    body[data-theme="dark"] .chip{border:1px solid rgba(255,255,255,0.18);background:rgba(50,50,50,0.6);color:#ddd;}
-    .chip.active{background:#007aff;border-color:#007aff;color:#fff;}
-    body[data-theme="dark"] .chip.active{background:#0a84ff;border-color:#0a84ff;}
-    .chip:hover{transform:scale(1.03)}
-    .biz-actions{display:flex;gap:8px;align-items:center}
-    .btn{border:1px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.75);padding:9px 12px;border-radius:14px;cursor:pointer;font-size:13px;transition:transform .15s ease, background .2s ease;}
-    body[data-theme="dark"] .btn{border:1px solid rgba(255,255,255,0.18);background:rgba(50,50,50,0.75);color:#ddd;}
-    .btn:hover{transform:translateY(-1px)}
-    .biz-layout{display:grid;grid-template-columns:1fr;gap:12px;padding:0 18px;}
-    #map{min-height:360px;border-radius:20px;overflow:hidden;border:1px solid rgba(0,0,0,0.1);box-shadow:0 10px 28px rgba(0,0,0,0.12);}
-    body[data-theme="dark"] #map{border:1px solid rgba(255,255,255,0.12);box-shadow:0 10px 28px rgba(0,0,0,0.45);}
-    .biz-form{display:none;padding:14px;border-radius:20px;background:rgba(255,255,255,0.65);border:1px solid rgba(0,0,0,0.08);}
-    body[data-theme="dark"] .biz-form{background:rgba(30,30,30,0.65);border:1px solid rgba(255,255,255,0.1);}
-    .biz-form .row{display:grid;gap:8px;margin:10px 0}
-    .biz-form input,.biz-form select,.biz-form textarea{width:100%;padding:10px 12px;border-radius:14px;border:1px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.9);font-size:14px;}
-    body[data-theme="dark"] .biz-form input,body[data-theme="dark"] .biz-form select,body[data-theme="dark"] .biz-form textarea{border:1px solid rgba(255,255,255,0.15);background:rgba(20,20,20,0.8);color:#fff;}
-    .biz-form textarea{min-height:80px;resize:vertical}
-    .hint{font-size:12px;color:#777;line-height:1.4}
-    body[data-theme="dark"] .hint{color:#aaa}
-    .nav{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:calc(12px + env(safe-area-inset-left));right:calc(12px + env(safe-area-inset-right));z-index:100;display:flex;justify-content:center;padding:10px;border-radius:22px;}
-    .nav-inner{display:flex;gap:8px;justify-content:center;width:100%;max-width:600px;}
-    .nav-btn{background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.12);padding:11px 24px;border-radius:18px;cursor:pointer;font-size:14px;font-weight:500;transition:all 0.3s;color:#333;white-space:nowrap;text-decoration:none;display:flex;align-items:center;gap:6px;}
-    body[data-theme="dark"] .nav-btn{background:rgba(50,50,50,0.6);border:1px solid rgba(255,255,255,0.18);color:#ccc;}
-    .nav-btn:hover{background:rgba(255,255,255,0.9);transform:translateY(-2px) scale(1.05);box-shadow:0 6px 16px rgba(0,0,0,0.15);}
-    body[data-theme="dark"] .nav-btn:hover{background:rgba(70,70,70,0.9);}
-    .nav-btn.active{background:#007aff;color:#fff;border-color:#007aff;box-shadow:0 4px 12px rgba(0,122,255,0.4);}
-    body[data-theme="dark"] .nav-btn.active{background:#0a84ff;border-color:#0a84ff;box-shadow:0 4px 12px rgba(10,132,255,0.4);}
-    .nav.liquid-glass{background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.4);box-shadow:0 -4px 24px rgba(0,0,0,0.12);}
-    body[data-theme="dark"] .nav.liquid-glass{background:rgba(20,20,20,0.7);border:1px solid rgba(255,255,255,0.2);box-shadow:0 -4px 24px rgba(0,0,0,0.4);}
-    @media (max-width:550px){.nav-btn .nav-text{display:none}.nav-btn{padding:11px 16px;}}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Карта бизнесов - Испанские кварталы</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        #map { width: 100%; height: 100vh; }
+        .business-popup { padding: 10px; }
+        .business-popup h3 { margin-bottom: 8px; font-size: 16px; }
+        .business-popup .category { color: #666; font-size: 13px; margin-bottom: 8px; }
+        .business-popup .rating { color: #f39c12; font-size: 14px; margin-bottom: 8px; }
+        .business-popup .description { font-size: 14px; margin-bottom: 8px; }
+        .business-popup .address { color: #666; font-size: 12px; margin-bottom: 8px; }
+        .add-btn { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 60px; 
+            height: 60px; 
+            font-size: 30px; 
+            cursor: pointer; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 2000;
+        }
+        .modal-content { 
+            background: white; 
+            margin: 50px auto; 
+            padding: 30px; 
+            max-width: 500px; 
+            border-radius: 12px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal h2 { margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 14px;
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            margin-right: 10px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .close-btn { 
+            float: right; 
+            font-size: 28px; 
+            cursor: pointer; 
+            color: #999; 
+        }
+    </style>
 </head>
-
 <body>
-  <header class="header liquid-glass">
-    <a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener">
-      <img class="logo-img" src="https://raw.githubusercontent.com/EgorLesNet/ispanskie_msk_bot_ver/main/public/logo.png" alt="Лого" />
-      <div>
-        <h3>Агрегатор для района</h3>
-        <div class="subtitle">Бизнес-карта</div>
-      </div>
-    </a>
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
-      <span id="theme-icon">🌙</span>
-    </button>
-  </header>
-
-  <section id="businessView">
-    <div class="biz-topbar">
-      <div class="biz-filters" id="bizFilters"></div>
-
-      <input type="text" id="bizSearch" class="biz-search" placeholder="🔍 Поиск по названию бизнеса...">
-
-      <div class="biz-actions">
-        <button class="btn" id="btnSetBizSecret" type="button">🔐 Секрет</button>
-        <button class="btn" id="btnAddBiz" type="button">➕ Добавить бизнес</button>
-      </div>
+    <div id="map"></div>
+    
+    <button class="add-btn" onclick="openModal()">+</button>
+    
+    <div id="addBusinessModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2>Добавить бизнес</h2>
+            <form id="addBusinessForm">
+                <div class="form-group">
+                    <label>Название *</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Категория *</label>
+                    <select id="category" required>
+                        <option value="">Выберите категорию</option>
+                        <option value="Кафе/Ресторан">Кафе/Ресторан</option>
+                        <option value="Магазин">Магазин</option>
+                        <option value="Услуги">Услуги</option>
+                        <option value="Развлечения">Развлечения</option>
+                        <option value="Другое">Другое</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Адрес</label>
+                    <input type="text" id="address">
+                </div>
+                <div class="form-group">
+                    <label>Сайт/Ссылка</label>
+                    <input type="url" id="url">
+                </div>
+                <div class="form-group">
+                    <label>Координаты (нажмите на карте)</label>
+                    <input type="text" id="coordinates" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Секретный ключ *</label>
+                    <input type="password" id="secret" required placeholder="Получите у администратора">
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+            </form>
+        </div>
     </div>
 
-    <div class="biz-layout">
-      <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Центр - Испанские кварталы, Москва
+        const map = L.map('map').setView([55.786, 37.53], 16);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-      <div class="biz-form" id="bizForm">
-        <div class="hint">
-          1) Нажми на карте точку (координаты подставятся).<br/>
-          2) Заполни поля и нажми “Сохранить”.<br/>
-          3) Нужен секрет (кнопка “🔐 Секрет”).
-        </div>
+        let selectedCoords = null;
+        let tempMarker = null;
 
-        <div class="row">
-          <label>Категория</label>
-          <select id="bizCategory">
-            <option value="Кафе/Рестораны">Кафе/Рестораны</option>
-            <option value="Магазины">Магазины</option>
-            <option value="Услуги">Услуги</option>
-            <option value="Красота">Красота</option>
-            <option value="Медицина">Медицина</option>
-            <option value="Спорт">Спорт</option>
-            <option value="Дети">Дети</option>
-            <option value="Образование">Образование</option>
-            <option value="Ремонт/Строительство">Ремонт/Строительство</option>
-            <option value="Доставка">Доставка</option>
-            <option value="Авто">Авто</option>
-            <option value="Развлечения">Развлечения</option>
-            <option value="Фото/Видео">Фото/Видео</option>
-            <option value="Юридические услуги">Юридические услуги</option>
-            <option value="Недвижимость">Недвижимость</option>
-            <option value="Химчистка/Прачечная">Химчистка/Прачечная</option>
-            <option value="Зоомагазины/Вет">Зоомагазины/Вет</option>
-            <option value="Финансы/Банки">Финансы/Банки</option>
-            <option value="Другое">Другое</option>
-          </select>
-        </div>
-
-        <div class="row">
-          <label>Название</label>
-          <input id="bizName" placeholder="Например: Пекарня ‘Хлеб’" />
-        </div>
-
-        <div class="row">
-          <label>Описание</label>
-          <textarea id="bizDesc" placeholder="Коротко: что за бизнес, часы, особенности"></textarea>
-        </div>
-
-        <div class="row">
-          <label>Адрес (опционально)</label>
-          <input id="bizAddress" placeholder="Например: ул. ..., дом ..." />
-        </div>
-
-        <div class="row">
-          <label>Ссылка (сайт/телеграм) (опционально)</label>
-          <input id="bizUrl" placeholder="https://t.me/..." />
-        </div>
-
-        <div class="row">
-          <label>Координаты</label>
-          <input id="bizLat" placeholder="lat" />
-          <input id="bizLng" placeholder="lng" />
-          <div class="hint" id="bizPickHint">Кликни по карте, чтобы выбрать точку.</div>
-        </div>
-
-        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn" id="btnSaveBiz" type="button">✅ Сохранить</button>
-          <button class="btn" id="btnCancelBiz" type="button">✖ Закрыть</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-<nav class="nav liquid-glass">
-    <div class="nav-inner">
-      <a href="news.html" class="nav-btn active">
-        <span>📰</span>
-        <span class="nav-text"> Новости</span>
-      </a>
-      <a href="business.html" class="nav-btn">
-        <span>💼</span>
-        <span class="nav-text"> Бизнес</span>
-      </a>
-      <a href="recommendations.html" class="nav-btn">
-        <span>⭐</span>
-        <span class="nav-text"> Рекомендации</span>
-      </a>
-    </div>
-  </nav>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <script>
-    // ---------------- theme ----------------
-    function toggleTheme() {
-      const body = document.body;
-      const icon = document.getElementById('theme-icon');
-      const isDark = body.getAttribute('data-theme') === 'dark';
-      body.setAttribute('data-theme', isDark ? '' : 'dark');
-      icon.textContent = isDark ? '🌙' : '☀️';
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    }
-    function initTheme() {
-      const saved = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const useDark = saved === 'dark' || (!saved && prefersDark);
-      if (useDark) {
-        document.body.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-icon').textContent = '☀️';
-      }
-    }
-
-    // ---------------- helpers ----------------
-    function escapeHtml(s) {
-      return String(s || '')
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'","'");
-    }
-
-    // ---------------- business map ----------------
-    let bizList = [];
-    let bizCategoryFilter = 'Все';
-
-    let map = null;
-    let markersLayer = null;
-    let pickMarker = null;
-
-    function ensureMap() {
-      if (map) return;
-
-      const center = [55.57, 37.43];
-      map = L.map('map', { zoomControl: true }).setView(center, 14);
-
-      // OSM tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
-
-      markersLayer = L.layerGroup().addTo(map);
-
-      map.on('click', (e) => {
-        const form = document.getElementById('bizForm');
-        if (form.style.display !== 'block') return;
-
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
-
-        document.getElementById('bizLat').value = lat.toFixed(6);
-        document.getElementById('bizLng').value = lng.toFixed(6);
-
-        if (pickMarker) pickMarker.remove();
-        pickMarker = L.marker([lat, lng]).addTo(map);
-
-        document.getElementById('bizPickHint').textContent = 'Точка выбрана. Можно сохранять.';
-      });
-    }
-
-    function buildBizFilters() {
-      const container = document.getElementById('bizFilters');
-      const cats = new Set(['Все']);
-      bizList.forEach(b => cats.add(b.category || 'Другое'));
-      const items = Array.from(cats);
-
-      container.innerHTML = items.map(c => {
-        const active = c === bizCategoryFilter ? 'chip active' : 'chip';
-        return `<button class="${active}" type="button" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`;
-      }).join('');
-
-      container.querySelectorAll('button[data-cat]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          bizCategoryFilter = btn.getAttribute('data-cat') || 'Все';
-          buildBizFilters();
-          renderBusinesses();
-        });
-      });
-    }
-
-    function currentSearch() {
-      return (document.getElementById('bizSearch').value || '').trim().toLowerCase();
-    }
-
-    function renderBusinesses() {
-      if (!map || !markersLayer) return;
-
-      markersLayer.clearLayers();
-
-      const q = currentSearch();
-      const filtered = bizList.filter(b => {
-        const catOk = (bizCategoryFilter === 'Все') ? true : ((b.category || 'Другое') === bizCategoryFilter);
-        const name = String(b.name || '').toLowerCase();
-        const searchOk = !q || name.includes(q);
-        return catOk && searchOk;
-      });
-
-      filtered.forEach(b => {
-        const lat = Number(b.lat);
-        const lng = Number(b.lng);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-
-        const title = escapeHtml(b.name || 'Бизнес');
-        const cat = escapeHtml(b.category || 'Другое');
-        const desc = b.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.35;">${escapeHtml(b.description)}</div>` : '';
-        const addr = b.address ? `<div style="margin-top:6px;font-size:12px;opacity:0.85;">${escapeHtml(b.address)}</div>` : '';
-        const link = b.url ? `<div style="margin-top:8px;"><a href="${escapeHtml(b.url)}" target="_blank" rel="noopener">Открыть ссылку</a></div>` : '';
-
-        const popupHtml = `
-          <div style="font-size:14px;font-weight:600;">${title}</div>
-          <div style="font-size:12px;opacity:0.85;margin-top:2px;">${cat}</div>
-          ${desc}
-          ${addr}
-          ${link}
-        `;
-
-        L.marker([lat, lng]).addTo(markersLayer).bindPopup(popupHtml);
-      });
-    }
-
-    async function loadBusinesses({ render = true } = {}) {
-      try {
-        const res = await fetch('/api/businesses', { cache: 'no-store' });
-        const data = await res.json();
-        bizList = Array.isArray(data.businesses) ? data.businesses : [];
-        buildBizFilters();
-        if (render) renderBusinesses();
-      } catch (e) {
-        console.error(e);
-        alert('Не удалось загрузить бизнесы (/api/businesses).');
-      }
-    }
-
-    function getBizSecret() {
-      return localStorage.getItem('biz_admin_secret') || '';
-    }
-
-    function setBizSecret() {
-      const cur = getBizSecret();
-      const s = prompt('Введите секрет BUSINESS_ADMIN_KEY (сохранится в браузере):', cur || '');
-      if (s == null) return;
-      localStorage.setItem('biz_admin_secret', s.trim());
-      alert('Секрет сохранён.');
-    }
-
-    function openBizForm() {
-      document.getElementById('bizForm').style.display = 'block';
-      document.getElementById('bizPickHint').textContent = 'Кликни по карте, чтобы выбрать точку.';
-    }
-
-    function closeBizForm() {
-      document.getElementById('bizForm').style.display = 'none';
-      document.getElementById('bizName').value = '';
-      document.getElementById('bizDesc').value = '';
-      document.getElementById('bizAddress').value = '';
-      document.getElementById('bizUrl').value = '';
-      document.getElementById('bizLat').value = '';
-      document.getElementById('bizLng').value = '';
-      document.getElementById('bizPickHint').textContent = 'Кликни по карте, чтобы выбрать точку.';
-      if (pickMarker) { pickMarker.remove(); pickMarker = null; }
-    }
-
-    async function saveBusiness() {
-      const secret = getBizSecret();
-      if (!secret) {
-        alert('Сначала задай секрет кнопкой “🔐 Секрет”.');
-        return;
-      }
-
-      const payload = {
-        secret,
-        name: document.getElementById('bizName').value,
-        category: document.getElementById('bizCategory').value,
-        description: document.getElementById('bizDesc').value,
-        address: document.getElementById('bizAddress').value,
-        url: document.getElementById('bizUrl').value,
-        lat: document.getElementById('bizLat').value,
-        lng: document.getElementById('bizLng').value
-      };
-
-      try {
-        const res = await fetch('/api/businesses', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        // Клик по карте для выбора координат
+        map.on('click', function(e) {
+            selectedCoords = e.latlng;
+            document.getElementById('coordinates').value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+            
+            if (tempMarker) map.removeLayer(tempMarker);
+            tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41]
+                })
+            }).addTo(map);
         });
 
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          alert('Ошибка сохранения: ' + (data.error || res.status));
-          return;
+        // Загрузка существующих бизнесов
+        async function loadBusinesses() {
+            try {
+                const res = await fetch('/api/businesses');
+                const data = await res.json();
+                
+                data.businesses.forEach(biz => {
+                    const marker = L.marker([biz.lat, biz.lng]).addTo(map);
+                    
+                    const popupContent = `
+                        <div class="business-popup">
+                            <h3>${biz.name}</h3>
+                            <div class="category">${biz.category}</div>
+                            ${biz.avgRating ? `<div class="rating">⭐ ${biz.avgRating} (${biz.reviewCount} отзывов)</div>` : ''}
+                            ${biz.description ? `<div class="description">${biz.description}</div>` : ''}
+                            ${biz.address ? `<div class="address">📍 ${biz.address}</div>` : ''}
+                            ${biz.url ? `<div><a href="${biz.url}" target="_blank">Перейти →</a></div>` : ''}
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent);
+                });
+            } catch (err) {
+                console.error('Ошибка загрузки бизнесов:', err);
+            }
         }
 
-        closeBizForm();
-        await loadBusinesses({ render: true });
-        alert('Бизнес добавлен!');
-      } catch (e) {
-        console.error(e);
-        alert('Ошибка сети при сохранении.');
-      }
-    }
+        function openModal() {
+            document.getElementById('addBusinessModal').style.display = 'block';
+        }
 
-    // ---------------- init ----------------
-    initTheme();
-    ensureMap();
-    loadBusinesses({ render: true });
+        function closeModal() {
+            document.getElementById('addBusinessModal').style.display = 'none';
+            document.getElementById('addBusinessForm').reset();
+            if (tempMarker) {
+                map.removeLayer(tempMarker);
+                tempMarker = null;
+            }
+            selectedCoords = null;
+        }
 
-    document.getElementById('btnSetBizSecret').addEventListener('click', setBizSecret);
-    document.getElementById('btnAddBiz').addEventListener('click', openBizForm);
-    document.getElementById('btnCancelBiz').addEventListener('click', closeBizForm);
-    document.getElementById('btnSaveBiz').addEventListener('click', saveBusiness);
+        document.getElementById('addBusinessForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedCoords) {
+                alert('Пожалуйста, выберите место на карте');
+                return;
+            }
 
-    document.getElementById('bizSearch').addEventListener('input', () => renderBusinesses());
-  </script>
+            const data = {
+                secret: document.getElementById('secret').value,
+                name: document.getElementById('name').value,
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                address: document.getElementById('address').value,
+                url: document.getElementById('url').value,
+                lat: selectedCoords.lat,
+                lng: selectedCoords.lng
+            };
+
+            try {
+                const res = await fetch('/api/businesses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                
+                if (res.ok) {
+                    alert('Бизнес успешно добавлен!');
+                    closeModal();
+                    loadBusinesses(); // Перезагрузить карту
+                } else {
+                    alert('Ошибка: ' + (result.error || 'Неизвестная ошибка'));
+                }
+            } catch (err) {
+                alert('Ошибка сети: ' + err.message);
+            }
+        });
+
+        // Загрузить бизнесы при старте
+        loadBusinesses();
+    </script>
 </body>
 </html>
