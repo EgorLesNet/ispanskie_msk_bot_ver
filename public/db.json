@@ -27,6 +27,747 @@
       "moderationMessage": null,
       "status": "approved",
       "sourceType": "admin"
+    },
+    {
+      "id": 23,
+      "text": "🚒 В деревне ночью был пожар :(",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-24T08:32:19.005Z",
+      "timestamp": "2026-01-24T08:32:19.005Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICWGl0g5GXnQHtRgQu5YQSOgsAAakR8QACqYcAAnbsoEtg-zdhI8pEDzgE"
+        },
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICWWl0g5GyvkNMjWhXpn7mjsOwDX96AAKqhwACduygS-4b5kWzD01eOAQ"
+        },
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICWml0g5E3QYSn88FU4A1ekfmTadNOAAKrhwACduygS61Usx-MjSpPOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8936,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8936"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 22,
+      "text": "🚬 Идиоты, кидающие сигареты, этот пост вам…\n\nШла с двумя детьми по Севильскому бульвару вечером 23.01.26., один из них в коляске. И кто-то толи проходящий мимо нас, толи из окна кинул непотушенную сигарету, которая попала в коляску. Ребёнок ехал и тлел. Благо сам не пострадал, так как зимний комбинезон. Запах я улавливала, но не понимала откуда. В итоге испорчены вещи. \nКурящие (особенно те, кто курит «собрание») не будьте свиньями, проявляйте уважение. Проходящие будте бдительны. Очень не приятно и опасно!",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-23T18:41:01.136Z",
+      "timestamp": "2026-01-23T18:41:01.136Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICVWlzwLsGhp06ndRUGT7cVoXo93cPAAK_E2sbyN-YSxXD9FZVepEsAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICVmlzwLt-WzKKq6xufNG0E92jSBF-AALAE2sbyN-YSwg6pd6Qg7LfAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICVWlzwLsGhp06ndRUGT7cVoXo93cPAAK_E2sbyN-YSxXD9FZVepEsAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICVWlzwLsGhp06ndRUGT7cVoXo93cPAAK_E2sbyN-YSxXD9FZVepEsAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAICVmlzwLt-WzKKq6xufNG0E92jSBF-AALAE2sbyN-YSwg6pd6Qg7LfAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8934,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8934"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 21,
+      "text": "🇮🇪 Ирландский актер в Испанских Кварталах \n\nСмотрите, какой интересный человек живет в нашем ЖК. Этот ирландец известен в России ;)\n\nКинопоиск\n\nПресса",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-23T16:02:59.320Z",
+      "timestamp": "2026-01-23T16:02:59.320Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICU2lzm7LhWxvJjLcErlueryZT3P41AAInkwACyN-YS1Fd0a4b3NL2OAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8933,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8933"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 20,
+      "text": "🌎 ⛪️\nВ чате инициативной группы по Лайт-индастриал появился опрос, касательно строительства храма на месте Лайт индастриал, ниже цитата:\n🙌Дорогие соседи и жители нашего ЖК Испанские кварталы!🙌 \nПрошу минутку вашего внимания, для меня и актива - это очень важно! \n\nМы с вами проделали уже очень большой путь и будем продолжать также активно противостоять постройке промзоны (Лайт-Индастриал/Бизнес-Хаб) в нашем ЖК. \n\nНам удалось на время отложить строительство у дома Магеллана 2, но этого недостаточно. \n\nСМИ и другие источники пока не готовы подключаться, так как нет еще фактически никакой стройки,  а в Мосархитектеру  даже еще не поступал проект от а101.\n\nНа данном этапе мы уже понимаем, что ФОК на этом участке не построят, так как он планируется в деревне Николо-Хованская.\n\nМы будем и дальше продолжать нашу активность в сторону муз. школ, парка, спорт.площадок и др. нужных для нас объектов.\n\nПри этом у нас появилось еще одно направление, которое имеет большой вес в пользу жителей. Совсем недавно нам удалось найти людей, которые могут посодействовать нам в строительстве храма в нашем районе. Есть возможность просить о постройке храма на участке, где сейчас планируется постройка Лайт Индастриал/Бизнес-Хаб. \n\nНо для того, чтобы начать в эту сторону активность, важно знать и быть уверенными, что жители за эту идею и окажут поддержку. Мы активно будем, как минимум, требовать также сбор подписей. Без подписей жителей продвинуть эту идею будет невозможно.\n\nВ связи с этим мы решили провести опрос в каналах/группах района. Если наберётся достаточно человек проголосовавших за, то мы начнем работу в эту сторону.\n\nНо, тут есть одно но, о котором мы хотим сообщить сразу: храм для нашего района могут подтвердить, но если не получится договориться с А101, то его построят на другом участке.\n\nПрошу всех подключиться к решению вопроса и проголосовать.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-23T16:02:49.216Z",
+      "timestamp": "2026-01-23T16:02:49.216Z",
+      "category": "all",
+      "media": [],
+      "photoFileId": null,
+      "source": {
+        "title": "Испанские Кварталы | Прокшино ❄️☃️",
+        "username": "ispanskie_msk",
+        "chatId": -1001907008907,
+        "messageId": 534,
+        "chatUrl": "https://t.me/ispanskie_msk",
+        "postUrl": "https://t.me/ispanskie_msk/534"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 19,
+      "text": "Соседи!\nУчастковыми уполномоченными ОМВД России «Коммунарский» г. Москвы и сотрудниками ГКУ «Московская безопасность» на бульваре Веласкеса, д.9 корп 1 была пресечена деятельность очередной «резиновой» квартиры, в которой незаконно проживали иностранные граждане. \nДвое задержаны, в отношении организатора возбуждено уголовное дело по ст. 322.1 УК РФ- Незаконная организация миграции.\nПри выявлении подозрительных ситуаций или фактов «резиновых» квартир в вашем доме просим вас сообщать информацию:\n• Через личные сообщения @Nik_Sadov \n• По телефону   +7 916 193 8941",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-23T12:02:02.468Z",
+      "timestamp": "2026-01-23T12:02:02.468Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICTmlzYzhA9e6OfRVceXSU7yTZU-CKAAL-D2sbnhSYS83eh7G6O7vnAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICT2lzYzhGkcndwRVA9qAuwuby94ySAAL_D2sbnhSYS_cnO7fDcyfRAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICTmlzYzhA9e6OfRVceXSU7yTZU-CKAAL-D2sbnhSYS83eh7G6O7vnAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICTmlzYzhA9e6OfRVceXSU7yTZU-CKAAL-D2sbnhSYS83eh7G6O7vnAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAICT2lzYzhGkcndwRVA9qAuwuby94ySAAL_D2sbnhSYS_cnO7fDcyfRAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "Николай Садов",
+        "username": "nicksadov",
+        "chatId": -1001613129162,
+        "messageId": 1411,
+        "chatUrl": "https://t.me/nicksadov",
+        "postUrl": "https://t.me/nicksadov/1411"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 18,
+      "text": "Собаки вернулись? Давненько не было новостей о них. Теперь на набережной. Правда эти похожи на новую стаю.\n\n 📣 Поделиться новостью.\n\nЧат | Telegram\nНовости | Telegram\nВКонтакте\nInstagram",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-23T06:43:52.736Z",
+      "timestamp": "2026-01-23T06:43:52.736Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICS2lzGKf88xDpoDyG5tGnwaYolVbEAAK5lgAC8GCZS-6m1CYvhhhAOAQ"
+        },
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICTGlzGKfJFQQcEOb_laFk58nClrBJAAK6lgAC8GCZSw4WYlkwIJQyOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ЖК Прокшино | Новости",
+        "username": "pro_prokshino",
+        "chatId": -1001676774641,
+        "messageId": 9164,
+        "chatUrl": "https://t.me/pro_prokshino",
+        "postUrl": "https://t.me/pro_prokshino/9164"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 17,
+      "text": "🥶В ближайшие дни в Москве ожидаются сильные морозы: ночью до −25, днём до −15. \n\nРассказываем, как комфортнее пережить морозы:\n• Одевайтесь слоями: от тонких к тёплым, утепляйте голову, шею, руки и ноги\n• Ограничивайте время на морозе, делайте перерывы в тепле. Пейте тёплые напитки\n• Воздержитесь от алкоголя: он не согревает, ускоряет потерю тепла и притупляет симптомы переохлаждения\n• Плотно закрывайте за собой двери подъездов — сохраним тепло во входных группах\n• Сократите время прогулок с детьми, пожилыми и питомцами\n\nЕсли сильно замерзли:\n• Зайдите в тёплое помещение, снимите мокрую одежду и обувь, переоденьтесь \n• Согреться помогут теплые напитки – чай, морс, травяной настой. \n• Не используйте горячую ванну, не грейтесь у батареи вплотную\n• При признаках обморожения  (бледная/восковая кожа, онемение, боль, пузыри) и/или признаках переохлаждения (сильная дрожь, слабость, сонливость, спутанная речь) сразу обращайтесь к врачу.\n\nПрислушивайтесь к своим ощущениям. Каждый переносит холод по‑разному. Берегите себя и близких ❤️",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-23T06:35:45.935Z",
+      "timestamp": "2026-01-23T06:35:45.935Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICSWlzFr9dq01Ak3ZduKJp_1hgQ-u6AAKPEGsbpayRSybdsxYTn7CNAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICSWlzFr9dq01Ak3ZduKJp_1hgQ-u6AAKPEGsbpayRSybdsxYTn7CNAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICSWlzFr9dq01Ak3ZduKJp_1hgQ-u6AAKPEGsbpayRSybdsxYTn7CNAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ЖК Испанские кварталы | А101-КОМФОРТ",
+        "username": "isk_official",
+        "chatId": -1001704456867,
+        "messageId": 3952,
+        "chatUrl": "https://t.me/isk_official",
+        "postUrl": "https://t.me/isk_official/3952"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 16,
+      "text": "Похоже реально кто-то что-то готовил в клумбе….\n\nТам росли многолетние цветы :(",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-22T20:27:10.702Z",
+      "timestamp": "2026-01-22T20:27:10.702Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICR2lyiB4N8v18qIYdGS7JSF7OP54hAALpE2sbyN-QS4kzRaD3CSYyAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICR2lyiB4N8v18qIYdGS7JSF7OP54hAALpE2sbyN-QS4kzRaD3CSYyAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICR2lyiB4N8v18qIYdGS7JSF7OP54hAALpE2sbyN-QS4kzRaD3CSYyAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8930,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8930"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 15,
+      "text": "Опять авария на нашем перекрестке…",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-22T20:27:05.006Z",
+      "timestamp": "2026-01-22T20:27:05.006Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICRWlyiBj5CSfGhgHglzQjiiZf6GXkAAITE2sbyN-QS2rkCK43I22DAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICRWlyiBj5CSfGhgHglzQjiiZf6GXkAAITE2sbyN-QS2rkCK43I22DAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICRWlyiBj5CSfGhgHglzQjiiZf6GXkAAITE2sbyN-QS2rkCK43I22DAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8929,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8929"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 14,
+      "text": "Соседи пишут, что кто-то второй день разжигает костер в клумбах на набережной 🫣\n\nДобрый день, соседи прислали в чате дома на Магеллана 4. Жгут костер в клумбах на набережной, которые дети делали..\n\nЕсть у кого-то возможность сходить и проверить?",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-22T20:27:00.808Z",
+      "timestamp": "2026-01-22T20:27:00.808Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICQ2lyiBOR8utvTypksAczynMVB33zAAKpEGsbyN-QS4whhb_mLrToAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICQ2lyiBOR8utvTypksAczynMVB33zAAKpEGsbyN-QS4whhb_mLrToAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICQ2lyiBOR8utvTypksAczynMVB33zAAKpEGsbyN-QS4whhb_mLrToAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8928,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8928"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
+      "id": 13,
+      "text": "📍Строительство канализационно-насосной станции «Прокшино» завершилось в Коммунарке\n\nСпециалисты возвели техническое сооружение, установили оборудование и завершили пусконаладочные мероприятия. Новый объект позволит перекачивать 30 тысяч кубометров в сутки.\n\nПосле подключения канализационно-насосной станции «Прокшино» к центральным сетям жилые дома районов Коммунарка и Филимонковский будут обеспечены бесперебойным водоотведением. Сейчас рабочие разрабатывают схемы интегрирования объекта с городскими системами.\n\n«Строители установили аварийно-регулирующие резервуары и оборудование закрытого типа с автоматизированным управлением. Комплекс инженерных сооружений позволит распределять нагрузку на насосные станции и в случае нештатной ситуации сможет принять объем сточных вод. Для нейтрализации запахов на резервуарах специалисты установили фильтрационные системы», — отметил депутат Коммунарки Николай Садов.\n\nℹ️На территории канализационно-насосной станции провели благоустройство. Строители создали проезды для техники и установили ограждения.\n\n🧩 Подписаться на канал «Префектура ТиНАО» в MAX.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-22T11:47:18.313Z",
+      "timestamp": "2026-01-22T11:47:18.313Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICP2lyDkRxrpFSJYFc_XZ8VaEUvK7ZAALoDWsbh8uQS1rOIYOaH_NCAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICQGlyDkS-iMJ0s5Pe6DCm-oc6EOBmAALpDWsbh8uQSwd5PXtuexPmAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICQWlyDkT936qXZV_UIEmcLKz3fFxBAALqDWsbh8uQS-sB9DQjFdNTAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICP2lyDkRxrpFSJYFc_XZ8VaEUvK7ZAALoDWsbh8uQS1rOIYOaH_NCAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICP2lyDkRxrpFSJYFc_XZ8VaEUvK7ZAALoDWsbh8uQS1rOIYOaH_NCAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAICQGlyDkS-iMJ0s5Pe6DCm-oc6EOBmAALpDWsbh8uQSwd5PXtuexPmAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAICQWlyDkT936qXZV_UIEmcLKz3fFxBAALqDWsbh8uQS-sB9DQjFdNTAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "Префектура ТиНАО",
+        "username": "tinao_mos",
+        "chatId": -1001743318325,
+        "messageId": 7428,
+        "chatUrl": "https://t.me/tinao_mos",
+        "postUrl": "https://t.me/tinao_mos/7428"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 41,
+      "dislikes": 5,
+      "sourceType": "admin"
+    },
+    {
+      "id": 12,
+      "text": "Уважаемые жители!\n\nНапоминаем: для утилизации бытового мусора предусмотрена контейнерная площадка на территории ЖК.\n\nМаленькие урны у подъездов предназначены лишь для мелкого бытового мусора (обёртки, салфетки). Они не предназначены для пакетов с мусором.\n\nПожалуйста, не оставляйте мусор в урнах у подъездов — пользуйтесь контейнерной площадкой.\n\nВместе сделаем двор уютнее — спасибо за заботу!\n\n#уютный_двор",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-22T10:14:50.523Z",
+      "timestamp": "2026-01-22T10:14:50.523Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICPWlx-Jkyuqst7j31Bb-5X8j6gD22AAJrDmsbpayRS9W3opCHBPfUAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICPWlx-Jkyuqst7j31Bb-5X8j6gD22AAJrDmsbpayRS9W3opCHBPfUAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICPWlx-Jkyuqst7j31Bb-5X8j6gD22AAJrDmsbpayRS9W3opCHBPfUAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ЖК Испанские кварталы | А101-КОМФОРТ",
+        "username": "isk_official",
+        "chatId": -1001704456867,
+        "messageId": 3950,
+        "chatUrl": "https://t.me/isk_official",
+        "postUrl": "https://t.me/isk_official/3950"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 12,
+      "dislikes": 0,
+      "sourceType": "admin"
+    },
+    {
+      "id": 11,
+      "text": "‼️ Драка иностранных специалистов на маршруте автобуса 982\n\nСосед сегодня стал свидетелями стычки иностранных специалистов с кондукторами и пассажиром, который заступился за кондукторов на нашем автобусе 982, примерно в 19.00. Это случилось на повороте на Николо-Хованскую улицу. \n\nЗашли, не оплатили проезд на Корниловской. На следующей остановке зашли кондуктора и начали проверять проездные. \n\nОдин из группы иностранцев, не оплатив проезд, отказался предоставлять документы. \n\nАвтобус подъезжает к остановке «Газопровод», и началась потасовка… \n\nКондуктора кричат водителю, чтобы он заблокировал задние двери. Иностранцы, оттолкнув кондукторов, бегут на выход к передним дверям. Им на пути попадается мужчина, и начинается драка. \n\nВ итоге иностранцы отбились и выбежали на улицу, кинув свой пакет с хурмой.\n\nЕсть еще очевидцы этого? По видео ничего не понятно…",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-21T21:48:19.013Z",
+      "timestamp": "2026-01-21T21:48:19.013Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICOmlxSaEGoWURDH_FdQNZUSpyQVIWAAIzkAACQemISxXdnASV9IjjOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8925,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8925"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 3,
+      "dislikes": 53,
+      "sourceType": "admin"
+    },
+    {
+      "id": 10,
+      "text": "С 24 января автобусы с999 пойдут до метро «Новомосковская». \n\nЭто связано с открытием новой дороги в Коммунарке.\n\nДобираться до Троицкой линии и социальных объектов станет удобнее.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-21T10:12:50.608Z",
+      "timestamp": "2026-01-21T10:12:50.608Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICOGlwpqCAENsUMEKxSGABunI24DIbAAKqD2sb2JN5S9uGOloa8_KAAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICOGlwpqCAENsUMEKxSGABunI24DIbAAKqD2sb2JN5S9uGOloa8_KAAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICOGlwpqCAENsUMEKxSGABunI24DIbAAKqD2sb2JN5S9uGOloa8_KAAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "Дептранс. Оперативно",
+        "username": "DtOperativno",
+        "chatId": -1001031559169,
+        "messageId": 24624,
+        "chatUrl": "https://t.me/DtOperativno",
+        "postUrl": "https://t.me/DtOperativno/24624"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 22,
+      "dislikes": 19,
+      "sourceType": "admin"
+    },
+    {
+      "id": 9,
+      "text": "🚱 Отключение водоснабжения\n\n📍ул. Сервантеса, дом 1, к. 3, п. 1\n\nУважаемые жители, наблюдаются перебои в подаче  водоснабжения по указанному адресу. \nАварийная бригада уже приступила к восстановительным работам.\n\nПриносим извинения за возможные неудобства.\nС заботой, А101-Комфорт.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-20T13:33:01.860Z",
+      "timestamp": "2026-01-20T13:33:01.860Z",
+      "category": "all",
+      "media": [],
+      "photoFileId": null,
+      "source": {
+        "title": "ЖК Испанские кварталы | А101-КОМФОРТ",
+        "username": "isk_official",
+        "chatId": -1001704456867,
+        "messageId": 3948,
+        "chatUrl": "https://t.me/isk_official",
+        "postUrl": "https://t.me/isk_official/3948"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 0,
+      "dislikes": 5,
+      "sourceType": "admin"
+    },
+    {
+      "id": 8,
+      "text": "Сегодня с @RoMiSe1979 чистили проходы в ЖК и перекресток.\n\nКто может завтра помочь почистить у метро - напишите в ЛС.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T22:22:37.906Z",
+      "timestamp": "2026-01-19T22:22:37.906Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICNGlurqxQwx-KJIQoKdVrlYkgNhAqAAIIigACjxV5S9-egRBNvuV9OAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8908,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8908"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 52,
+      "dislikes": 1,
+      "sourceType": "admin"
+    },
+    {
+      "id": 7,
+      "text": "Будьте аккуратны, сегодня был замечен неадекват на мосту. Честно, не знаю как бы сам реагировал на такое поведение, но теперь кажется, что рекомендация иметь при себе газовый баллон не кажется чем-то необычным.\n\nВсем добра.\n\nДобрый вечер, сегодня на мосту ходил неадекват, пинал в людей футбольный мяч и кричал что-то о том, что все вокруг неверующие собаки и их покарают. Возможно, это автор недавних религиозных надписей на льду, либо кто-то, кто таким образом решил их прокомментировать\n\nСпасибо Валерии за видео.\n\n 📣 Поделиться новостью.\n\nЧат | Telegram\nНовости | Telegram\nВКонтакте\nInstagram",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T21:16:59.103Z",
+      "timestamp": "2026-01-19T21:16:59.103Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICMmlun0kFAAH-Ad3BlZdTawABQqiMej4AAr2YAAJZo3hLxIpy2w5fuDs4BA"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ЖК Прокшино | Новости",
+        "username": "pro_prokshino",
+        "chatId": -1001676774641,
+        "messageId": 9140,
+        "chatUrl": "https://t.me/pro_prokshino",
+        "postUrl": "https://t.me/pro_prokshino/9140"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 11,
+      "dislikes": 21,
+      "sourceType": "admin"
+    },
+    {
+      "id": 6,
+      "text": "Кусок единственной пешеходной дорожки до метро не чистили с 20х чисел декабря, как пошел снег.\n\nКто-нибудь может назвать место в Новой Москве, где единственная дорога возле метро не почищена?",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T18:10:18.667Z",
+      "timestamp": "2026-01-19T18:10:18.667Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICMGluc4lg4w9-PQu79sG2U6__a47FAALelAACjxVxS8OQvA4hLYUcOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8907,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8907"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 56,
+      "dislikes": 12,
+      "sourceType": "admin"
+    },
+    {
+      "id": 5,
+      "text": "На 982 наконец-то чаще стали проверять билеты вместо рейдов на конечной.\n\n📷 @RoMiSe1979",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T17:59:18.244Z",
+      "timestamp": "2026-01-19T17:59:18.244Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICLmlucPWK1ZlV01VHtURmR4u3zw_0AAJgDWsbpOMgS3b6fZpsQTEuAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICLmlucPWK1ZlV01VHtURmR4u3zw_0AAJgDWsbpOMgS3b6fZpsQTEuAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICLmlucPWK1ZlV01VHtURmR4u3zw_0AAJgDWsbpOMgS3b6fZpsQTEuAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8822,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8822"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 41,
+      "dislikes": 23,
+      "sourceType": "admin"
+    },
+    {
+      "id": 4,
+      "text": "😣 Пешеходная дорога до метро\n\nСитуация без изменений. Единственная пешеходная дорога в районе до метро «Прокшино» не чищена на 2/3 участка (на фото красная линия, где не почистили). \n\nЭто Новомихайловское шоссе и часть Филатовского шоссе у метро «Прокшино». Почему-то часть дороги чистят, а остальную часть нет. У нас порядка 40 тысяч жителей в районе, а это единственная дорога до метро. \n\nПроблема с этими участками дороги систематическая, начиная с открытия шоссе (2019 год). \n\nПоследние 4 фото — 2021-2024 года.\n\nПрошу написать обращения в Департамент ЖКХ, Префектуру ТиНАО и Управу района через электронную приемную. Текст обращения оставлю в описании, фото можете сохранить из поста.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T17:59:12.554Z",
+      "timestamp": "2026-01-19T17:59:12.554Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICJWlucPAUTkZqXkaKGJYHzpOqeXEmAAL_C2sbFhEoS7DaPXvDJ0-HAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICJmlucPAClypnS4cS0dVuvH9CnoYKAAMMaxsWEShL411wmVYbg5EBAAMCAAN5AAM4BA"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICJ2lucPCIoTKqQiXQpCbGHvpVeA7AAAIBDGsbFhEoS6k3Jbwj2kJ3AQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICJWlucPAUTkZqXkaKGJYHzpOqeXEmAAL_C2sbFhEoS7DaPXvDJ0-HAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICJWlucPAUTkZqXkaKGJYHzpOqeXEmAAL_C2sbFhEoS7DaPXvDJ0-HAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAICJmlucPAClypnS4cS0dVuvH9CnoYKAAMMaxsWEShL411wmVYbg5EBAAMCAAN5AAM4BA",
+        "AgACAgIAAxkBAAICJ2lucPCIoTKqQiXQpCbGHvpVeA7AAAIBDGsbFhEoS6k3Jbwj2kJ3AQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8824,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8824"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 17,
+      "dislikes": 40,
+      "sourceType": "admin"
+    },
+    {
+      "id": 3,
+      "text": "Департамент ЖКХ оперативно реагирует на ситуацию со снегом. \n\nНадеюсь, что в ближайшее время нашу дорогу до метро почистят. \n\nЯ написал обращения по этим вопросам во все возможные инстанции, но, возможно, придется, как в прошлом году, выходить и чистить часть дороги самим. \n\nВы можете зайти в чат Департамента ЖКХ и прислать свои фото / видео с просьбой как-то повлиять. Кажется, это быстрее обычных обращений. \n\nСсылка на чат",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T17:58:58.857Z",
+      "timestamp": "2026-01-19T17:58:58.857Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICI2lucOKExGzytePMLf8wmDpP_pKPAAIcDGsbpOMoSwSl4pcAAUcnogEAAwIAA3kAAzgE"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICI2lucOKExGzytePMLf8wmDpP_pKPAAIcDGsbpOMoSwSl4pcAAUcnogEAAwIAA3kAAzgE",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICI2lucOKExGzytePMLf8wmDpP_pKPAAIcDGsbpOMoSwSl4pcAAUcnogEAAwIAA3kAAzgE"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8839,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8839"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 33,
+      "dislikes": 2,
+      "sourceType": "admin"
+    },
+    {
+      "id": 2,
+      "text": "На переходе из ИК1 в ИК2\n\nТротуар в одном месте вообще завалили снегом…",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-19T17:58:55.507Z",
+      "timestamp": "2026-01-19T17:58:55.507Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICIWlucN524sdp_HauJURV0TU1KJUEAALjlwACpOMoS3iQGHv6bAwdOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8840,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8840"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 6,
+      "dislikes": 15,
+      "sourceType": "admin"
+    },
+    {
+      "id": 1,
+      "text": "Возможно «легализуют» народную тропу возле ИК2.\n\nУправа прислала ответ по поводу возможности сделать тротуар вместо убитого газона возле остановки Николо-Хованская улица, со стороны ИК2.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-18T09:12:50.480Z",
+      "timestamp": "2026-01-18T09:12:50.480Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIBfGlspBEc6v4xKVkjy1o6ZTbRun5JAAIcEGsbUpxpSLqyziVB8RgbAQADAgADeQADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIBfGlspBEc6v4xKVkjy1o6ZTbRun5JAAIcEGsbUpxpSLqyziVB8RgbAQADAgADeQADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIBfGlspBEc6v4xKVkjy1o6ZTbRun5JAAIcEGsbUpxpSLqyziVB8RgbAQADAgADeQADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 7914,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/7914"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "likes": 38,
+      "dislikes": 0,
+      "sourceType": "admin"
     }
   ],
   "pending": [],
@@ -55,7 +796,185 @@
       "url": "https://salaris.ru/",
       "reviews": [],
       "createdAt": "2026-01-20T14:05:24.477Z"
+    },
+    {
+      "id": 15,
+      "name": "Гипермаркет \"Перекрёсток\"",
+      "category": "Кафе/Рестораны",
+      "lat": 55.588738,
+      "lng": 37.451202,
+      "description": "Магазин продуктов, гипермаркет. Есть свое кафе. \n\n09:00 - 23:00",
+      "address": "ТЦ \"Сиеста\", -1 этаж",
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-20T13:59:58.435Z"
+    },
+    {
+      "id": 14,
+      "name": "Кофейня \"Cofix\"",
+      "category": "Кафе/Рестораны",
+      "lat": 55.587447,
+      "lng": 37.433376,
+      "description": "Кофейня Cofix — это уютное место, где можно насладиться ароматным кофе и легкими десертами.\n\n07:00 - 22:00",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-20T13:57:56.659Z"
+    },
+    {
+      "id": 13,
+      "name": "Вкусно -- и точка",
+      "category": "Кафе/Рестораны",
+      "lat": 55.589505,
+      "lng": 37.451009,
+      "description": "Ресторан быстрого питания. Бывший McDonald’s.\n\n24/7",
+      "address": null,
+      "url": "https://vkusnoitochka.ru/",
+      "reviews": [],
+      "createdAt": "2026-01-20T13:44:53.462Z"
+    },
+    {
+      "id": 12,
+      "name": "ТРЦ \"МЕГА Тёплый Стан\"",
+      "category": "Магазины",
+      "lat": 55.603881,
+      "lng": 37.491102,
+      "description": "ТРЦ **МЕГА Тёплый Стан** — крупный торгово‑развлекательный центр на юго‑западе Москвы. \n\nАдрес и режим работы:\n- Адрес: Калужское шоссе, 21‑й км (ориентир: 41‑й км МКАД).\n- Время работы: ежедневно 10:00–22:00.\n\nАктуальный список магазинов и их расположение по ТРЦ удобнее всего смотреть в каталоге на официальном сайте «МЕГИ Тёплый Стан». https://mega.ru/shops/teplyi_stan",
+      "address": "Калужское шоссе, 21‑й км",
+      "url": "https://mega.ru/shops/teplyi_stan",
+      "reviews": [],
+      "createdAt": "2026-01-20T13:41:59.581Z"
+    },
+    {
+      "id": 11,
+      "name": "Оптово-розничный центр \"ФудСити\"",
+      "category": "Магазины",
+      "lat": 55.59983,
+      "lng": 37.469044,
+      "description": "Самый крупный продуктовый рынок в Европе",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-20T13:39:44.781Z"
+    },
+    {
+      "id": 10,
+      "name": "Пекарня \"Хлебник\"",
+      "category": "Кафе/Рестораны",
+      "lat": 55.591971,
+      "lng": 37.456011,
+      "description": "Пекарня\n08:00 - 21:00",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:19:24.075Z"
+    },
+    {
+      "id": 9,
+      "name": "OZON",
+      "category": "Услуги",
+      "lat": 55.592152,
+      "lng": 37.461917,
+      "description": "Маркетплейс \n09:00 - 21:00",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:18:30.115Z"
+    },
+    {
+      "id": 8,
+      "name": "Сдэк",
+      "category": "Услуги",
+      "lat": 55.591761,
+      "lng": 37.442796,
+      "description": "Почтовая служба",
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:16:44.326Z"
+    },
+    {
+      "id": 7,
+      "name": "Школа 547 \"Диалектика\"",
+      "category": "Дети",
+      "lat": 55.590319,
+      "lng": 37.441864,
+      "description": null,
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:16:08.266Z"
+    },
+    {
+      "id": 6,
+      "name": "Школа 547 \"Логика\"",
+      "category": "Дети",
+      "lat": 55.591298,
+      "lng": 37.460301,
+      "description": null,
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:15:43.712Z"
+    },
+    {
+      "id": 5,
+      "name": "Детский сад 547 \"Солнечная Страна\"",
+      "category": "Дети",
+      "lat": 55.590712,
+      "lng": 37.453836,
+      "description": null,
+      "address": null,
+      "url": null,
+      "reviews": [],
+      "createdAt": "2026-01-19T16:15:23.705Z"
+    },
+    {
+      "id": 4,
+      "name": "Вкусвилл",
+      "category": "Магазины",
+      "lat": 55.591227,
+      "lng": 37.454812,
+      "description": "Магазин продуктов, супермаркет, полезное питание. Есть свое кафе. \n07:00 - 23:00",
+      "address": null,
+      "url": "https://vkusvill.ru/",
+      "reviews": [],
+      "createdAt": "2026-01-19T16:14:19.912Z"
+    },
+    {
+      "id": 3,
+      "name": "Сдэк",
+      "category": "Услуги",
+      "lat": 55.592152,
+      "lng": 37.460858,
+      "description": "Почтовая служба\n09:00 - 21:00",
+      "address": null,
+      "url": "www.cdek.ru",
+      "reviews": [],
+      "createdAt": "2026-01-18T08:43:53.386Z"
+    },
+    {
+      "id": 2,
+      "name": "Пятерочка",
+      "category": "Магазины",
+      "lat": 55.594443,
+      "lng": 37.460587,
+      "description": "Магазин продуктов, супермаркет. \n09:00 - 22:00",
+      "address": null,
+      "url": "5ka.ru",
+      "createdAt": "2026-01-18T08:34:58.480Z"
+    },
+    {
+      "id": 1,
+      "name": "Пятерочка",
+      "category": "Магазины",
+      "lat": 55.592913,
+      "lng": 37.46045,
+      "description": "Магазин продуктов, супермаркет. \n09:00 - 23:00",
+      "address": null,
+      "url": "5ka.ru",
+      "createdAt": "2026-01-18T08:34:10.357Z",
+      "reviews": []
     }
-  ],
-  "seq": 24
+  ]
 }
