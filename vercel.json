@@ -1,5 +1,14 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "public"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/api/telegram",
@@ -10,11 +19,11 @@
       "dest": "/api/media.js"
     },
     {
-      "src": "/api/news",
+      "src": "/api/news.*",
       "dest": "/api/news.js"
     },
     {
-      "src": "/api/businesses(.*)",
+      "src": "/api/businesses.*",
       "dest": "/api/businesses.js"
     },
     {
@@ -22,8 +31,16 @@
       "dest": "/api/reactions.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.js"
+      "src": "/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/public/news.html"
+    },
+    {
+      "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|svg|ico))",
+      "dest": "/public/$1"
     }
   ]
 }
