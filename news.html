@@ -39,7 +39,135 @@
     </div>
   </nav>
 
-  <script src="/news.js"></script>
-  <script src="/theme.js"></script>
+  <script>
+// ---------------- theme ----------------
+function toggleTheme() {
+  const body = document.body;
+  const icon = document.getElementById('theme-icon');
+  const isDark = body.getAttribute('data-theme') === 'dark';
+  body.setAttribute('data-theme', isDark ? '' : 'dark');
+  icon.textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const useDark = saved === 'dark' || (!saved && prefersDark);
+  if (useDark) {
+    document.body.setAttribute('data-theme', 'dark');
+    document.getElementById('theme-icon').textContent = '☀️';
+  }
+}
+
+// ---------------- helpers ----------------
+function escapeHtml(s) {
+  return String(s || '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+function linkify(text) {
+  const safe = escapeHtml(text);
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${day}.${month}.${year}, ${hours}:${minutes}`;
+}
+function buildSourceLine(n) {
+  const s = n && n.source ? n.source : null;
+  if (!s) return '';
+  const url = s.postUrl || s.chatUrl || '';
+  const title = s.title || (s.username ? '@' + s.username : 'Источник');
+  if (!url) return ` · Источник: ${escapeHtml(title)}`;
+  return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
+}
+
+// ---------------- news ----------------
+let allNews = [];
+let hasBackgroundUpdates = false;
+
+function renderNews() {
+  const feed = document.getElementById('feed');
+  // Только обычные новости (не рекомендации)
+  const filtered = allNews.filter(n => (n.category || 'all') !== 'reco');
+  
+  if (!filtered.length) {
+    feed.innerHTML = '<div class="no-news">Пока нет новостей!</div>';
+    return;
+  }
+  
+  feed.innerHTML = filtered.map(n => {
+    const ts = n.timestamp || n.createdAt || null;
+    let html = '<div class="card">';
+    html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
+    
+    // Медиа
+    const media = n.media || [];
+    const mediaItems = media.filter(m => m && (m.type === 'photo' || m.type === 'video'));
+    
+    if (mediaItems.length > 0) {
+      html += '<div class="card-media-scroll">';
+      mediaItems.forEach(item => {
+        if (item.type === 'photo') {
+          html += `<img src="/api/media/${encodeURIComponent(item.fileId)}" loading="lazy" alt="Фото"/>`;
+        } else if (item.type === 'video') {
+          html += `<video controls preload="metadata" playsinline><source src="/api/media/${encodeURIComponent(item.fileId)}" type="video/mp4">Ваш браузер не поддерживает видео.</video>`;
+        }
+      });
+      html += '</div>';
+    }
+    
+    html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+    html += '</div>';
+    return html;
+  }).join('');
+}
+
+function sameTop(a, b) {
+  const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
+  const b0 = (Array.isArray(b) && b.length) ? b[0] : null;
+  return a0 && b0 && a0.id === b0.id && a.length === b.length;
+}
+
+async function loadNews({ render = true } = {}) {
+  try {
+    const res = await fetch('/api/news', { cache: 'no-store' });
+    const data = await res.json();
+    const next = Array.isArray(data.posts) ? data.posts : [];
+    const changed = !sameTop(allNews, next);
+    allNews = next;
+    if (render && changed) renderNews();
+    if (!render && changed) hasBackgroundUpdates = true;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// обновляем новости в фоне
+setInterval(() => {
+  if (document.visibilityState !== 'visible') loadNews({ render: false });
+}, 3000);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && hasBackgroundUpdates) {
+    hasBackgroundUpdates = false;
+    renderNews();
+  }
+});
+
+// ---------------- init ----------------
+initTheme();
+loadNews({ render: true });
+  </script>
 </body>
 </html>
