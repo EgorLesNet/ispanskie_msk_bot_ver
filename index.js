@@ -1,11 +1,152 @@
 require('dotenv/config')
 const express = require('express')
 const fetch = require('node-fetch')
+const fs = require('fs')
+const path = require('path')
 
 const BOT_TOKEN = process.env.BOT_TOKEN
 const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'fusuges').toLowerCase()
 const WEBAPP_URL = process.env.WEBAPP_URL
 const PORT = Number(process.env.PORT || 3000)
+const DB_PATH = path.join(__dirname, 'db.json')
+
+// ============== Database Functions ==============
+function readNewsDB() {
+  try {
+    if (fs.existsSync(DB_PATH)) {
+      const data = fs.readFileSync(DB_PATH, 'utf8')
+      return JSON.parse(data)
+    }
+  } catch (err) {
+    console.error('Error reading db.json:', err)
+  }
+  return {
+    posts: [],
+    pending: [],
+    rejected: [],
+    businesses: [],
+    seq: 0
+  }
+}
+
+function writeNewsDB(db) {
+  try {
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8')
+    return true
+  } catch (err) {
+    console.error('Error writing db.json:', err)
+    return false
+  }
+}
+
+function isAdminUser(user) {
+  if (!user) return false
+  const username = (user.username || '').toLowerCase()
+  return username === ADMIN_USERNAME
+}
+
+function addNews({ text, author, isAdmin, photoFileId, media }) {
+  const db = readNewsDB()
+  db.seq = (db.seq || 0) + 1
+  
+  const post = {
+    id: db.seq,
+    text: text || '',
+    authorId: author.id,
+    authorName: [author.first_name, author.last_name].filter(Boolean).join(' '),
+    authorUsername: author.username || null,
+    createdAt: new Date().toISOString(),
+    timestamp: new Date().toISOString(),
+    category: 'all',
+    media: media || [],
+    photoFileId: photoFileId || null,
+    source: null,
+    moderationMessage: null,
+    status: isAdmin ? 'approved' : 'pending',
+    sourceType: isAdmin ? 'admin' : 'user'
+  }
+  
+  if (photoFileId && (!media || media.length === 0)) {
+    post.media = [{ type: 'photo', fileId: photoFileId }]
+    post.photoFileIds = [photoFileId]
+  }
+  
+  if (isAdmin) {
+    db.posts.unshift(post)
+  } else {
+    if (!db.pending) db.pending = []
+    db.pending.unshift(post)
+  }
+  
+  writeNewsDB(db)
+  return post
+}
+
+function setNewsStatus(postId, newStatus) {
+  const db = readNewsDB()
+  
+  const pendingIndex = (db.pending || []).findIndex(p => p.id === postId)
+  if (pendingIndex === -1) return null
+  
+  const post = db.pending[pendingIndex]
+  post.status = newStatus
+  
+  db.pending.splice(pendingIndex, 1)
+  
+  if (newStatus === 'approved') {
+    db.posts.unshift(post)
+  } else if (newStatus === 'rejected') {
+    if (!db.rejected) db.rejected = []
+    db.rejected.unshift(post)
+  }
+  
+  writeNewsDB(db)
+  return post
+}
+
+function deleteNews(postId) {
+  const db = readNewsDB()
+  
+  const lists = ['posts', 'pending', 'rejected']
+  for (const listName of lists) {
+    const list = db[listName] || []
+    const index = list.findIndex(p => p.id === postId)
+    if (index !== -1) {
+      const deleted = list.splice(index, 1)[0]
+      writeNewsDB(db)
+      return deleted
+    }
+  }
+  
+  return null
+}
+
+function addReview(businessId, review) {
+  const db = readNewsDB()
+  const business = db.businesses?.find(b => b.id === businessId)
+  if (!business) return null
+  if (!business.reviews) business.reviews = []
+  const newReview = {
+    id: Date.now(),
+    userId: review.userId,
+    userName: review.userName,
+    rating: review.rating,
+    text: review.text,
+    createdAt: new Date().toISOString()
+  }
+  business.reviews.unshift(newReview)
+  writeNewsDB(db)
+  return newReview
+}
+
+function sanitizeText(text) {
+  if (!text) return ''
+  return String(text)
+    .trim()
+    .slice(0, 500)
+    .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
+}
 
 // Express сервер
 const app = express()
@@ -13,22 +154,19 @@ app.use(express.json())
 app.use(express.static('public'))
 
 // Root redirect
-app.get('/', (req, res) => res.redirect('/public/news.html'))
+app.get('/', (req, res) => res.redirect('/news.html'))
 
-// ============== Security middleware ==============
-// CORS - разрешаем только с нашего домена (в production)
-const ALLOWED_ORIGINS = [
-  'https://ispanskiemskbotver.vercel.app',
-  'http://localhost:3000'
-]
+let bot = null
 
-if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
+if (BOT_TOKEN && WEBAPP_URL) {
   const { Telegraf, Markup } = require('telegraf')
   bot = new Telegraf(BOT_TOKEN)
-  const userStates = new Map && !process.env.VERCEL()
-  bot.start(async ctx => {    userStates.delete(ctx.from.id)
+  const userStates = new Map()
+  
+  bot.start(async ctx => {
+    userStates.delete(ctx.from.id)
     await ctx.reply(
-      'Добро пожаловать! 👋\\n\\nИспользуйте кнопку ниже, чтобы открыть приложение:',
+      'Добро пожаловать! 👋\n\nИспользуйте кнопку ниже, чтобы открыть приложение:',
       Markup.keyboard([[Markup.button.webApp('📱 Открыть приложение', WEBAPP_URL)]]).resize()
     )
     await ctx.reply('Или отправьте новость текстом (можно с фото):', { reply_markup: { remove_keyboard: true } })
@@ -48,10 +186,10 @@ if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
         await ctx.reply('📩 Новость отправлена на проверку.')
         try {
           await ctx.telegram.sendPhoto(ctx.botInfo.id, photoFileId, {
-            caption: `📬 Новая новость #\${post.id} от \${post.authorName}\${post.authorUsername ? ' (@' + post.authorUsername + ')' : ''}:\\n\\n\${post.text}`,
+            caption: `📬 Новая новость #${post.id} от ${post.authorName}${post.authorUsername ? ' (@' + post.authorUsername + ')' : ''}:\n\n${post.text}`,
             reply_markup: { inline_keyboard: [[
-              { text: '✅ Одобрить', callback_data: `approve:\${post.id}` },
-              { text: '❌ Отклонить', callback_data: `reject:\${post.id}` }
+              { text: '✅ Одобрить', callback_data: `approve:${post.id}` },
+              { text: '❌ Отклонить', callback_data: `reject:${post.id}` }
             ]] }
           })
         } catch (err) { console.error('Failed to notify admin:', err) }
@@ -79,10 +217,10 @@ if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
       await ctx.reply('📩 Новость отправлена на проверку.')
       try {
         const msgData = {
-          caption: `📬 Новая новость #\${post.id} от \${post.authorName}\${post.authorUsername ? ' (@' + post.authorUsername + ')' : ''}:\\n\\n\${post.text}`,
+          caption: `📬 Новая новость #${post.id} от ${post.authorName}${post.authorUsername ? ' (@' + post.authorUsername + ')' : ''}:\n\n${post.text}`,
           reply_markup: { inline_keyboard: [[
-            { text: '✅ Одобрить', callback_data: `approve:\${post.id}` },
-            { text: '❌ Отклонить', callback_data: `reject:\${post.id}` }
+            { text: '✅ Одобрить', callback_data: `approve:${post.id}` },
+            { text: '❌ Отклонить', callback_data: `reject:${post.id}` }
           ]] }
         }
         if (photoFileId) {
@@ -116,13 +254,13 @@ if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
         return
       }
       await ctx.answerCbQuery(newStatus === 'approved' ? 'Одобрено' : 'Отклонено')
-      await ctx.reply(newStatus === 'approved' ? `Новость #\${p.id} одобрена и опубликована.` : `Новость #\${p.id} отклонена.`)
+      await ctx.reply(newStatus === 'approved' ? `Новость #${p.id} одобрена и опубликована.` : `Новость #${p.id} отклонена.`)
       return
     }
     await ctx.answerCbQuery('Неизвестное действие')
   })
 
-    // Webhook endpoint for Vercel
+  // Webhook endpoint for Vercel
   app.post('/api/telegram', async (req, res) => {
     try {
       await bot.handleUpdate(req.body)
@@ -130,24 +268,32 @@ if (BOT_TOKEN && WEBAPP_URL && !process.env.VERCEL) {
     } catch (err) {
       console.error('Webhook error:', err)
       res.sendStatus(500)
-          }
-        })
+    }
+  })
+  
+  // Запуск бота только не на Vercel
+  if (!process.env.VERCEL) {
+    bot.launch().then(() => console.log('Bot started'))
+      .catch(err => console.error('Bot launch error:', err))
+  }
 } else {
-    console.log('Bot not started (missing BOT_TOKEN or WEBAPP_URL). Web server only.')
+  console.log('Bot not started (missing BOT_TOKEN or WEBAPP_URL). Web server only.')
 }
-// API endpoints
+
+// ============== API endpoints ==============
+
+// News API
 app.get('/api/news', (req, res) => {
   const db = readNewsDB()
   const approved = db.posts.filter(p => p.status === 'approved')
   const postsWithLikes = approved.map(post => ({
-        ...post,
-        likes: post.likes || 0,
-        dislikes: post.dislikes || 0
-            }))
-  res.json({ posts: postsWithLikes })  
+    ...post,
+    likes: post.likes || 0,
+    dislikes: post.dislikes || 0
+  }))
+  res.json({ posts: postsWithLikes })
 })
 
-// Лайки и дизлайки
 app.post('/api/news/:id/like', (req, res) => {
   const postId = Number(req.params.id)
   const db = readNewsDB()
@@ -179,103 +325,10 @@ app.delete('/api/news/:id', (req, res) => {
   res.json({ success: true, deleted })
 })
 
-
-
-// ============== Reviews API ==============
-// Функция для добавления отзыва
-function addReview(businessId, review) {
-  const db = readNewsDB()
-  const business = db.businesses?.find(b => b.id === businessId)
-  if (!business) return null
-  if (!business.reviews) business.reviews = []
-  const newReview = {
-    id: Date.now(),
-    userId: review.userId,
-    userName: review.userName,
-    rating: review.rating,
-    text: review.text,
-    createdAt: new Date().toISOString()
-  }
-  business.reviews.unshift(newReview)
-  writeNewsDB(db)
-  return newReview
-}
-
-// Rate limiter (простой in-memory)
-const reviewRateLimits = new Map()
-function canAddReview(userId) {
-  const now = Date.now()
-  const lastReview = reviewRateLimits.get(userId)
-  if (lastReview && (now - lastReview) < 60000) { // 1 минута
-    return false
-  }
-  reviewRateLimits.set(userId, now)
-  return true
-}
-
-// Валидация и санитизация
-function sanitizeText(text) {
-  if (!text) return ''
-  return String(text)
-    .trim()
-    .slice(0, 500)
-    .replace(/<[^>]*>/g, '')
-    .replace(/[<>]/g, '')
-}
-
-// API endpoint: GET /api/businesses/:id/reviews
-app.get('/api/businesses/:id/reviews', (req, res) => {
-  const businessId = Number(req.params.id)
-  const db = readNewsDB()
-  const business = db.businesses?.find(b => b.id === businessId)
-  if (!business) return res.status(404).json({ error: 'Business not found' })
-  res.json({ reviews: business.reviews || [] })
-})
-
-// API endpoint: POST /api/businesses/:id/reviews
-app.post('/api/businesses/:id/reviews', (req, res) => {
-  const businessId = Number(req.params.id)
-  const { userId, userName, rating, text } = req.body
-  
-  // Валидация
-  if (!userId || !userName) {
-    return res.status(400).json({ error: 'userId and userName required' })
-  }
-  
-  const numRating = Number(rating)
-  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
-    return res.status(400).json({ error: 'rating must be 1-5' })
-  }
-  
-  const cleanText = sanitizeText(text)
-  if (cleanText.length < 1 || cleanText.length > 500) {
-    return res.status(400).json({ error: 'text must be 1-500 characters' })
-  }
-  
-  // Rate limiting
-  if (!canAddReview(userId)) {
-    return res.status(429).json({ error: 'Too many reviews. Wait 1 minute.' })
-  }
-  
-  const review = addReview(businessId, {
-    userId,
-    userName: sanitizeText(userName),
-    rating: numRating,
-    text: cleanText
-  })
-  
-  if (!review) {
-    return res.status(404).json({ error: 'Business not found' })
-  }
-  
-  res.json({ success: true, review })
-})
-
-// API endpoint: GET /api/businesses
+// Business API
 app.get('/api/businesses', (req, res) => {
   const db = readNewsDB()
   const businesses = db.businesses || []
-  // Добавляем средний рейтинг
   const enriched = businesses.map(b => {
     const reviews = b.reviews || []
     const avgRating = reviews.length > 0
@@ -286,7 +339,6 @@ app.get('/api/businesses', (req, res) => {
   res.json({ businesses: enriched })
 })
 
-// API endpoint: POST /api/businesses (с улучшенной безопасностью)
 app.post('/api/businesses', (req, res) => {
   const { secret, name, category, description, address, url, lat, lng } = req.body
   const BUSINESS_ADMIN_KEY = process.env.BUSINESS_ADMIN_KEY || 'demo_secret'
@@ -295,7 +347,6 @@ app.post('/api/businesses', (req, res) => {
     return res.status(403).json({ error: 'Invalid secret' })
   }
   
-  // Валидация
   if (!name || !category) {
     return res.status(400).json({ error: 'name and category required' })
   }
@@ -327,7 +378,63 @@ app.post('/api/businesses', (req, res) => {
   res.json({ success: true, business: newBiz })
 })
 
-// API endpoint: GET /api/media/:fileId (переименован с /api/photo)
+// Reviews API
+const reviewRateLimits = new Map()
+function canAddReview(userId) {
+  const now = Date.now()
+  const lastReview = reviewRateLimits.get(userId)
+  if (lastReview && (now - lastReview) < 60000) {
+    return false
+  }
+  reviewRateLimits.set(userId, now)
+  return true
+}
+
+app.get('/api/businesses/:id/reviews', (req, res) => {
+  const businessId = Number(req.params.id)
+  const db = readNewsDB()
+  const business = db.businesses?.find(b => b.id === businessId)
+  if (!business) return res.status(404).json({ error: 'Business not found' })
+  res.json({ reviews: business.reviews || [] })
+})
+
+app.post('/api/businesses/:id/reviews', (req, res) => {
+  const businessId = Number(req.params.id)
+  const { userId, userName, rating, text } = req.body
+  
+  if (!userId || !userName) {
+    return res.status(400).json({ error: 'userId and userName required' })
+  }
+  
+  const numRating = Number(rating)
+  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+    return res.status(400).json({ error: 'rating must be 1-5' })
+  }
+  
+  const cleanText = sanitizeText(text)
+  if (cleanText.length < 1 || cleanText.length > 500) {
+    return res.status(400).json({ error: 'text must be 1-500 characters' })
+  }
+  
+  if (!canAddReview(userId)) {
+    return res.status(429).json({ error: 'Too many reviews. Wait 1 minute.' })
+  }
+  
+  const review = addReview(businessId, {
+    userId,
+    userName: sanitizeText(userName),
+    rating: numRating,
+    text: cleanText
+  })
+  
+  if (!review) {
+    return res.status(404).json({ error: 'Business not found' })
+  }
+  
+  res.json({ success: true, review })
+})
+
+// Media API
 app.get('/api/media/:fileId', async (req, res) => {
   if (!bot) return res.status(503).json({ error: 'Bot not available' })
   const fileId = req.params.fileId
@@ -342,5 +449,12 @@ app.get('/api/media/:fileId', async (req, res) => {
     res.status(500).json({ error: 'Failed to get media' })
   }
 })
-// hi!
-module.exports = app;
+
+// Запуск сервера только локально
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`)
+  })
+}
+
+module.exports = app
