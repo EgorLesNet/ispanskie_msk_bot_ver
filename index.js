@@ -10,44 +10,75 @@ const WEBAPP_URL = process.env.WEBAPP_URL
 const PORT = Number(process.env.PORT || 3000)
 
 // Use /tmp for Vercel serverless (writable), otherwise local path
-const DB_PATH = process.env.VERCEL ? '/tmp/db.json' : path.join(__dirname, 'db.json')
+const TMP_DB_PATH = '/tmp/db.json'
 const PUBLIC_DB_PATH = path.join(__dirname, 'public', 'db.json')
+const LOCAL_DB_PATH = path.join(__dirname, 'db.json')
 
 // ============== Database Functions ==============
 function readNewsDB() {
-  try {
-    // Try to read from /tmp first (Vercel)
-    if (fs.existsSync(DB_PATH)) {
-      const data = fs.readFileSync(DB_PATH, 'utf8')
-      return JSON.parse(data)
-    }
-    // Fallback to public/db.json if exists
-    if (fs.existsSync(PUBLIC_DB_PATH)) {
-      const data = fs.readFileSync(PUBLIC_DB_PATH, 'utf8')
-      return JSON.parse(data)
-    }
-  } catch (err) {
-    console.error('Error reading db.json:', err)
-  }
-  return {
+  let baseData = {
     posts: [],
     pending: [],
     rejected: [],
     businesses: [],
     seq: 0
   }
+  
+  // 1. Try to read initial data from public/db.json (static data)
+  try {
+    if (fs.existsSync(PUBLIC_DB_PATH)) {
+      const data = fs.readFileSync(PUBLIC_DB_PATH, 'utf8')
+      baseData = JSON.parse(data)
+    }
+  } catch (err) {
+    console.error('Error reading public/db.json:', err)
+  }
+  
+  // 2. If Vercel, try to merge with /tmp/db.json (runtime updates)
+  if (process.env.VERCEL) {
+    try {
+      if (fs.existsSync(TMP_DB_PATH)) {
+        const tmpData = fs.readFileSync(TMP_DB_PATH, 'utf8')
+        const parsed = JSON.parse(tmpData)
+        // Merge: prefer tmp data if it has content
+        if (parsed.posts && parsed.posts.length > 0) {
+          baseData.posts = parsed.posts
+        }
+        if (parsed.businesses && parsed.businesses.length > 0) {
+          baseData.businesses = parsed.businesses
+        }
+        if (parsed.pending) baseData.pending = parsed.pending
+        if (parsed.rejected) baseData.rejected = parsed.rejected
+        if (parsed.seq) baseData.seq = parsed.seq
+      }
+    } catch (err) {
+      console.error('Error reading /tmp/db.json:', err)
+    }
+  } else {
+    // Local: use local db.json if exists
+    try {
+      if (fs.existsSync(LOCAL_DB_PATH)) {
+        const data = fs.readFileSync(LOCAL_DB_PATH, 'utf8')
+        baseData = JSON.parse(data)
+      }
+    } catch (err) {
+      console.error('Error reading db.json:', err)
+    }
+  }
+  
+  return baseData
 }
 
 function writeNewsDB(db) {
   try {
-    // Write to /tmp (Vercel writable)
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8')
+    const dbStr = JSON.stringify(db, null, 2)
     
-    // Also try to write to public for static access (may fail on Vercel)
-    try {
-      fs.writeFileSync(PUBLIC_DB_PATH, JSON.stringify(db, null, 2), 'utf8')
-    } catch (e) {
-      // Ignore - Vercel doesn't allow writing to public
+    if (process.env.VERCEL) {
+      // On Vercel: write to /tmp (writable)
+      fs.writeFileSync(TMP_DB_PATH, dbStr, 'utf8')
+    } else {
+      // Local: write to db.json
+      fs.writeFileSync(LOCAL_DB_PATH, dbStr, 'utf8')
     }
     return true
   } catch (err) {
@@ -173,7 +204,7 @@ app.use(express.static('public'))
 // Root redirect
 app.get('/', (req, res) => res.redirect('/news.html'))
 
-// Serve db.json dynamically from /tmp
+// Serve db.json dynamically
 app.get('/db.json', (req, res) => {
   const db = readNewsDB()
   res.json(db)
