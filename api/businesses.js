@@ -38,37 +38,27 @@ async function readDbViaGithubRaw() {
   }
 }
 
-function normalizePost(p) {
-  const photoIds = Array.isArray(p.photoFileIds)
-    ? p.photoFileIds
-    : (p.photoFileId ? [p.photoFileId] : []);
-
-  const media = Array.isArray(p.media) ? p.media : [];
-
-  return {
-    ...p,
-    timestamp: p.timestamp || p.createdAt || null,
-    category: p.category || 'all',
-    photoFileIds: photoIds,
-    media
-  };
-}
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  try {
-    const db = await readDbViaGithubRaw();
-    const posts = (db.posts || []).map(normalizePost);
-    return res.status(200).json({ posts, businesses: db.businesses || [] });
-  } catch (e) {
-    console.error('api/news error:', e);
-    return res.status(500).json({ error: 'Failed to load news', message: e.message });
+  if (req.method === 'GET') {
+    try {
+      const db = await readDbViaGithubRaw();
+      return res.status(200).json({ businesses: db.businesses || [] });
+    } catch (e) {
+      console.error('api/businesses GET error:', e);
+      return res.status(500).json({ error: 'Failed to load businesses', message: e.message });
+    }
   }
+
+  if (req.method === 'POST') {
+    return res.status(405).json({ error: 'POST not implemented yet. Use Telegram bot.' });
+  }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 };
