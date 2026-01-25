@@ -29,16 +29,30 @@
 ## Структура проекта
 
 ```
-ispanskie_msk_bot/
-├── index.js              # Основной код: бот + веб-сервер
-├── db_news.json          # База данных новостей (создаётся автоматически)
-├── business.json         # Список бизнесов (для будущего функционала)
-├── services.json         # Список услуг (для будущего функционала)
+ispanskie_msk_bot_ver/
+├── api/
+│   ├── media/
+│   ├── photo/
+│   ├── _db.js
+│   ├── _db.json
+│   ├── businesses.js
+│   ├── news.js
+│   ├── reactions.js
+│   └── telegram.js
 ├── public/
-│   └── index.html        # Интерфейс мини-приложения
+│   ├── index.html (редирект)
+│   ├── logo.png
+│   └── styles.css
+├── news.html
+├── business.html
+├── recommendations.html
+├── index.html (редирект)
+├── index.js
+├── db.json
 ├── package.json
-├── .env.example
-└── README.md
+├── vercel.json
+└── .env.example
+
 ```
 
 ## Лицензия
