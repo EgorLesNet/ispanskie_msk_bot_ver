@@ -429,7 +429,7 @@ function sameTop(a, b) {
 
 async function loadNews({ render = true } = {}) {
   try {
-    const res = await fetch('../api/news', { cache: 'no-store' });
+    const res = await fetch('/api/news', { cache: 'no-store' });
     const data = await res.json();
     const next = Array.isArray(data.posts) ? data.posts : [];
     const changed = !sameTop(allNews, next);
