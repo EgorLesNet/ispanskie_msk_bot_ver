@@ -4,7 +4,293 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Новости - Агрегатор для района</title>
-  <link rel="stylesheet" href="/public/styles.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      transition: background 0.3s ease, color 0.3s ease;
+      padding-top: calc(80px + env(safe-area-inset-top));
+      padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    }
+    body[data-theme="dark"] {
+      background: #0e0e0e;
+      color: #fff;
+    }
+    .header {
+      position: fixed;
+      top: calc(12px + env(safe-area-inset-top));
+      left: 12px;
+      right: 12px;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border-radius: 20px;
+    }
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      transition: transform 0.3s;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .logo-img:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+    h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 0;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #666;
+      margin-top: 3px;
+    }
+    body[data-theme="dark"] .subtitle {
+      color: #999;
+    }
+    .theme-toggle {
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: transform 0.3s, background 0.2s;
+    }
+    .theme-toggle:hover {
+      transform: scale(1.15) rotate(15deg);
+      background: rgba(0, 0, 0, 0.05);
+    }
+    body[data-theme="dark"] .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .feed {
+      display: grid;
+      gap: 16px;
+      width: min(680px, 92vw);
+      margin: 20px auto;
+    }
+    .card {
+      padding: 18px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: fadeIn 0.5s ease-out;
+    }
+    body[data-theme="dark"] .card {
+      background: rgba(30, 30, 30, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    }
+    body[data-theme="dark"] .card:hover {
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    }
+    .card-meta {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .card-meta a {
+      color: inherit;
+      text-decoration: underline;
+    }
+    .card-meta a:hover {
+      opacity: 0.85;
+    }
+    .card-text {
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .card-text a {
+      color: #007aff;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .card-text a:hover {
+      text-decoration: underline;
+      color: #0051d5;
+    }
+    body[data-theme="dark"] .card-text a {
+      color: #0a84ff;
+    }
+    .card-media-scroll {
+      display: flex !important;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 10px;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      margin: 12px -18px;
+      padding: 0 18px;
+      scrollbar-width: none;
+    }
+    .card-media-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .card-media-scroll img,
+    .card-media-scroll video {
+      flex-shrink: 0;
+      width: 80vw;
+      max-width: 400px;
+      height: auto;
+      max-height: 400px;
+      border-radius: 12px;
+      object-fit: cover;
+      scroll-snap-align: center;
+      display: block;
+    }
+    @media (min-width: 768px) {
+      .card-media-scroll {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 10px;
+        overflow-x: visible;
+        margin: 12px 0;
+        padding: 0;
+        scroll-snap-type: none;
+      }
+      .card-media-scroll img,
+      .card-media-scroll video {
+        flex: none;
+        max-width: 100%;
+        width: 100%;
+      }
+    }
+    .no-news {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+      font-size: 15px;
+    }
+    .nav {
+      position: fixed;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      left: calc(12px + env(safe-area-inset-left));
+      right: calc(12px + env(safe-area-inset-right));
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 22px;
+    }
+    .nav-inner {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      width: 100%;
+      max-width: 600px;
+    }
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      padding: 11px 24px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+      color: #333;
+      white-space: nowrap;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    body[data-theme="dark"] .nav-btn {
+      background: rgba(50, 50, 50, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ccc;
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+    body[data-theme="dark"] .nav-btn:hover {
+      background: rgba(70, 70, 70, 0.9);
+    }
+    .nav-btn.active {
+      background: #007aff;
+      color: #fff;
+      border-color: #007aff;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+    }
+    body[data-theme="dark"] .nav-btn.active {
+      background: #0a84ff;
+      border-color: #0a84ff;
+      box-shadow: 0 4px 12px rgba(10, 132, 255, 0.4);
+    }
+    .liquid-glass {
+      backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
+      -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
+    }
+    .header.liquid-glass {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+    }
+    body[data-theme="dark"] .header.liquid-glass {
+      background: rgba(20, 20, 20, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.15);
+    }
+    .nav.liquid-glass {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+    }
+    body[data-theme="dark"] .nav.liquid-glass {
+      background: rgba(20, 20, 20, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+    }
+    @media (max-width: 550px) {
+      .nav-btn .nav-text {
+        display: none;
+      }
+      .nav-btn {
+        padding: 11px 16px;
+      }
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="header liquid-glass">
@@ -26,39 +312,39 @@
     <div class="nav-inner">
       <a href="/news.html" class="nav-btn active">
         <span>📰</span>
-        <span class="nav-text">Новости</span>
+        <span class="nav-text"> Новости</span>
       </a>
       <a href="/business.html" class="nav-btn">
         <span>💼</span>
-        <span class="nav-text">Бизнес</span>
+        <span class="nav-text"> Бизнес</span>
       </a>
       <a href="/recommendations.html" class="nav-btn">
         <span>⭐</span>
-        <span class="nav-text">Рекомендации</span>
+        <span class="nav-text"> Рекомендации</span>
       </a>
     </div>
   </nav>
 
   <script>
-// Theme
-function toggleTheme() {
-  const body = document.body;
-  const icon = document.getElementById('theme-icon');
-  const isDark = body.getAttribute('data-theme') === 'dark';
-  body.setAttribute('data-theme', isDark ? '' : 'dark');
-  icon.textContent = isDark ? '🌙' : '☀️';
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-}
+    // Theme
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById('theme-icon');
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? '' : 'dark');
+      icon.textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
 
-function initTheme() {
-  const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const useDark = saved === 'dark' || (!saved && prefersDark);
-  if (useDark) {
-    document.body.setAttribute('data-theme', 'dark');
-    document.getElementById('theme-icon').textContent = '☀️';
-  }
-}
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const useDark = saved === 'dark' || (!saved && prefersDark);
+      if (useDark) {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').textContent = '☀️';
+      }
+    }
 
 // Helpers
 function escapeHtml(s) {
