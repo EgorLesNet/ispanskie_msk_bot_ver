@@ -121,11 +121,10 @@ function deleteNews(postId) {
 
 // Инициализация бота
 let bot = null
-if (BOT_TOKEN && WEBAPP_URL) { && !process.env.VERCEL
+if (BOT_TOKEN && WEBAPP_URL) { && !process.env.VERCEL {
   const { Telegraf, Markup } = require('telegraf')
   bot = new Telegraf(BOT_TOKEN)
-  const userStates = new Map()
-
+  const userStates = new Map && !process.env.VERCEL()
   bot.start(async ctx => {
     userStates.delete(ctx.from.id)
     await ctx.reply(
