@@ -1,18 +1,14 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/news.html", "destination": "/news.html" },
-    { "source": "/business.html", "destination": "/business.html" },
-    { "source": "/recommendations.html", "destination": "/recommendations.html" }
+    { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
   "headers": [
     {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|eot))",
+      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|eot|html))",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
