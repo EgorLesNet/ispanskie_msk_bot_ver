@@ -809,7 +809,24 @@
       "sourceType": "admin"
     }
   ],
-  "pending": [],
+  "pending": [
+    {
+      "id": 26,
+      "text": "Какая-то новость.",
+      "authorId": 164794874,
+      "authorName": "Bella",
+      "authorUsername": "io_spero",
+      "createdAt": "2026-01-26T18:06:35.314Z",
+      "timestamp": "2026-01-26T18:06:35.315Z",
+      "category": "all",
+      "media": [],
+      "photoFileId": null,
+      "source": null,
+      "moderationMessage": null,
+      "status": "pending",
+      "sourceType": "user"
+    }
+  ],
   "rejected": [],
   "businesses": [
     {
