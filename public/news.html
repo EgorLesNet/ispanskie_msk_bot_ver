@@ -484,7 +484,8 @@
       if (!append) renderNews();
       
       try {
-        const url = `/api/news?limit=${LIMIT}&offset=${currentOffset}`;
+        // Добавляем timestamp для обхода кэша браузера
+        const url = `/api/news?limit=${LIMIT}&offset=${currentOffset}&t=${Date.now()}`;
         const res = await fetch(url, { 
           cache: 'no-store',
           headers: { 'Accept': 'application/json' }
@@ -522,26 +523,30 @@
       await loadNews({ append: true });
     }
 
-    // Auto-refresh first page
+    // Auto-refresh first page - сокращено до 2 секунд для мгновенных обновлений
     setInterval(async () => {
-      if (document.visibilityState === 'visible') {
-        const url = `/api/news?limit=${LIMIT}&offset=0`;
+      if (document.visibilityState === 'visible' && !isLoading) {
+        const url = `/api/news?limit=${LIMIT}&offset=0&t=${Date.now()}`;
         try {
           const res = await fetch(url, { cache: 'no-store' });
           if (res.ok) {
             const data = await res.json();
             const newPosts = Array.isArray(data.posts) ? data.posts : [];
-            if (newPosts.length && newPosts[0].id !== allNews[0]?.id) {
-              // New post detected, reload
-              currentOffset = 0;
-              await loadNews();
+            // Проверяем любые изменения в первых новостях
+            if (newPosts.length > 0) {
+              const hasChanges = newPosts[0].id !== allNews[0]?.id || newPosts.length !== allNews.slice(0, LIMIT).length;
+              if (hasChanges) {
+                console.log('[AUTO-REFRESH] New content detected, reloading...');
+                currentOffset = 0;
+                await loadNews();
+              }
             }
           }
         } catch (e) {
           console.error('Auto-refresh failed:', e);
         }
       }
-    }, 5000);
+    }, 2000); // 2 секунды вместо 5
 
     // Init
     initTheme();
