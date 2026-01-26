@@ -167,10 +167,114 @@
     .back-btn:hover {
       background: #0051d5;
     }
+
+    /* Login form */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+    }
+    body[data-theme="dark"] .login-box {
+      background: #1e1e1e;
+    }
+    .login-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .login-subtitle {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    body[data-theme="dark"] .login-subtitle {
+      color: #999;
+    }
+    .login-input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-bottom: 16px;
+      background: white;
+      color: #1a1a1a;
+      transition: border-color 0.3s;
+    }
+    body[data-theme="dark"] .login-input {
+      background: #2a2a2a;
+      border-color: #444;
+      color: white;
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: #007aff;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: #007aff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .login-btn:hover {
+      background: #0051d5;
+      transform: translateY(-2px);
+    }
+    .login-error {
+      color: #ff3b30;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 12px;
+      display: none;
+    }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- Login overlay -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <div class="login-title">🔒 Доступ к статистике</div>
+      <div class="login-subtitle">Введите пароль для просмотра</div>
+      <input 
+        type="password" 
+        class="login-input" 
+        id="passwordInput" 
+        placeholder="Пароль"
+        autocomplete="off"
+      />
+      <button class="login-btn" onclick="checkPassword()">Войти</button>
+      <div class="login-error" id="loginError">Неверный пароль</div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="container hidden" id="mainContent">
     <div class="header">
       <div>
         <h1>📊 Статистика</h1>
@@ -202,6 +306,43 @@
   </div>
 
   <script>
+    const CORRECT_PASSWORD = 'business key';
+
+    function checkPassword() {
+      const input = document.getElementById('passwordInput');
+      const error = document.getElementById('loginError');
+      const overlay = document.getElementById('loginOverlay');
+      const content = document.getElementById('mainContent');
+
+      if (input.value === CORRECT_PASSWORD) {
+        // Сохраняем в sessionStorage
+        sessionStorage.setItem('statsAuth', 'true');
+        overlay.classList.add('hidden');
+        content.classList.remove('hidden');
+        loadStats();
+      } else {
+        error.style.display = 'block';
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    // Enter клавиша
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('passwordInput');
+      input.focus();
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkPassword();
+      });
+
+      // Проверяем, есть ли уже авторизация
+      if (sessionStorage.getItem('statsAuth') === 'true') {
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        loadStats();
+      }
+    });
+
     function toggleTheme() {
       const body = document.body;
       const icon = document.getElementById('theme-icon');
@@ -327,7 +468,6 @@
     }
 
     initTheme();
-    loadStats();
   </script>
 
   <!-- Яндекс Метрика -->
