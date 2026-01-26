@@ -209,6 +209,30 @@
       color: #ff453a;
       background: rgba(255, 69, 58, 0.15);
     }
+    .load-more {
+      text-align: center;
+      padding: 20px;
+    }
+    .load-more-btn {
+      background: #007aff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .load-more-btn:hover {
+      background: #0051d5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+    }
+    .load-more-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     .nav {
       position: fixed;
       bottom: calc(12px + env(safe-area-inset-bottom));
@@ -403,21 +427,23 @@
       return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
     }
 
-    // News
+    // News with pagination
     let allNews = [];
-    let hasBackgroundUpdates = false;
     let isLoading = false;
+    let hasMore = true;
+    let currentOffset = 0;
+    const LIMIT = 10;
 
     function renderNews() {
       const feed = document.getElementById('feed');
       const filtered = allNews.filter(n => (n.category || 'all') !== 'reco');
       
-      if (!filtered.length) {
+      if (!filtered.length && !hasMore) {
         feed.innerHTML = '<div class="no-news">Пока нет новостей! Отправьте первую новость боту.</div>';
         return;
       }
       
-      feed.innerHTML = filtered.map(n => {
+      const cardsHtml = filtered.map(n => {
         const ts = n.timestamp || n.createdAt || null;
         let html = '<div class="card">';
         html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
@@ -428,7 +454,6 @@
         if (mediaItems.length > 0) {
           html += '<div class="card-media-scroll">';
           mediaItems.forEach(item => {
-            // ИСПРАВЛЕНО: правильный формат URL с query parameter
             const mediaUrl = `/api/media?fileId=${encodeURIComponent(item.fileId)}`;
             if (item.type === 'photo') {
               html += `<img src="${mediaUrl}" loading="lazy" alt="Фото" onerror="this.style.display='none'"/>`;
@@ -443,20 +468,24 @@
         html += '</div>';
         return html;
       }).join('');
+      
+      let loadMoreHtml = '';
+      if (hasMore) {
+        loadMoreHtml = `<div class="load-more"><button class="load-more-btn" onclick="loadMore()" ${isLoading ? 'disabled' : ''}>${isLoading ? 'Загрузка...' : 'Загрузить ещё'}</button></div>`;
+      }
+      
+      feed.innerHTML = cardsHtml + loadMoreHtml;
     }
 
-    function sameTop(a, b) {
-      const a0 = (Array.isArray(a) && a.length) ? a[0] : null;
-      const b0 = (Array.isArray(b) && b.length) ? b[0] : null;
-      return a0 && b0 && a0.id === b0.id && a.length === b.length;
-    }
-
-    async function loadNews({ render = true } = {}) {
+    async function loadNews({ append = false } = {}) {
       if (isLoading) return;
       isLoading = true;
       
+      if (!append) renderNews();
+      
       try {
-        const res = await fetch('/api/news', { 
+        const url = `/api/news?limit=${LIMIT}&offset=${currentOffset}`;
+        const res = await fetch(url, { 
           cache: 'no-store',
           headers: { 'Accept': 'application/json' }
         });
@@ -466,45 +495,57 @@
         }
         
         const data = await res.json();
-        const next = Array.isArray(data.posts) ? data.posts : [];
-        const changed = !sameTop(allNews, next);
-        allNews = next;
+        const newPosts = Array.isArray(data.posts) ? data.posts : [];
         
-        if (render && changed) {
-          renderNews();
+        if (append) {
+          allNews = [...allNews, ...newPosts];
+        } else {
+          allNews = newPosts;
         }
-        if (!render && changed) {
-          hasBackgroundUpdates = true;
-        }
+        
+        hasMore = data.hasMore || false;
+        currentOffset = allNews.length;
+        
+        renderNews();
       } catch (e) {
         console.error('Failed to load news:', e);
-        if (render && !allNews.length) {
+        if (!allNews.length) {
           document.getElementById('feed').innerHTML = 
-            `<div class="error-msg">Ошибка загрузки новостей: ${escapeHtml(e.message)}<br><br><button onclick="loadNews({render:true})" style="padding:8px 16px;border-radius:8px;border:none;background:#007aff;color:#fff;cursor:pointer;">Повторить</button></div>`;
+            `<div class="error-msg">Ошибка загрузки новостей: ${escapeHtml(e.message)}<br><br><button onclick="loadNews()" style="padding:8px 16px;border-radius:8px;border:none;background:#007aff;color:#fff;cursor:pointer;">Повторить</button></div>`;
         }
       } finally {
         isLoading = false;
       }
     }
 
-    // Auto-refresh in background
-    setInterval(() => {
-      if (document.visibilityState !== 'visible') {
-        loadNews({ render: false });
+    async function loadMore() {
+      await loadNews({ append: true });
+    }
+
+    // Auto-refresh first page
+    setInterval(async () => {
+      if (document.visibilityState === 'visible') {
+        const url = `/api/news?limit=${LIMIT}&offset=0`;
+        try {
+          const res = await fetch(url, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            const newPosts = Array.isArray(data.posts) ? data.posts : [];
+            if (newPosts.length && newPosts[0].id !== allNews[0]?.id) {
+              // New post detected, reload
+              currentOffset = 0;
+              await loadNews();
+            }
+          }
+        } catch (e) {
+          console.error('Auto-refresh failed:', e);
+        }
       }
     }, 5000);
 
-    // Re-render when tab becomes visible
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && hasBackgroundUpdates) {
-        hasBackgroundUpdates = false;
-        renderNews();
-      }
-    });
-
     // Init
     initTheme();
-    loadNews({ render: true });
+    loadNews();
   </script>
 </body>
 </html>
