@@ -629,7 +629,7 @@
         }
 
         // Map Setup
-        const map = L.map('map').setView([55.592312, 37.458014], 15); // zoom 15 вместо 16
+        const map = L.map('map').setView([55.592312, 37.458014], 15);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -780,7 +780,8 @@
                     
                     alert('Бизнес успешно добавлен!');
                     closeModal();
-                    loadBusinesses();
+                    // Reload page to show new business
+                    window.location.reload();
                 } else {
                     alert('Ошибка: ' + (result.error || 'Неизвестная ошибка'));
                 }
