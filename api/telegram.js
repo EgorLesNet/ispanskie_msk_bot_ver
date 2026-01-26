@@ -1,33 +1,36 @@
+// api/telegram.js - Telegram бот для приема и модерации новостей
 require('dotenv/config');
 const { Telegraf } = require('telegraf');
+const { readDB, updateDB } = require('./_db');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const WEBAPP_URL = process.env.WEBAPP_URL;
-
 const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'fusuges').toLowerCase();
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID ? Number(process.env.ADMIN_CHAT_ID) : null;
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const GITHUB_REPO = process.env.GITHUB_REPO || 'EgorLesNet/ispanskie_msk_bot_ver';
-const DB_FILE_PATH = process.env.DB_FILE_PATH || 'db.json';
-const DB_BRANCH = process.env.DB_BRANCH || 'main';
-
-if (!BOT_TOKEN) throw new Error('BOT_TOKEN is required');
+if (!BOT_TOKEN) {
+  console.error('BOT_TOKEN is required!');
+  module.exports = async (req, res) => {
+    res.status(503).json({ error: 'Bot not configured' });
+  };
+  return;
+}
 
 const bot = new Telegraf(BOT_TOKEN);
 
-// одиночное медиа без подписи -> ждём текст
+// Состояния пользователей
 const userStates = new Map();
-// альбомы: key = `${fromId}:${mediaGroupId}`
 const albums = new Map();
+
+// =========================
+// Helper Functions
+// =========================
 
 function isAdmin(ctx) {
   const u = ctx?.from;
   const chat = ctx?.chat;
   const byUsername = Boolean(u?.username) && u.username.toLowerCase() === ADMIN_USERNAME;
-  const byId =
-    ADMIN_CHAT_ID != null &&
-    (Number(u?.id) === ADMIN_CHAT_ID || Number(chat?.id) === ADMIN_CHAT_ID);
+  const byId = ADMIN_CHAT_ID != null && (Number(u?.id) === ADMIN_CHAT_ID || Number(chat?.id) === ADMIN_CHAT_ID);
   return byUsername || byId;
 }
 
@@ -68,107 +71,45 @@ function getForwardSource(msg) {
   return null;
 }
 
-// DB helpers
-function normalizeDb(raw) {
-  const db = raw && typeof raw === 'object' ? raw : {};
-  const postsRaw = Array.isArray(db.posts) ? db.posts : [];
-  const pendingRaw = Array.isArray(db.pending) ? db.pending : [];
-  const rejectedRaw = Array.isArray(db.rejected) ? db.rejected : [];
-
-  const posts = [];
-  const pending = [...pendingRaw];
-  for (const p of postsRaw) {
-    if (p && p.status === 'pending') pending.push(p);
-    else posts.push(p);
-  }
-
-  return {
-    posts,
-    pending,
-    rejected: rejectedRaw,
-    businesses: Array.isArray(db.businesses) ? db.businesses : []
-  };
-}
-
 function nextPostId(db) {
   const ids = [];
   for (const arr of [db.posts, db.pending, db.rejected]) {
-    for (const p of arr) if (p && typeof p.id === 'number') ids.push(p.id);
+    for (const p of arr) {
+      if (p && typeof p.id === 'number') ids.push(p.id);
+    }
   }
   return ids.length ? Math.max(...ids) + 1 : 1;
 }
 
-async function readDbFile() {
-  const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}?ref=${encodeURIComponent(DB_BRANCH)}`;
-  const resp = await fetch(apiUrl, {
-    headers: {
-      Accept: 'application/vnd.github.v3+json',
-      ...(GITHUB_TOKEN ? { Authorization: `token ${GITHUB_TOKEN}` } : {})
-    },
-    cache: 'no-store'
-  });
-
-  if (!resp.ok) {
-    if (resp.status === 404) {
-      return { sha: null, db: { posts: [], pending: [], rejected: [], businesses: [] } };
-    }
-    const t = await resp.text().catch(() => '');
-    throw new Error(`GitHub read failed: ${resp.status} ${t}`);
-  }
-
-  const json = await resp.json();
-  const sha = json?.sha || null;
-  const contentB64 = json?.content || '';
-  const buf = Buffer.from(contentB64, 'base64');
-  const text = buf.toString('utf8');
-  const data = JSON.parse(text);
-  return { sha, db: normalizeDb(data) };
+function extractPostIdFromText(text) {
+  if (!text) return null;
+  const m = String(text).match(/#(\d+)/);
+  return m ? Number(m[1]) : null;
 }
 
-async function writeDbFile(db, sha) {
-  if (!GITHUB_TOKEN) throw new Error('Missing GITHUB_TOKEN');
+async function findPostIdByReplyMessage(replyMsg) {
+  if (!replyMsg) return null;
+  const replyChatId = replyMsg.chat?.id ?? null;
+  const replyMessageId = replyMsg.message_id ?? null;
+  if (replyChatId == null || replyMessageId == null) return null;
 
-  const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}`;
-  const content = Buffer.from(JSON.stringify(db, null, 2)).toString('base64');
+  const { db } = await readDB();
+  const all = [...db.pending, ...db.posts, ...db.rejected];
 
-  const body = { message: 'Update news via bot', content, branch: DB_BRANCH };
-  if (sha) body.sha = sha;
-
-  const resp = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: {
-      Authorization: `token ${GITHUB_TOKEN}`,
-      Accept: 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-
-  return resp;
-}
-
-async function updateDB(mutator, retries = 5) {
-  let lastErr = null;
-  for (let i = 0; i < retries; i++) {
-    try {
-      const { sha, db } = await readDbFile();
-      const result = await mutator(db);
-      const putResp = await writeDbFile(db, sha);
-
-      if (putResp.ok) return result;
-
-      const txt = await putResp.text().catch(() => '');
-      lastErr = new Error(`GitHub write failed: ${putResp.status} ${txt}`);
-      if (putResp.status === 409) continue;
-      throw lastErr;
-    } catch (e) {
-      lastErr = e;
+  for (const p of all) {
+    const mm = p?.moderationMessage;
+    if (mm && mm.chatId === replyChatId && mm.messageId === replyMessageId) {
+      return p.id;
     }
   }
-  throw lastErr || new Error('updateDB failed');
+
+  return extractPostIdFromText(replyMsg.text || replyMsg.caption || '') || null;
 }
 
-// news / moderation
+// =========================
+// Database Operations
+// =========================
+
 async function submitNews({ text, author, admin, media, source }) {
   return updateDB(async (db) => {
     const id = nextPostId(db);
@@ -220,7 +161,9 @@ async function appendMediaToPost(postId, items) {
       const merged = [...existing];
 
       for (const it of add) {
-        if (!merged.some(m => m.type === it.type && m.fileId === it.fileId)) merged.push(it);
+        if (!merged.some(m => m.type === it.type && m.fileId === it.fileId)) {
+          merged.push(it);
+        }
       }
 
       p.media = merged;
@@ -263,7 +206,10 @@ async function attachModerationMessage(postId, msg) {
   return updateDB(async (db) => {
     const p = db.pending.find(x => x && x.id === postId);
     if (!p) return false;
-    p.moderationMessage = { chatId: msg?.chat?.id ?? null, messageId: msg?.message_id ?? null };
+    p.moderationMessage = {
+      chatId: msg?.chat?.id ?? null,
+      messageId: msg?.message_id ?? null
+    };
     return true;
   });
 }
@@ -288,6 +234,10 @@ async function deleteNews(postId) {
   });
 }
 
+// =========================
+// Bot Helpers
+// =========================
+
 function adminKeyboard(postId) {
   return {
     inline_keyboard: [[
@@ -298,21 +248,24 @@ function adminKeyboard(postId) {
 }
 
 async function notifyAdmin(ctx, post) {
-  if (!ADMIN_CHAT_ID) return;
+  if (!ADMIN_CHAT_ID) {
+    console.log('ADMIN_CHAT_ID not set, skipping admin notification');
+    return;
+  }
 
   const src = post.source;
   const srcUrl = src?.postUrl || src?.chatUrl || '';
   const srcTitle = src?.title || (src?.username ? `@${src.username}` : 'Источник');
   const srcLine = srcUrl ? `\n\nИсточник: ${srcTitle} ${srcUrl}` : '';
 
-  const header =
-    `📬 Новая новость #${post.id} от ${post.authorName || 'Unknown'}${
-      post.authorUsername ? ` (@${post.authorUsername})` : ''
-    }:\n\n${post.text}${srcLine}`;
+  const header = `📬 Новая новость #${post.id} от ${post.authorName || 'Unknown'}${
+    post.authorUsername ? ` (@${post.authorUsername})` : ''
+  }:\n\n${post.text}${srcLine}`;
 
   try {
     const firstPhoto = post.photoFileId;
     let sent;
+    
     if (firstPhoto) {
       sent = await ctx.telegram.sendPhoto(ADMIN_CHAT_ID, firstPhoto, {
         caption: header,
@@ -323,54 +276,133 @@ async function notifyAdmin(ctx, post) {
         reply_markup: adminKeyboard(post.id)
       });
     }
-    if (sent?.message_id) await attachModerationMessage(post.id, sent);
+    
+    if (sent?.message_id) {
+      await attachModerationMessage(post.id, sent);
+    }
   } catch (err) {
     console.error('Failed to notify admin:', err);
   }
 }
 
-function extractPostIdFromText(text) {
-  if (!text) return null;
-  const m = String(text).match(/#(\d+)/);
-  return m ? Number(m[1]) : null;
-}
+// =========================
+// Media Handler
+// =========================
 
-async function findPostIdByReplyMessage(replyMsg) {
-  if (!replyMsg) return null;
-  const replyChatId = replyMsg.chat?.id ?? null;
-  const replyMessageId = replyMsg.message_id ?? null;
-  if (replyChatId == null || replyMessageId == null) return null;
+async function handleMedia(ctx, item) {
+  const admin = isAdmin(ctx);
+  const msg = ctx.message;
+  const caption = (msg.caption || '').trim();
+  const mediaGroupId = msg.media_group_id || null;
+  const source = getForwardSource(msg);
 
-  const { db } = await readDbFile();
-  const all = [...db.pending, ...db.posts, ...db.rejected];
+  // Альбом (несколько фото/видео)
+  if (mediaGroupId) {
+    const key = `${ctx.from.id}:${mediaGroupId}`;
+    const cur = albums.get(key) || {
+      postId: null,
+      media: [],
+      caption: null,
+      source: source || null
+    };
 
-  for (const p of all) {
-    const mm = p?.moderationMessage;
-    if (mm && mm.chatId === replyChatId && mm.messageId === replyMessageId) return p.id;
+    cur.media.push(item);
+    if (caption) cur.caption = caption;
+    if (source && !cur.source) cur.source = source;
+
+    // Если есть подпись и пост еще не создан
+    if (!cur.postId && cur.caption) {
+      const post = await submitNews({
+        text: cur.caption,
+        author: ctx.from,
+        admin,
+        media: cur.media,
+        source: cur.source
+      });
+      cur.postId = post.id;
+      albums.set(key, cur);
+
+      if (admin) {
+        await ctx.reply('✅ Новость опубликована!');
+      } else {
+        await ctx.reply('📩 Новость отправлена на проверку.');
+        await notifyAdmin(ctx, post);
+      }
+      
+      // Удаляем альбом через 30 секунд
+      setTimeout(() => albums.delete(key), 30000);
+      return;
+    }
+
+    // Если пост уже создан, добавляем медиа
+    if (cur.postId) {
+      albums.set(key, cur);
+      await appendMediaToPost(cur.postId, [item]);
+      return;
+    }
+
+    // Сохраняем и ждем подписи
+    albums.set(key, cur);
+    setTimeout(() => albums.delete(key), 30000);
+    return;
   }
 
-  return extractPostIdFromText(replyMsg.text || replyMsg.caption || '') || null;
+  // Одно фото/видео с подписью
+  if (caption) {
+    const post = await submitNews({
+      text: caption,
+      author: ctx.from,
+      admin,
+      media: [item],
+      source
+    });
+
+    if (admin) {
+      await ctx.reply('✅ Новость опубликована!');
+    } else {
+      await ctx.reply('📩 Новость отправлена на проверку.');
+      await notifyAdmin(ctx, post);
+    }
+    return;
+  }
+
+  // Одно фото/видео без подписи - ждем текст
+  userStates.set(ctx.from.id, { media: [item], source });
+  await ctx.reply('📎 Медиа получено! Теперь отправьте текст новости:');
 }
 
-// commands
-bot.command('start', async ctx => {
+// =========================
+// Bot Handlers
+// =========================
+
+bot.command('start', async (ctx) => {
   userStates.delete(ctx.from.id);
+  
+  if (!WEBAPP_URL) {
+    return ctx.reply('Добро пожаловать! Отправьте новость текстом (можно с фото/видео):');
+  }
+  
   await ctx.reply(
-    'Добро пожаловать!\n\nИспользуйте кнопку ниже, чтобы открыть приложение:',
+    'Добро пожаловать! 👋\n\nИспользуйте кнопку ниже, чтобы открыть приложение:',
     {
       reply_markup: {
-        keyboard: [[{ text: '📱 Открыть приложение', web_app: { url: WEBAPP_URL } }]],
+        keyboard: [[
+          { text: '📱 Открыть приложение', web_app: { url: WEBAPP_URL } }
+        ]],
         resize_keyboard: true
       }
     }
   );
+  
   await ctx.reply('Или отправьте новость текстом (можно с фото/видео):', {
     reply_markup: { remove_keyboard: true }
   });
 });
 
-bot.command('delete', async ctx => {
-  if (!isAdmin(ctx)) return ctx.reply('Нет доступа!');
+bot.command('delete', async (ctx) => {
+  if (!isAdmin(ctx)) {
+    return ctx.reply('Нет доступа!');
+  }
 
   const full = String(ctx.message?.text || '').trim();
   const parts = full.split(/\s+/);
@@ -386,181 +418,149 @@ bot.command('delete', async ctx => {
   }
 
   const result = await deleteNews(postId);
-  if (!result) return ctx.reply(`Пост #${postId} не найден (или уже удалён).`);
+  if (!result) {
+    return ctx.reply(`Пост #${postId} не найден (или уже удалён).`);
+  }
 
   try {
     const mm = result.post?.moderationMessage;
     if (mm?.chatId != null && mm?.messageId != null) {
       await ctx.telegram.deleteMessage(mm.chatId, mm.messageId);
     }
-  } catch (_) {}
+  } catch (e) {
+    console.log('Could not delete moderation message:', e.message);
+  }
 
   return ctx.reply(`🗑 Удалено: #${postId} (раздел: ${result.place}).`);
 });
 
-// generic media handler
-async function handleMedia(ctx, item) {
-  const admin = isAdmin(ctx);
-  const msg = ctx.message;
-  const caption = (msg.caption || '').trim();
-  const mediaGroupId = msg.media_group_id || null;
-  const source = getForwardSource(msg);
-
-  if (mediaGroupId) {
-    const key = `${ctx.from.id}:${mediaGroupId}`;
-    const cur = albums.get(key) || {
-      postId: null,
-      media: [],
-      caption: null,
-      source: source || null
-    };
-
-    cur.media.push(item);
-    if (caption) cur.caption = caption;
-    if (source && !cur.source) cur.source = source;
-
-    if (!cur.postId && cur.caption) {
-      const post = await submitNews({
-        text: cur.caption,
-        author: ctx.from,
-        admin,
-        media: cur.media,
-        source: cur.source
-      });
-      cur.postId = post.id;
-      albums.set(key, cur);
-
-      if (admin) await ctx.reply('✅ Новость опубликована!');
-      else {
-        await ctx.reply('📩 Новость отправлена на проверку.');
-        await notifyAdmin(ctx, post);
-      }
-      return;
+bot.on('photo', async (ctx) => {
+  try {
+    const photos = ctx.message.photo || [];
+    const best = photos.length ? photos[photos.length - 1] : null;
+    const fileId = best?.file_id;
+    if (!fileId) {
+      return ctx.reply('Не удалось прочитать фото, попробуйте ещё раз.');
     }
-
-    if (cur.postId) {
-      albums.set(key, cur);
-      await appendMediaToPost(cur.postId, [item]);
-      return;
-    }
-
-    albums.set(key, cur);
-    return;
+    return handleMedia(ctx, { type: 'photo', fileId });
+  } catch (error) {
+    console.error('Photo handler error:', error);
+    await ctx.reply('Ошибка при обработке фото. Попробуйте ещё раз.');
   }
+});
 
-  if (caption) {
+bot.on('video', async (ctx) => {
+  try {
+    const fileId = ctx.message.video?.file_id;
+    if (!fileId) {
+      return ctx.reply('Не удалось прочитать видео, попробуйте ещё раз.');
+    }
+    return handleMedia(ctx, { type: 'video', fileId });
+  } catch (error) {
+    console.error('Video handler error:', error);
+    await ctx.reply('Ошибка при обработке видео. Попробуйте ещё раз.');
+  }
+});
+
+bot.on('text', async (ctx, next) => {
+  try {
+    const text = (ctx.message.text || '').trim();
+    if (!text) return;
+
+    if (text.startsWith('/')) {
+      if (typeof next === 'function') return next();
+      return;
+    }
+
+    const admin = isAdmin(ctx);
+    const st = userStates.get(ctx.from.id);
+    userStates.delete(ctx.from.id);
+
+    const media = st?.media || [];
+    const source = st?.source || getForwardSource(ctx.message) || null;
+
     const post = await submitNews({
-      text: caption,
+      text,
       author: ctx.from,
       admin,
-      media: [item],
+      media,
       source
     });
 
-    if (admin) await ctx.reply('✅ Новость опубликована!');
-    else {
+    if (admin) {
+      await ctx.reply('✅ Новость опубликована!');
+    } else {
       await ctx.reply('📩 Новость отправлена на проверку.');
       await notifyAdmin(ctx, post);
     }
-    return;
-  }
-
-  userStates.set(ctx.from.id, { media: [item], source });
-  await ctx.reply('📎 Медиа получено! Теперь отправьте текст новости:');
-}
-
-// фото
-bot.on('photo', async ctx => {
-  const photos = ctx.message.photo || [];
-  const best = photos.length ? photos[photos.length - 1] : null;
-  const fileId = best?.file_id;
-  if (!fileId) return ctx.reply('Не удалось прочитать фото, попробуйте ещё раз.');
-  return handleMedia(ctx, { type: 'photo', fileId });
-});
-
-// видео
-bot.on('video', async ctx => {
-  const fileId = ctx.message.video?.file_id;
-  if (!fileId) return ctx.reply('Не удалось прочитать видео, попробуйте ещё раз.');
-  return handleMedia(ctx, { type: 'video', fileId });
-});
-
-// text
-bot.on('text', async (ctx, next) => {
-  const text = (ctx.message.text || '').trim();
-  if (!text) return;
-
-  if (text.startsWith('/')) {
-    if (typeof next === 'function') return next();
-    return;
-  }
-
-  const admin = isAdmin(ctx);
-
-  const st = userStates.get(ctx.from.id);
-  userStates.delete(ctx.from.id);
-
-  const media = st?.media || [];
-  const source = st?.source || getForwardSource(ctx.message) || null;
-
-  const post = await submitNews({
-    text,
-    author: ctx.from,
-    admin,
-    media,
-    source
-  });
-
-  if (admin) await ctx.reply('✅ Новость опубликована!');
-  else {
-    await ctx.reply('📩 Новость отправлена на проверку.');
-    await notifyAdmin(ctx, post);
+  } catch (error) {
+    console.error('Text handler error:', error);
+    await ctx.reply('Ошибка при обработке сообщения. Попробуйте ещё раз.');
   }
 });
 
-// moderation
-bot.on('callback_query', async ctx => {
-  if (!isAdmin(ctx)) {
-    await ctx.answerCbQuery('Нет доступа!', { show_alert: true });
-    return;
-  }
+bot.on('callback_query', async (ctx) => {
+  try {
+    if (!isAdmin(ctx)) {
+      await ctx.answerCbQuery('Нет доступа!', { show_alert: true });
+      return;
+    }
 
-  const data = String(ctx.callbackQuery.data || '');
-  const [action, idStr] = data.split(':');
-  const postId = Number(idStr);
+    const data = String(ctx.callbackQuery.data || '');
+    const [action, idStr] = data.split(':');
+    const postId = Number(idStr);
 
-  if (!postId || (action !== 'approve' && action !== 'reject')) {
-    await ctx.answerCbQuery('Некорректная команда', { show_alert: true });
-    return;
-  }
+    if (!postId || (action !== 'approve' && action !== 'reject')) {
+      await ctx.answerCbQuery('Некорректная команда', { show_alert: true });
+      return;
+    }
 
-  const result = await moderateNews(postId, action);
-  if (!result) {
-    await ctx.answerCbQuery('Не найдено / уже обработано', { show_alert: true });
-    return;
-  }
+    const result = await moderateNews(postId, action);
+    if (!result) {
+      await ctx.answerCbQuery('Не найдено / уже обработано', { show_alert: true });
+      return;
+    }
 
-  try { await ctx.editMessageReplyMarkup(); } catch (_) {}
+    try {
+      await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+    } catch (e) {
+      console.log('Could not remove keyboard:', e.message);
+    }
 
-  if (result.status === 'approved') {
-    await ctx.answerCbQuery('Одобрено');
-    await ctx.reply(`Новость #${result.post.id} одобрена и опубликована.`);
-  } else {
-    await ctx.answerCbQuery('Отклонено');
-    await ctx.reply(`Новость #${result.post.id} отклонена.`);
+    if (result.status === 'approved') {
+      await ctx.answerCbQuery('Одобрено');
+      await ctx.reply(`Новость #${result.post.id} одобрена и опубликована.`);
+    } else {
+      await ctx.answerCbQuery('Отклонено');
+      await ctx.reply(`Новость #${result.post.id} отклонена.`);
+    }
+  } catch (error) {
+    console.error('Callback query error:', error);
+    await ctx.answerCbQuery('Ошибка обработки', { show_alert: true });
   }
 });
+
+// =========================
+// Webhook Handler for Vercel
+// =========================
 
 module.exports = async (req, res) => {
   try {
     let update = req.body;
-    if (typeof update === 'string') update = JSON.parse(update);
-    else if (Buffer.isBuffer(update)) update = JSON.parse(update.toString('utf8'));
+    
+    if (typeof update === 'string') {
+      update = JSON.parse(update);
+    } else if (Buffer.isBuffer(update)) {
+      update = JSON.parse(update.toString('utf8'));
+    }
 
     await bot.handleUpdate(update);
     res.status(200).json({ ok: true });
   } catch (err) {
     console.error('Webhook error:', err);
-    res.status(500).json({ error: err?.message || String(err) });
+    res.status(500).json({ 
+      error: 'Webhook processing failed',
+      message: err?.message || String(err) 
+    });
   }
 };
