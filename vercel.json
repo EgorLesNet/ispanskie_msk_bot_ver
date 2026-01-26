@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "functions": {
     "api/**/*.js": {
       "memory": 1024,
@@ -9,11 +8,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/public/news.html"
-    },
-    {
-      "source": "/((?!api|_next|public|static).*)",
-      "destination": "/public/$1"
+      "destination": "/news.html"
     }
   ],
   "headers": [
@@ -35,7 +30,7 @@
       ]
     },
     {
-      "source": "/public/(.*\\.(png|jpg|jpeg|gif|svg|ico|webp))",
+      "source": "/(.*\\.(png|jpg|jpeg|gif|svg|ico|webp))",
       "headers": [
         {
           "key": "Cache-Control",
@@ -48,12 +43,9 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=3600, must-revalidate"
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
