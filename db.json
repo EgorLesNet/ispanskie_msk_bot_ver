@@ -52,11 +52,12 @@
       "moderationMessage": null,
       "status": "approved",
       "sourceType": "admin",
-      "likes": 1,
+      "likes": 2,
       "dislikes": 1,
       "userReactions": {
         "web_mm3qax6d1mkvggcey": "like",
-        "web_pvt1yyt0bmkvgoknj": "dislike"
+        "web_pvt1yyt0bmkvgoknj": "dislike",
+        "web_4venzlj1lmkvhbiey": "like"
       }
     },
     {
