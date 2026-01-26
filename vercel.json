@@ -15,12 +15,40 @@
   ],
   "routes": [
     {
-      "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json))",
+      "src": "/api/telegram",
+      "dest": "/api/telegram.js",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/news",
+      "dest": "/api/news.js",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/media",
+      "dest": "/api/media.js",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/businesses(.*)",
+      "dest": "/api/businesses.js"
+    },
+    {
+      "src": "/api/reactions",
+      "dest": "/api/reactions.js",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|webp))",
       "dest": "/public/$1"
     },
     {
       "src": "/",
       "dest": "/public/news.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
   ],
   "functions": {
@@ -29,6 +57,34 @@
       "maxDuration": 10
     }
   },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        }
+      ]
+    },
+    {
+      "source": "/public/(.*\\.(png|jpg|jpeg|gif|svg|ico|webp))",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
   "env": {
     "NODE_ENV": "production"
   }
