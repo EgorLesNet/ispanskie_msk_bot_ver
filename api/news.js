@@ -29,7 +29,10 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 'public, max-age=10, s-maxage=10, stale-while-revalidate=30');
+  // Отключаем кэширование для мгновенных обновлений
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -44,8 +47,8 @@ module.exports = async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 10, 50); // Максимум 50
     const offset = Math.max(parseInt(req.query.offset) || 0, 0);
     
-    // Читаем базу (с кэшем)
-    const { db } = await readDB(true);
+    // Читаем базу БЕЗ кэша для мгновенных обновлений
+    const { db } = await readDB(false);
     
     // Фильтруем и сортируем
     const allApprovedPosts = (db.posts || [])
