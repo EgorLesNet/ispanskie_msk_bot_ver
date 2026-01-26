@@ -846,7 +846,10 @@
       "media": [],
       "photoFileId": null,
       "source": null,
-      "moderationMessage": null,
+      "moderationMessage": {
+        "chatId": 273473755,
+        "messageId": 644
+      },
       "status": "pending",
       "sourceType": "user"
     }
