@@ -184,6 +184,56 @@
         width: 100%;
       }
     }
+    .card-reactions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    body[data-theme="dark"] .card-reactions {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .reaction-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    body[data-theme="dark"] .reaction-btn {
+      background: rgba(50, 50, 50, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .reaction-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .reaction-btn.active {
+      background: rgba(0, 122, 255, 0.15);
+      border-color: #007aff;
+      color: #007aff;
+    }
+    body[data-theme="dark"] .reaction-btn.active {
+      background: rgba(10, 132, 255, 0.2);
+      border-color: #0a84ff;
+      color: #0a84ff;
+    }
+    .reaction-btn .emoji {
+      font-size: 18px;
+      line-height: 1;
+    }
+    .reaction-btn .count {
+      font-weight: 500;
+      min-width: 16px;
+      text-align: center;
+    }
     .loading {
       text-align: center;
       color: #999;
@@ -385,6 +435,16 @@
   <!-- /Yandex.Metrika counter -->
 
   <script>
+    // User ID for reactions
+    function getUserId() {
+      let userId = localStorage.getItem('newsUserId');
+      if (!userId) {
+        userId = 'web_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        localStorage.setItem('newsUserId', userId);
+      }
+      return userId;
+    }
+
     // Theme
     function toggleTheme() {
       const body = document.body;
@@ -441,6 +501,46 @@
       return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
     }
 
+    // Reactions
+    async function handleReaction(postId, type, event) {
+      const btn = event.currentTarget;
+      const userId = getUserId();
+      
+      // Optimistic UI update
+      const wasActive = btn.classList.contains('active');
+      const otherType = type === 'like' ? 'dislike' : 'like';
+      const otherBtn = btn.parentElement.querySelector(`[data-type="${otherType}"]`);
+      
+      try {
+        const res = await fetch('/api/reactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postId, type, userId })
+        });
+        
+        if (!res.ok) {
+          throw new Error('Failed to update reaction');
+        }
+        
+        const data = await res.json();
+        
+        // Update UI
+        const likeBtn = btn.parentElement.querySelector('[data-type="like"]');
+        const dislikeBtn = btn.parentElement.querySelector('[data-type="dislike"]');
+        
+        likeBtn.querySelector('.count').textContent = data.likes || 0;
+        dislikeBtn.querySelector('.count').textContent = data.dislikes || 0;
+        
+        likeBtn.classList.toggle('active', data.userReaction === 'like');
+        dislikeBtn.classList.toggle('active', data.userReaction === 'dislike');
+        
+      } catch (error) {
+        console.error('Reaction error:', error);
+        // Revert optimistic update
+        btn.classList.toggle('active', wasActive);
+      }
+    }
+
     // News with pagination
     let allNews = [];
     let isLoading = false;
@@ -451,6 +551,7 @@
     function renderNews() {
       const feed = document.getElementById('feed');
       const filtered = allNews.filter(n => (n.category || 'all') !== 'reco');
+      const userId = getUserId();
       
       if (!filtered.length && !hasMore) {
         feed.innerHTML = '<div class="no-news">Пока нет новостей! Отправьте первую новость боту.</div>';
@@ -479,6 +580,23 @@
         }
         
         html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+        
+        // Reactions
+        const likes = n.likes || 0;
+        const dislikes = n.dislikes || 0;
+        const userReaction = n.userReactions?.[userId] || null;
+        
+        html += '<div class="card-reactions">';
+        html += `<div class="reaction-btn ${userReaction === 'like' ? 'active' : ''}" data-type="like" onclick="handleReaction(${n.id}, 'like', event)">`;
+        html += '<span class="emoji">👍</span>';
+        html += `<span class="count">${likes}</span>`;
+        html += '</div>';
+        html += `<div class="reaction-btn ${userReaction === 'dislike' ? 'active' : ''}" data-type="dislike" onclick="handleReaction(${n.id}, 'dislike', event)">`;
+        html += '<span class="emoji">👎</span>';
+        html += `<span class="count">${dislikes}</span>`;
+        html += '</div>';
+        html += '</div>';
+        
         html += '</div>';
         return html;
       }).join('');
