@@ -1,45 +1,9 @@
-// api/news.js
-const https = require('https');
-
-const GITHUB_REPO = 'EgorLesNet/ispanskie_msk_bot_ver';
-const DB_FILE_PATH = 'db.json';
-const DB_BRANCH = 'main';
-
-function httpsGet(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        if (res.statusCode === 200) {
-          resolve(data);
-        } else {
-          reject(new Error(`HTTP ${res.statusCode}`));
-        }
-      });
-    }).on('error', reject);
-  });
-}
-
-async function readDBViaGitHubRaw() {
-  try {
-    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${DB_BRANCH}/${DB_FILE_PATH}`;
-    const text = await httpsGet(rawUrl);
-    const data = JSON.parse(text);
-    
-    return {
-      posts: Array.isArray(data.posts) ? data.posts : [],
-      pending: Array.isArray(data.pending) ? data.pending : [],
-      rejected: Array.isArray(data.rejected) ? data.rejected : [],
-      businesses: Array.isArray(data.businesses) ? data.businesses : []
-    };
-  } catch (e) {
-    console.error('readDBViaGitHubRaw error:', e);
-    return { posts: [], pending: [], rejected: [], businesses: [] };
-  }
-}
+// api/news.js - API для получения новостей
+const { readDB } = require('./_db');
 
 function normalizePost(p) {
+  if (!p) return null;
+  
   return {
     id: p.id,
     text: p.text || '',
@@ -48,11 +12,11 @@ function normalizePost(p) {
     authorUsername: p.authorUsername,
     createdAt: p.createdAt,
     timestamp: p.timestamp,
-    category: p.category || null,
-    media: p.media || [],
+    category: p.category || 'all',
+    media: Array.isArray(p.media) ? p.media : [],
     photoFileId: p.photoFileId || null,
+    photoFileIds: Array.isArray(p.photoFileIds) ? p.photoFileIds : [],
     source: p.source || null,
-    moderationMessage: p.moderationMessage || null,
     status: p.status || 'approved',
     sourceType: p.sourceType || 'admin',
     likes: p.likes || 0,
@@ -61,27 +25,46 @@ function normalizePost(p) {
 }
 
 module.exports = async (req, res) => {
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('Cache-Control', 'public, max-age=10, s-maxage=10, stale-while-revalidate=30');
   
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  if (req.method === 'GET') {
-    const db = await readDBViaGitHubRaw();
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    // Читаем базу (с кэшем)
+    const { db } = await readDB(true);
     
     // Возвращаем только одобренные новости
     const approvedPosts = (db.posts || [])
-      .filter(p => p.status === 'approved')
+      .filter(p => p && p.status === 'approved')
       .map(normalizePost)
-      .sort((a, b) => b.id - a.id); // Сначала новые
+      .filter(Boolean)
+      .sort((a, b) => {
+        // Сортируем по ID (новые сверху)
+        return (b.id || 0) - (a.id || 0);
+      });
     
-    console.log(`[API/NEWS] Returning ${approvedPosts.length} posts`);
-    return res.json({ posts: approvedPosts });
+    console.log(`[API/NEWS] Returning ${approvedPosts.length} approved posts`);
+    
+    return res.status(200).json({
+      posts: approvedPosts,
+      total: approvedPosts.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[API/NEWS] Error:', error);
+    return res.status(500).json({
+      error: 'Failed to load news',
+      message: error.message
+    });
   }
-  
-  res.status(405).json({ error: 'Method not allowed' });
 };
