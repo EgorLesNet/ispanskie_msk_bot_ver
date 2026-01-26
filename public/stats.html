@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Статистика - Агрегатор для района</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+    body[data-theme="dark"] {
+      background: #0e0e0e;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    body[data-theme="dark"] .header {
+      background: #1e1e1e;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    body[data-theme="dark"] .stat-card {
+      background: #1e1e1e;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    body[data-theme="dark"] .stat-label {
+      color: #999;
+    }
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: #007aff;
+    }
+    .stat-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 30px 0 16px;
+    }
+    .top-list {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    body[data-theme="dark"] .top-list {
+      background: #1e1e1e;
+    }
+    .top-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    body[data-theme="dark"] .top-item {
+      border-bottom: 1px solid #333;
+    }
+    .top-item:last-child {
+      border-bottom: none;
+    }
+    .top-rank {
+      font-size: 24px;
+      font-weight: 700;
+      width: 40px;
+      text-align: center;
+      color: #007aff;
+    }
+    .top-content {
+      flex: 1;
+      margin: 0 16px;
+    }
+    .top-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .top-meta {
+      font-size: 13px;
+      color: #666;
+    }
+    body[data-theme="dark"] .top-meta {
+      color: #999;
+    }
+    .top-score {
+      font-size: 20px;
+      font-weight: 600;
+      color: #007aff;
+    }
+    .theme-toggle {
+      background: #007aff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .theme-toggle:hover {
+      background: #0051d5;
+    }
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+      font-size: 16px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #007aff;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .back-btn:hover {
+      background: #0051d5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>📊 Статистика</h1>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <a href="news.html" class="back-btn">
+          <span>←</span>
+          <span>Назад</span>
+        </a>
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <span id="theme-icon">🌙 Темная</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="mainStats">
+      <div class="loading">Загрузка статистики...</div>
+    </div>
+
+    <h2 class="section-title">🏆 Топ новостей по популярности</h2>
+    <div class="top-list" id="topPosts">
+      <div class="loading">Загрузка...</div>
+    </div>
+
+    <h2 class="section-title">⭐ Топ авторов</h2>
+    <div class="top-list" id="topAuthors">
+      <div class="loading">Загрузка...</div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById('theme-icon');
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? '' : 'dark');
+      icon.textContent = isDark ? '🌙 Темная' : '☀️ Светлая';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').textContent = '☀️ Светлая';
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/news?limit=1000&offset=0', { cache: 'no-store' });
+        const data = await res.json();
+        const posts = data.posts || [];
+
+        // Основная статистика
+        const totalPosts = posts.length;
+        const totalLikes = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
+        const totalDislikes = posts.reduce((sum, p) => sum + (p.dislikes || 0), 0);
+        const postsWithMedia = posts.filter(p => p.media && p.media.length > 0).length;
+        const uniqueAuthors = new Set(posts.map(p => p.authorUsername).filter(Boolean)).size;
+
+        // Отрисовка основных карточек
+        document.getElementById('mainStats').innerHTML = `
+          <div class="stat-card">
+            <div class="stat-icon">📰</div>
+            <div class="stat-label">Всего новостей</div>
+            <div class="stat-value">${totalPosts}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👍</div>
+            <div class="stat-label">Лайков</div>
+            <div class="stat-value">${totalLikes}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👎</div>
+            <div class="stat-label">Дизлайков</div>
+            <div class="stat-value">${totalDislikes}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📸</div>
+            <div class="stat-label">С медиа</div>
+            <div class="stat-value">${postsWithMedia}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✍️</div>
+            <div class="stat-label">Авторов</div>
+            <div class="stat-value">${uniqueAuthors}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-label">Ср. лайков на пост</div>
+            <div class="stat-value">${totalPosts ? Math.round(totalLikes / totalPosts) : 0}</div>
+          </div>
+        `;
+
+        // Топ новостей
+        const topPosts = posts
+          .map(p => ({
+            ...p,
+            score: (p.likes || 0) - (p.dislikes || 0)
+          }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 10);
+
+        document.getElementById('topPosts').innerHTML = topPosts.map((p, i) => `
+          <div class="top-item">
+            <div class="top-rank">${i + 1}</div>
+            <div class="top-content">
+              <div class="top-title">${escapeHtml(p.text.substring(0, 80))}${p.text.length > 80 ? '...' : ''}</div>
+              <div class="top-meta">#${p.id} · ${p.authorName || 'Unknown'}</div>
+            </div>
+            <div class="top-score">
+              <span style="color: #34c759;">↑${p.likes || 0}</span>
+              <span style="color: #ff3b30; margin-left: 8px;">↓${p.dislikes || 0}</span>
+            </div>
+          </div>
+        `).join('');
+
+        // Топ авторов
+        const authorsMap = {};
+        posts.forEach(p => {
+          const author = p.authorUsername || 'unknown';
+          if (!authorsMap[author]) {
+            authorsMap[author] = { name: p.authorName || author, count: 0, likes: 0 };
+          }
+          authorsMap[author].count++;
+          authorsMap[author].likes += (p.likes || 0);
+        });
+
+        const topAuthors = Object.entries(authorsMap)
+          .map(([username, data]) => ({ username, ...data }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10);
+
+        document.getElementById('topAuthors').innerHTML = topAuthors.map((a, i) => `
+          <div class="top-item">
+            <div class="top-rank">${i + 1}</div>
+            <div class="top-content">
+              <div class="top-title">${escapeHtml(a.name)}</div>
+              <div class="top-meta">@${escapeHtml(a.username)} · ${a.count} новостей</div>
+            </div>
+            <div class="top-score">👍 ${a.likes}</div>
+          </div>
+        `).join('');
+
+      } catch (e) {
+        console.error('Failed to load stats:', e);
+        document.getElementById('mainStats').innerHTML = '<div class="loading">Ошибка загрузки</div>';
+      }
+    }
+
+    initTheme();
+    loadStats();
+  </script>
+
+  <!-- Яндекс Метрика -->
+  <script type="text/javascript">
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+    // Замени YOUR_COUNTER_ID на свой номер счётчика
+    // ym(YOUR_COUNTER_ID, "init", {
+    //   clickmap:true,
+    //   trackLinks:true,
+    //   accurateTrackBounce:true,
+    //   webvisor:true
+    // });
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/YOUR_COUNTER_ID" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+</body>
+</html>
