@@ -107,6 +107,25 @@ async function findPostIdByReplyMessage(replyMsg) {
   return extractPostIdFromText(replyMsg.text || replyMsg.caption || '') || null;
 }
 
+/**
+ * Выбирает оптимальный размер фото (не оригинал, чтобы избежать 20MB лимита)
+ * Telegram создаёт несколько версий: small, medium, large, original
+ * Берём предпоследнюю (высокое качество, но < 1MB)
+ */
+function getBestPhotoSize(photos) {
+  if (!Array.isArray(photos) || photos.length === 0) return null;
+  
+  // Если только 1 размер, возьмём его
+  if (photos.length === 1) return photos[0];
+  
+  // Если 2 размера, возьмём последний
+  if (photos.length === 2) return photos[1];
+  
+  // Если 3+ размера, возьмём предпоследний (не оригинал)
+  // Это гарантированно < 1MB, но высокого качества
+  return photos[photos.length - 2];
+}
+
 // =========================
 // Database Operations
 // =========================
@@ -441,7 +460,8 @@ bot.command('delete', async (ctx) => {
 bot.on('photo', async (ctx) => {
   try {
     const photos = ctx.message.photo || [];
-    const best = photos.length ? photos[photos.length - 1] : null;
+    // Используем сжатую версию, не оригинал
+    const best = getBestPhotoSize(photos);
     const fileId = best?.file_id;
     if (!fileId) {
       return ctx.reply('Не удалось прочитать фото, попробуйте ещё раз.');
