@@ -833,7 +833,24 @@
       "sourceType": "admin"
     }
   ],
-  "pending": [],
+  "pending": [
+    {
+      "id": 27,
+      "text": "Какая-то неинтересная новость.",
+      "authorId": 164794874,
+      "authorName": "Bella",
+      "authorUsername": "io_spero",
+      "createdAt": "2026-01-26T18:09:17.714Z",
+      "timestamp": "2026-01-26T18:09:17.714Z",
+      "category": "all",
+      "media": [],
+      "photoFileId": null,
+      "source": null,
+      "moderationMessage": null,
+      "status": "pending",
+      "sourceType": "user"
+    }
+  ],
   "rejected": [],
   "businesses": [
     {
