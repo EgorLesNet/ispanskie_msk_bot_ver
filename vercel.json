@@ -6,42 +6,14 @@
       "maxDuration": 10
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/telegram",
-      "dest": "/api/telegram.js",
-      "methods": ["POST", "OPTIONS"]
+      "source": "/",
+      "destination": "/public/news.html"
     },
     {
-      "src": "/api/news",
-      "dest": "/api/news.js",
-      "methods": ["GET", "OPTIONS"]
-    },
-    {
-      "src": "/api/media",
-      "dest": "/api/media.js",
-      "methods": ["GET", "OPTIONS"]
-    },
-    {
-      "src": "/api/businesses(.*)",
-      "dest": "/api/businesses.js"
-    },
-    {
-      "src": "/api/reactions",
-      "dest": "/api/reactions.js",
-      "methods": ["POST", "OPTIONS"]
-    },
-    {
-      "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|webp))",
-      "dest": "/public/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/public/news.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "source": "/((?!api|_next|public|static).*)",
+      "destination": "/public/$1"
     }
   ],
   "headers": [
@@ -68,6 +40,15 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.(html|css|js))",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, must-revalidate"
         }
       ]
     }
