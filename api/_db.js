@@ -1,39 +1,15 @@
-// api/_db.js - Единый модуль для работы с базой данных
-require('dotenv/config');
-const https = require('https');
+// api/_db.js - Database module using Vercel KV
+const { kv } = require('@vercel/kv');
 
-const GITHUB_REPO = process.env.GITHUB_REPO || 'EgorLesNet/ispanskie_msk_bot_ver';
-const DB_FILE_PATH = process.env.DB_FILE_PATH || 'db.json';
-const DB_BRANCH = process.env.DB_BRANCH || 'main';
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+// Fallback to local file system for development
+const fs = require('fs');
+const path = require('path');
 
-// Кэш для уменьшения запросов к GitHub
-let dbCache = null;
-let cacheTime = 0;
-const CACHE_TTL = 5000; // 5 секунд
+const IS_VERCEL = !!process.env.VERCEL || !!process.env.KV_REST_API_URL;
+const LOCAL_DB_PATH = path.join(process.cwd(), 'db.json');
 
-function httpsGet(url, headers = {}) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      headers: {
-        'User-Agent': 'ispanskie-bot',
-        ...headers
-      }
-    };
-
-    https.get(url, options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve({ data, statusCode: res.statusCode });
-        } else {
-          reject(new Error(`HTTP ${res.statusCode}: ${data}`));
-        }
-      });
-    }).on('error', reject);
-  });
-}
+// Cache for local development
+let localCache = null;
 
 function normalizeDb(raw) {
   const db = raw && typeof raw === 'object' ? raw : {};
@@ -46,131 +22,92 @@ function normalizeDb(raw) {
 }
 
 /**
- * Чтение базы данных из GitHub
- * @param {boolean} useCache - Использовать кэш
+ * Read database from KV (Vercel) or local file (development)
+ * @param {boolean} useCache - Use cache for local dev
  * @returns {Promise<{sha: string|null, db: object}>}
  */
 async function readDB(useCache = true) {
-  // Проверяем кэш
-  if (useCache && dbCache && (Date.now() - cacheTime) < CACHE_TTL) {
-    return { sha: dbCache.sha, db: dbCache.db };
-  }
+  if (IS_VERCEL) {
+    try {
+      // Read from Vercel KV
+      const db = await kv.get('ispanskie_db');
+      return {
+        sha: null, // KV doesn't need SHA
+        db: normalizeDb(db)
+      };
+    } catch (error) {
+      console.error('KV read error:', error);
+      return { sha: null, db: normalizeDb({}) };
+    }
+  } else {
+    // Local development - use file system
+    if (useCache && localCache) {
+      return { sha: null, db: localCache };
+    }
 
-  try {
-    // Читаем через GitHub Raw API (быстрее)
-    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${DB_BRANCH}/${DB_FILE_PATH}`;
-    const { data: text } = await httpsGet(rawUrl);
-    const db = normalizeDb(JSON.parse(text));
-
-    // Для записи нужен SHA, получаем его отдельным запросом
-    let sha = null;
-    if (GITHUB_TOKEN) {
-      try {
-        const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}?ref=${encodeURIComponent(DB_BRANCH)}`;
-        const headers = {
-          'Accept': 'application/vnd.github.v3+json',
-          'Authorization': `token ${GITHUB_TOKEN}`
-        };
-        const { data: apiData } = await httpsGet(apiUrl, headers);
-        const json = JSON.parse(apiData);
-        sha = json?.sha || null;
-      } catch (e) {
-        console.warn('Failed to get SHA, write operations may fail:', e.message);
+    try {
+      if (fs.existsSync(LOCAL_DB_PATH)) {
+        const text = fs.readFileSync(LOCAL_DB_PATH, 'utf8');
+        const db = normalizeDb(JSON.parse(text));
+        localCache = db;
+        return { sha: null, db };
       }
+    } catch (error) {
+      console.error('Local file read error:', error);
     }
 
-    // Обновляем кэш
-    dbCache = { sha, db };
-    cacheTime = Date.now();
-
-    return { sha, db };
-  } catch (error) {
-    console.error('readDB error:', error);
-    // Возвращаем кэш даже если он устарел
-    if (dbCache) {
-      return { sha: dbCache.sha, db: dbCache.db };
-    }
-    // Или пустую базу
     return { sha: null, db: normalizeDb({}) };
   }
 }
 
 /**
- * Запись базы данных в GitHub
- * @param {object} db - База данных
- * @param {string|null} sha - SHA текущего файла
- * @returns {Promise<Response>}
+ * Write database to KV (Vercel) or local file (development)
+ * @param {object} db - Database object
+ * @param {string|null} sha - Ignored for KV
+ * @returns {Promise<{ok: boolean}>}
  */
-async function writeDB(db, sha) {
-  if (!GITHUB_TOKEN) {
-    throw new Error('GITHUB_TOKEN is required for write operations');
+async function writeDB(db, sha = null) {
+  if (IS_VERCEL) {
+    try {
+      // Write to Vercel KV
+      await kv.set('ispanskie_db', db);
+      return { ok: true, statusCode: 200 };
+    } catch (error) {
+      console.error('KV write error:', error);
+      throw new Error(`KV write failed: ${error.message}`);
+    }
+  } else {
+    // Local development - write to file
+    try {
+      fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+      localCache = db;
+      return { ok: true, statusCode: 200 };
+    } catch (error) {
+      console.error('Local file write error:', error);
+      throw new Error(`File write failed: ${error.message}`);
+    }
   }
-
-  const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}`;
-  const content = Buffer.from(JSON.stringify(db, null, 2)).toString('base64');
-
-  const body = {
-    message: 'Update news via bot',
-    content,
-    branch: DB_BRANCH
-  };
-  if (sha) body.sha = sha;
-
-  return new Promise((resolve, reject) => {
-    const url = new URL(apiUrl);
-    const options = {
-      hostname: url.hostname,
-      path: url.pathname,
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'ispanskie-bot'
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        // Очищаем кэш после записи
-        dbCache = null;
-        cacheTime = 0;
-
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve({ ok: true, statusCode: res.statusCode, data });
-        } else {
-          reject(new Error(`GitHub write failed: ${res.statusCode} ${data}`));
-        }
-      });
-    });
-
-    req.on('error', reject);
-    req.write(JSON.stringify(body));
-    req.end();
-  });
 }
 
 /**
- * Обновление базы с повторными попытками при конфликтах
- * @param {Function} mutator - Функция, которая изменяет db
- * @param {number} retries - Количество попыток
+ * Update database with retry logic
+ * @param {Function} mutator - Function that modifies db
+ * @param {number} retries - Number of retries
  * @returns {Promise<any>}
  */
-async function updateDB(mutator, retries = 5) {
+async function updateDB(mutator, retries = 3) {
   let lastError = null;
 
   for (let i = 0; i < retries; i++) {
     try {
-      // Читаем без кэша, чтобы получить последнюю версию
-      const { sha, db } = await readDB(false);
+      // Read current state
+      const { db } = await readDB(false);
       
-      // Применяем изменения
+      // Apply changes
       const result = await mutator(db);
       
-      // Записываем
-      const writeResult = await writeDB(db, sha);
+      // Write back
+      const writeResult = await writeDB(db);
       
       if (writeResult.ok) {
         return result;
@@ -179,16 +116,12 @@ async function updateDB(mutator, retries = 5) {
       throw new Error('Write failed');
     } catch (error) {
       lastError = error;
+      console.log(`Update failed, retry ${i + 1}/${retries}:`, error.message);
       
-      // Если конфликт (409), повторяем
-      if (error.message.includes('409')) {
-        console.log(`Conflict detected, retry ${i + 1}/${retries}`);
-        await new Promise(r => setTimeout(r, 100 * (i + 1))); // Экспоненциальная задержка
-        continue;
+      // Wait before retry
+      if (i < retries - 1) {
+        await new Promise(r => setTimeout(r, 100 * (i + 1)));
       }
-      
-      // Другие ошибки - пробрасываем
-      throw error;
     }
   }
   
@@ -196,11 +129,10 @@ async function updateDB(mutator, retries = 5) {
 }
 
 /**
- * Очистить кэш (используйте после изменений)
+ * Clear local cache
  */
 function clearCache() {
-  dbCache = null;
-  cacheTime = 0;
+  localCache = null;
 }
 
 module.exports = {
