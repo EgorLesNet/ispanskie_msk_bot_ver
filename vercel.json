@@ -7,40 +7,29 @@
       "config": {
         "distDir": "public"
       }
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/telegram",
-      "dest": "/api/telegram.js"
-    },
-    {
-      "src": "/api/media",
-      "dest": "/api/media.js"
-    },
-    {
-      "src": "/api/news.*",
-      "dest": "/api/news.js"
-    },
-    {
-      "src": "/api/businesses.*",
-      "dest": "/api/businesses.js"
-    },
-    {
-      "src": "/api/reactions",
-      "dest": "/api/reactions.js"
-    },
-    {
-      "src": "/public/(.*)",
+      "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json))",
       "dest": "/public/$1"
     },
     {
       "src": "/",
       "dest": "/public/news.html"
-    },
-    {
-      "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|svg|ico))",
-      "dest": "/public/$1"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
