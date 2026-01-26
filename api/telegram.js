@@ -160,7 +160,9 @@ async function submitNews({ text, author, admin, media, source }) {
         photoFileId: firstPhoto,
         photoFileIds: photoIds.length ? photoIds : undefined,
         source: source || null,
-        moderationMessage: null
+        moderationMessage: null,
+        likes: 0,
+        dislikes: 0
       };
 
       let saved;
@@ -273,6 +275,60 @@ async function deleteNews(postId) {
     }
     return null;
   });
+}
+
+// =========================
+// Reactions (Like/Dislike)
+// =========================
+
+async function updateReaction(postId, reactionType, userId) {
+  return updateDB(async (db) => {
+    // Ищем пост во всех разделах
+    const post = db.posts.find(p => p && p.id === postId);
+    if (!post) return null;
+
+    // Инициализируем счётчики если их нет
+    if (typeof post.likes !== 'number') post.likes = 0;
+    if (typeof post.dislikes !== 'number') post.dislikes = 0;
+    if (!post.userReactions) post.userReactions = {};
+
+    const prevReaction = post.userReactions[userId];
+
+    // Если пользователь уже поставил эту же реакцию - убираем её
+    if (prevReaction === reactionType) {
+      delete post.userReactions[userId];
+      if (reactionType === 'like') post.likes = Math.max(0, post.likes - 1);
+      else post.dislikes = Math.max(0, post.dislikes - 1);
+      return { post, action: 'removed', reaction: reactionType };
+    }
+
+    // Убираем предыдущую реакцию
+    if (prevReaction === 'like') post.likes = Math.max(0, post.likes - 1);
+    if (prevReaction === 'dislike') post.dislikes = Math.max(0, post.dislikes - 1);
+
+    // Добавляем новую реакцию
+    post.userReactions[userId] = reactionType;
+    if (reactionType === 'like') post.likes++;
+    else post.dislikes++;
+
+    return { post, action: 'added', reaction: reactionType };
+  });
+}
+
+function getReactionKeyboard(post, userId) {
+  const userReaction = post.userReactions?.[userId] || null;
+  const likesCount = post.likes || 0;
+  const dislikesCount = post.dislikes || 0;
+
+  const likeEmoji = userReaction === 'like' ? '👍🏻' : '👍';
+  const dislikeEmoji = userReaction === 'dislike' ? '👎🏻' : '👎';
+
+  return {
+    inline_keyboard: [[
+      { text: `${likeEmoji} ${likesCount}`, callback_data: `like:${post.id}` },
+      { text: `${dislikeEmoji} ${dislikesCount}`, callback_data: `dislike:${post.id}` }
+    ]]
+  };
 }
 
 // =========================
@@ -440,6 +496,38 @@ bot.command('start', async (ctx) => {
   });
 });
 
+bot.command('news', async (ctx) => {
+  try {
+    const { db } = await readDB(false);
+    const latestPosts = db.posts.slice(0, 5); // Последние 5 новостей
+
+    if (latestPosts.length === 0) {
+      return ctx.reply('Новостей пока нет 🤷\u200d♂️');
+    }
+
+    await ctx.reply('📰 Последние новости:\n\nВыберите новость, чтобы поставить лайк или дизлайк!');
+
+    for (const post of latestPosts) {
+      const text = `#${post.id}\n\n${post.text}`;
+      const userId = ctx.from.id;
+      
+      if (post.photoFileId) {
+        await ctx.replyWithPhoto(post.photoFileId, {
+          caption: text,
+          reply_markup: getReactionKeyboard(post, userId)
+        });
+      } else {
+        await ctx.reply(text, {
+          reply_markup: getReactionKeyboard(post, userId)
+        });
+      }
+    }
+  } catch (error) {
+    console.error('[NEWS] Error:', error);
+    await ctx.reply('Ошибка при загрузке новостей. Попробуйте позже.');
+  }
+});
+
 bot.command('delete', async (ctx) => {
   if (!isAdmin(ctx)) {
     return ctx.reply('Нет доступа!');
@@ -550,14 +638,40 @@ bot.on('text', async (ctx, next) => {
 
 bot.on('callback_query', async (ctx) => {
   try {
+    const data = String(ctx.callbackQuery.data || '');
+    const [action, idStr] = data.split(':');
+    const postId = Number(idStr);
+
+    // Обработка лайков/дизлайков
+    if (action === 'like' || action === 'dislike') {
+      const userId = ctx.from.id;
+      const result = await updateReaction(postId, action, userId);
+
+      if (!result) {
+        await ctx.answerCbQuery('Новость не найдена', { show_alert: true });
+        return;
+      }
+
+      // Обновляем кнопки
+      try {
+        await ctx.editMessageReplyMarkup(
+          getReactionKeyboard(result.post, userId).inline_keyboard
+        );
+      } catch (e) {
+        console.log('Could not update keyboard:', e.message);
+      }
+
+      const emoji = action === 'like' ? '👍' : '👎';
+      const actionText = result.action === 'removed' ? 'убрали' : 'поставили';
+      await ctx.answerCbQuery(`Вы ${actionText} ${emoji}`);
+      return;
+    }
+
+    // Модерация (только для админов)
     if (!isAdmin(ctx)) {
       await ctx.answerCbQuery('Нет доступа!', { show_alert: true });
       return;
     }
-
-    const data = String(ctx.callbackQuery.data || '');
-    const [action, idStr] = data.split(':');
-    const postId = Number(idStr);
 
     if (!postId || (action !== 'approve' && action !== 'reject')) {
       await ctx.answerCbQuery('Некорректная команда', { show_alert: true });
