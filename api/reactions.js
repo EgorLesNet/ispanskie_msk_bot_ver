@@ -15,10 +15,10 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { postId, type } = req.body;
+  const { postId, type, userId } = req.body;
   
-  if (!postId || !type) {
-    return res.status(400).json({ error: 'postId and type are required' });
+  if (!postId || !type || !userId) {
+    return res.status(400).json({ error: 'postId, type, and userId are required' });
   }
   
   if (type !== 'like' && type !== 'dislike') {
@@ -30,13 +30,41 @@ module.exports = async (req, res) => {
       const post = db.posts.find(p => p && p.id === Number(postId));
       if (!post) return null;
       
-      if (type === 'like') {
-        post.likes = (post.likes || 0) + 1;
-        return { likes: post.likes, dislikes: post.dislikes || 0 };
-      } else {
-        post.dislikes = (post.dislikes || 0) + 1;
-        return { likes: post.likes || 0, dislikes: post.dislikes };
+      // Инициализируем счётчики и реакции
+      if (typeof post.likes !== 'number') post.likes = 0;
+      if (typeof post.dislikes !== 'number') post.dislikes = 0;
+      if (!post.userReactions) post.userReactions = {};
+
+      const prevReaction = post.userReactions[userId];
+
+      // Если пользователь уже поставил эту же реакцию - убираем её
+      if (prevReaction === type) {
+        delete post.userReactions[userId];
+        if (type === 'like') post.likes = Math.max(0, post.likes - 1);
+        else post.dislikes = Math.max(0, post.dislikes - 1);
+        return { 
+          likes: post.likes, 
+          dislikes: post.dislikes,
+          userReaction: null,
+          action: 'removed'
+        };
       }
+
+      // Убираем предыдущую реакцию
+      if (prevReaction === 'like') post.likes = Math.max(0, post.likes - 1);
+      if (prevReaction === 'dislike') post.dislikes = Math.max(0, post.dislikes - 1);
+
+      // Добавляем новую реакцию
+      post.userReactions[userId] = type;
+      if (type === 'like') post.likes++;
+      else post.dislikes++;
+
+      return { 
+        likes: post.likes, 
+        dislikes: post.dislikes,
+        userReaction: type,
+        action: 'added'
+      };
     });
     
     if (!result) {
