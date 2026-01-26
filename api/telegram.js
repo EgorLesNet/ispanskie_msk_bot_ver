@@ -93,7 +93,8 @@ async function findPostIdByReplyMessage(replyMsg) {
   const replyMessageId = replyMsg.message_id ?? null;
   if (replyChatId == null || replyMessageId == null) return null;
 
-  const { db } = await readDB();
+  // Читаем без кэша!
+  const { db } = await readDB(false);
   const all = [...db.pending, ...db.posts, ...db.rejected];
 
   for (const p of all) {
@@ -181,7 +182,10 @@ async function appendMediaToPost(postId, items) {
 async function moderateNews(postId, action) {
   return updateDB(async (db) => {
     const idx = db.pending.findIndex(p => p && p.id === postId);
-    if (idx === -1) return null;
+    if (idx === -1) {
+      console.log(`[MODERATE] Post #${postId} not found in pending. Current pending IDs:`, db.pending.map(p => p?.id));
+      return null;
+    }
 
     const p = db.pending.splice(idx, 1)[0];
     if (!p) return null;
