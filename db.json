@@ -17,7 +17,12 @@
         "messageId": 640
       },
       "status": "approved",
-      "sourceType": "user"
+      "sourceType": "user",
+      "likes": 0,
+      "dislikes": 1,
+      "userReactions": {
+        "web_pvt1yyt0bmkvgoknj": "dislike"
+      }
     },
     {
       "id": 25,
