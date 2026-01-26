@@ -10,7 +10,7 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 // Кэш для уменьшения запросов к GitHub
 let dbCache = null;
 let cacheTime = 0;
-const CACHE_TTL = 5000; // 5 секунд
+const CACHE_TTL = 2000; // 2 секунды (сокращено с 5 секунд)
 
 function httpsGet(url, headers = {}) {
   return new Promise((resolve, reject) => {
@@ -57,31 +57,31 @@ async function readDB(useCache = true) {
   }
 
   try {
-    // Читаем через GitHub Raw API (быстрее)
-    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${DB_BRANCH}/${DB_FILE_PATH}`;
-    const { data: text } = await httpsGet(rawUrl);
-    const db = normalizeDb(JSON.parse(text));
-
-    // Для записи нужен SHA, получаем его отдельным запросом
-    let sha = null;
+    // Читаем через GitHub API вместо Raw URL
+    // Raw URL кэшируется на 5 минут!
+    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}?ref=${encodeURIComponent(DB_BRANCH)}`;
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'ispanskie-bot'
+    };
+    
     if (GITHUB_TOKEN) {
-      try {
-        const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DB_FILE_PATH}?ref=${encodeURIComponent(DB_BRANCH)}`;
-        const headers = {
-          'Accept': 'application/vnd.github.v3+json',
-          'Authorization': `token ${GITHUB_TOKEN}`
-        };
-        const { data: apiData } = await httpsGet(apiUrl, headers);
-        const json = JSON.parse(apiData);
-        sha = json?.sha || null;
-      } catch (e) {
-        console.warn('Failed to get SHA, write operations may fail:', e.message);
-      }
+      headers['Authorization'] = `token ${GITHUB_TOKEN}`;
     }
+
+    const { data: apiData } = await httpsGet(apiUrl, headers);
+    const json = JSON.parse(apiData);
+    
+    // Декодируем base64 контент
+    const content = Buffer.from(json.content, 'base64').toString('utf8');
+    const db = normalizeDb(JSON.parse(content));
+    const sha = json.sha || null;
 
     // Обновляем кэш
     dbCache = { sha, db };
     cacheTime = Date.now();
+
+    console.log('[DB] Read from GitHub API, posts:', db.posts.length, 'pending:', db.pending.length);
 
     return { sha, db };
   } catch (error) {
@@ -139,8 +139,10 @@ async function writeDB(db, sha) {
         cacheTime = 0;
 
         if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log('[DB] Write successful, status:', res.statusCode);
           resolve({ ok: true, statusCode: res.statusCode, data });
         } else {
+          console.error('[DB] Write failed:', res.statusCode, data);
           reject(new Error(`GitHub write failed: ${res.statusCode} ${data}`));
         }
       });
@@ -182,7 +184,7 @@ async function updateDB(mutator, retries = 5) {
       
       // Если конфликт (409), повторяем
       if (error.message.includes('409')) {
-        console.log(`Conflict detected, retry ${i + 1}/${retries}`);
+        console.log(`[DB] Conflict detected, retry ${i + 1}/${retries}`);
         await new Promise(r => setTimeout(r, 100 * (i + 1))); // Экспоненциальная задержка
         continue;
       }
