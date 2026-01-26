@@ -833,7 +833,8 @@
       "sourceType": "admin"
     }
   ],
-  "pending": [
+  "pending": [],
+  "rejected": [
     {
       "id": 27,
       "text": "Какая-то неинтересная новость.",
@@ -850,11 +851,10 @@
         "chatId": 273473755,
         "messageId": 644
       },
-      "status": "pending",
+      "status": "rejected",
       "sourceType": "user"
     }
   ],
-  "rejected": [],
   "businesses": [
     {
       "id": 17,
