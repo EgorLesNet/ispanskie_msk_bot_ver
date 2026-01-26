@@ -40,24 +40,33 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Параметры пагинации
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50); // Максимум 50
+    const offset = Math.max(parseInt(req.query.offset) || 0, 0);
+    
     // Читаем базу (с кэшем)
     const { db } = await readDB(true);
     
-    // Возвращаем только одобренные новости
-    const approvedPosts = (db.posts || [])
+    // Фильтруем и сортируем
+    const allApprovedPosts = (db.posts || [])
       .filter(p => p && p.status === 'approved')
       .map(normalizePost)
       .filter(Boolean)
-      .sort((a, b) => {
-        // Сортируем по ID (новые сверху)
-        return (b.id || 0) - (a.id || 0);
-      });
+      .sort((a, b) => (b.id || 0) - (a.id || 0));
     
-    console.log(`[API/NEWS] Returning ${approvedPosts.length} approved posts`);
+    const total = allApprovedPosts.length;
+    
+    // Применяем пагинацию
+    const paginatedPosts = allApprovedPosts.slice(offset, offset + limit);
+    
+    console.log(`[API/NEWS] Returning ${paginatedPosts.length} of ${total} posts (offset: ${offset}, limit: ${limit})`);
     
     return res.status(200).json({
-      posts: approvedPosts,
-      total: approvedPosts.length,
+      posts: paginatedPosts,
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
