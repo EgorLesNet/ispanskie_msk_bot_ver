@@ -19,10 +19,8 @@
       "status": "approved",
       "sourceType": "user",
       "likes": 0,
-      "dislikes": 1,
-      "userReactions": {
-        "web_pvt1yyt0bmkvgoknj": "dislike"
-      }
+      "dislikes": 0,
+      "userReactions": {}
     },
     {
       "id": 25,
