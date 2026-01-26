@@ -131,40 +131,58 @@ function getBestPhotoSize(photos) {
 // =========================
 
 async function submitNews({ text, author, admin, media, source }) {
-  return updateDB(async (db) => {
-    const id = nextPostId(db);
-
-    const mediaArr = Array.isArray(media) ? media.filter(x => x && x.fileId && x.type) : [];
-    const photoIds = mediaArr.filter(m => m.type === 'photo').map(m => m.fileId);
-    const firstPhoto = photoIds[0] || null;
-
-    const base = {
-      id,
-      text: String(text || '').trim(),
-      authorId: author?.id ?? null,
-      authorName: [author?.first_name, author?.last_name].filter(Boolean).join(' ').trim(),
-      authorUsername: author?.username || null,
-      createdAt: new Date().toISOString(),
-      timestamp: new Date().toISOString(),
-      category: 'all',
-      media: mediaArr,
-      photoFileId: firstPhoto,
-      photoFileIds: photoIds.length ? photoIds : undefined,
-      source: source || null,
-      moderationMessage: null
-    };
-
-    let saved;
-    if (admin) {
-      saved = { ...base, status: 'approved', sourceType: 'admin' };
-      db.posts.unshift(saved);
-    } else {
-      saved = { ...base, status: 'pending', sourceType: 'user' };
-      db.pending.unshift(saved);
-    }
-
-    return saved;
+  console.log('[SUBMIT_NEWS] Starting...', {
+    text: text?.substring(0, 50),
+    authorId: author?.id,
+    admin,
+    mediaCount: media?.length || 0
   });
+
+  try {
+    const result = await updateDB(async (db) => {
+      const id = nextPostId(db);
+      console.log('[SUBMIT_NEWS] Generated post ID:', id);
+
+      const mediaArr = Array.isArray(media) ? media.filter(x => x && x.fileId && x.type) : [];
+      const photoIds = mediaArr.filter(m => m.type === 'photo').map(m => m.fileId);
+      const firstPhoto = photoIds[0] || null;
+
+      const base = {
+        id,
+        text: String(text || '').trim(),
+        authorId: author?.id ?? null,
+        authorName: [author?.first_name, author?.last_name].filter(Boolean).join(' ').trim(),
+        authorUsername: author?.username || null,
+        createdAt: new Date().toISOString(),
+        timestamp: new Date().toISOString(),
+        category: 'all',
+        media: mediaArr,
+        photoFileId: firstPhoto,
+        photoFileIds: photoIds.length ? photoIds : undefined,
+        source: source || null,
+        moderationMessage: null
+      };
+
+      let saved;
+      if (admin) {
+        saved = { ...base, status: 'approved', sourceType: 'admin' };
+        db.posts.unshift(saved);
+        console.log('[SUBMIT_NEWS] Saved as approved post #', id);
+      } else {
+        saved = { ...base, status: 'pending', sourceType: 'user' };
+        db.pending.unshift(saved);
+        console.log('[SUBMIT_NEWS] Saved as pending post #', id);
+      }
+
+      return saved;
+    });
+
+    console.log('[SUBMIT_NEWS] Success! Post #', result.id);
+    return result;
+  } catch (error) {
+    console.error('[SUBMIT_NEWS] Error:', error);
+    throw error;
+  }
 }
 
 async function appendMediaToPost(postId, items) {
@@ -487,6 +505,8 @@ bot.on('video', async (ctx) => {
 });
 
 bot.on('text', async (ctx, next) => {
+  console.log('[TEXT] Received text from:', ctx.from?.username || ctx.from?.id);
+  
   try {
     const text = (ctx.message.text || '').trim();
     if (!text) return;
@@ -497,6 +517,8 @@ bot.on('text', async (ctx, next) => {
     }
 
     const admin = isAdmin(ctx);
+    console.log('[TEXT] Is admin:', admin);
+    
     const st = userStates.get(ctx.from.id);
     userStates.delete(ctx.from.id);
 
@@ -511,6 +533,8 @@ bot.on('text', async (ctx, next) => {
       source
     });
 
+    console.log('[TEXT] Post created successfully #', post.id);
+
     if (admin) {
       await ctx.reply('✅ Новость опубликована!');
     } else {
@@ -518,7 +542,8 @@ bot.on('text', async (ctx, next) => {
       await notifyAdmin(ctx, post);
     }
   } catch (error) {
-    console.error('Text handler error:', error);
+    console.error('[TEXT] Handler error:', error);
+    console.error('[TEXT] Stack:', error.stack);
     await ctx.reply('Ошибка при обработке сообщения. Попробуйте ещё раз.');
   }
 });
