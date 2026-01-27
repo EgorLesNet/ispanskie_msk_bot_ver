@@ -70,10 +70,8 @@
       "status": "approved",
       "sourceType": "admin",
       "likes": 0,
-      "dislikes": 1,
-      "userReactions": {
-        "web_mm3qax6d1mkvggcey": "dislike"
-      }
+      "dislikes": 0,
+      "userReactions": {}
     },
     {
       "id": 25,
