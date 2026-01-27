@@ -139,6 +139,34 @@
     body[data-theme="dark"] .card-text a {
       color: #0a84ff;
     }
+    .card-text b {
+      font-weight: 600;
+    }
+    .card-text i {
+      font-style: italic;
+    }
+    .card-text code {
+      background: rgba(0, 0, 0, 0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    body[data-theme="dark"] .card-text code {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .card-text pre {
+      background: rgba(0, 0, 0, 0.05);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      margin: 8px 0;
+    }
+    body[data-theme="dark"] .card-text pre {
+      background: rgba(255, 255, 255, 0.1);
+    }
     .card-media-scroll {
       display: flex !important;
       flex-direction: row;
@@ -499,8 +527,14 @@
         .replaceAll("'", '&#039;');
     }
 
-    function linkify(text) {
-      const safe = escapeHtml(text);
+    // Не используем linkify, так как HTML уже приходит с сервера
+    function formatText(n) {
+      // Если есть textHTML - используем его
+      if (n.textHTML) {
+        return n.textHTML;
+      }
+      // Иначе linkify обычный текст
+      const safe = escapeHtml(n.text || '');
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
     }
@@ -659,7 +693,7 @@
           html += '</div>';
         }
         
-        html += `<div class="card-text">${linkify(n.text || '')}</div>`;
+        html += `<div class="card-text">${formatText(n)}</div>`;
         
         // Reactions
         const likes = n.likes || 0;
