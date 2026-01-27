@@ -109,7 +109,7 @@
             border-radius: 0;
         }
         
-        /* Search Bar - перемещена ниже */
+        /* Search Bar */
         .search-container {
             position: fixed;
             bottom: calc(102px + env(safe-area-inset-bottom));
@@ -145,7 +145,6 @@
             cursor: pointer;
         }
         
-        /* Desktop: горизонтальное расположение */
         @media (min-width: 768px) {
             .search-container {
                 flex-direction: row;
@@ -346,6 +345,113 @@
             background: #e1e4e8;
         }
         
+        /* Reviews Styles */
+        .reviews-section {
+            margin-top: 20px;
+        }
+        
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .reviews-header h3 {
+            font-size: 16px;
+        }
+        
+        .add-review-btn {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        
+        .add-review-btn:hover {
+            background: #0051d5;
+        }
+        
+        .review-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        
+        body[data-theme="dark"] .review-item {
+            background: #2a2a2a;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .review-author {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .review-rating {
+            color: #f39c12;
+            font-size: 14px;
+        }
+        
+        .review-comment {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #555;
+        }
+        
+        body[data-theme="dark"] .review-comment {
+            color: #ccc;
+        }
+        
+        .review-date {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+        }
+        
+        .no-reviews {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .star-rating {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .star {
+            font-size: 32px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+        
+        .star:hover {
+            transform: scale(1.2);
+        }
+        
+        .star.active {
+            color: #f39c12;
+        }
+        
+        .star.inactive {
+            color: #ddd;
+        }
+        
         /* Navigation */
         .nav {
             position: fixed;
@@ -496,6 +602,22 @@
             text-decoration: underline;
         }
         
+        .business-popup .view-reviews-btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: #007aff;
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .business-popup .view-reviews-btn:hover {
+            background: #0051d5;
+        }
+        
         @media (max-width: 550px) {
             .nav-btn .nav-text {
                 display: none;
@@ -542,7 +664,7 @@
     <!-- Add Button -->
     <button class="fab" onclick="openModal()" aria-label="Добавить бизнес">+</button>
     
-    <!-- Modal -->
+    <!-- Add Business Modal -->
     <div id="addBusinessModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -590,6 +712,50 @@
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Reviews Modal -->
+    <div id="reviewsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="reviewsBusinessName">Отзывы</h2>
+                <button class="close-btn" onclick="closeReviewsModal()">&times;</button>
+            </div>
+            <div class="reviews-section">
+                <div class="reviews-header">
+                    <h3>Отзывы <span id="reviewCount">(0)</span></h3>
+                    <button class="add-review-btn" onclick="showAddReviewForm()">Добавить</button>
+                </div>
+                <div id="reviewsList"></div>
+                
+                <!-- Add Review Form -->
+                <div id="addReviewForm" style="display: none;">
+                    <h3 style="margin-bottom: 16px; font-size: 16px;">Ваш отзыв</h3>
+                    <div class="form-group">
+                        <label>Ваше имя *</label>
+                        <input type="text" id="reviewUserName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Оценка *</label>
+                        <div class="star-rating" id="starRating">
+                            <span class="star inactive" data-rating="1">★</span>
+                            <span class="star inactive" data-rating="2">★</span>
+                            <span class="star inactive" data-rating="3">★</span>
+                            <span class="star inactive" data-rating="4">★</span>
+                            <span class="star inactive" data-rating="5">★</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Комментарий</label>
+                        <textarea id="reviewComment" placeholder="Расскажите о вашем опыте..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="submitReview()">Отправить</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddReviewForm()">Отмена</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -647,6 +813,16 @@
             }
         }
 
+        // User ID
+        function getUserId() {
+            let userId = localStorage.getItem('businessUserId');
+            if (!userId) {
+                userId = 'web_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+                localStorage.setItem('businessUserId', userId);
+            }
+            return userId;
+        }
+
         // Map Setup
         const map = L.map('map').setView([55.592312, 37.458014], 15);
         
@@ -658,6 +834,8 @@
         let tempMarker = null;
         let allBusinesses = [];
         let markers = [];
+        let currentBusinessId = null;
+        let currentRating = 0;
 
         // Click on map to select coordinates
         map.on('click', function(e) {
@@ -703,6 +881,7 @@
                         ${biz.description ? `<div class="description">${escapeHtml(biz.description)}</div>` : ''}
                         ${biz.address ? `<div class="address">📍 ${escapeHtml(biz.address)}</div>` : ''}
                         ${biz.url ? `<div><a href="${escapeHtml(biz.url)}" target="_blank">Перейти →</a></div>` : ''}
+                        <a class="view-reviews-btn" onclick="openReviewsModal(${biz.id}, '${escapeHtml(biz.name).replace(/'/g, "\\'")}')">📝 Отзывы</a>
                     </div>
                 `;
                 
@@ -808,6 +987,143 @@
                 alert('Ошибка сети: ' + err.message);
             }
         });
+
+        // Reviews Modal
+        async function openReviewsModal(businessId, businessName) {
+            currentBusinessId = businessId;
+            document.getElementById('reviewsBusinessName').textContent = businessName;
+            document.getElementById('reviewsModal').classList.add('active');
+            document.getElementById('addReviewForm').style.display = 'none';
+            await loadReviews();
+        }
+
+        function closeReviewsModal() {
+            document.getElementById('reviewsModal').classList.remove('active');
+            currentBusinessId = null;
+            currentRating = 0;
+        }
+
+        async function loadReviews() {
+            if (!currentBusinessId) return;
+            
+            try {
+                const res = await fetch(`/api/reviews?businessId=${currentBusinessId}`);
+                const data = await res.json();
+                
+                const reviewsList = document.getElementById('reviewsList');
+                document.getElementById('reviewCount').textContent = `(${data.reviewCount})`;
+                
+                if (data.reviews.length === 0) {
+                    reviewsList.innerHTML = '<div class="no-reviews">Пока нет отзывов. Будьте первым!</div>';
+                    return;
+                }
+                
+                reviewsList.innerHTML = data.reviews.map(review => {
+                    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                    const date = new Date(review.createdAt).toLocaleDateString('ru-RU');
+                    return `
+                        <div class="review-item">
+                            <div class="review-header">
+                                <span class="review-author">${escapeHtml(review.userName)}</span>
+                                <span class="review-rating">${stars}</span>
+                            </div>
+                            ${review.comment ? `<div class="review-comment">${escapeHtml(review.comment)}</div>` : ''}
+                            <div class="review-date">${date}</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Ошибка загрузки отзывов:', err);
+                document.getElementById('reviewsList').innerHTML = '<div class="no-reviews">Ошибка загрузки отзывов</div>';
+            }
+        }
+
+        function showAddReviewForm() {
+            document.getElementById('addReviewForm').style.display = 'block';
+            // Load saved username
+            const savedName = localStorage.getItem('businessUserName');
+            if (savedName) {
+                document.getElementById('reviewUserName').value = savedName;
+            }
+        }
+
+        function hideAddReviewForm() {
+            document.getElementById('addReviewForm').style.display = 'none';
+            document.getElementById('reviewUserName').value = '';
+            document.getElementById('reviewComment').value = '';
+            currentRating = 0;
+            updateStars();
+        }
+
+        // Star Rating
+        document.querySelectorAll('#starRating .star').forEach(star => {
+            star.addEventListener('click', function() {
+                currentRating = parseInt(this.getAttribute('data-rating'));
+                updateStars();
+            });
+        });
+
+        function updateStars() {
+            document.querySelectorAll('#starRating .star').forEach(star => {
+                const rating = parseInt(star.getAttribute('data-rating'));
+                if (rating <= currentRating) {
+                    star.classList.add('active');
+                    star.classList.remove('inactive');
+                } else {
+                    star.classList.add('inactive');
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        async function submitReview() {
+            const userName = document.getElementById('reviewUserName').value.trim();
+            const comment = document.getElementById('reviewComment').value.trim();
+            
+            if (!userName) {
+                alert('Пожалуйста, укажите ваше имя');
+                return;
+            }
+            
+            if (currentRating === 0) {
+                alert('Пожалуйста, поставьте оценку');
+                return;
+            }
+            
+            const userId = getUserId();
+            const data = {
+                businessId: currentBusinessId,
+                userId,
+                userName,
+                rating: currentRating,
+                comment
+            };
+            
+            try {
+                const res = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                
+                if (res.ok) {
+                    // Save username
+                    localStorage.setItem('businessUserName', userName);
+                    
+                    alert('Спасибо за отзыв!');
+                    hideAddReviewForm();
+                    await loadReviews();
+                    // Reload businesses to update ratings
+                    await loadBusinesses();
+                } else {
+                    alert('Ошибка: ' + (result.error || 'Неизвестная ошибка'));
+                }
+            } catch (err) {
+                alert('Ошибка сети: ' + err.message);
+            }
+        }
 
         // Initialize
         initTheme();
