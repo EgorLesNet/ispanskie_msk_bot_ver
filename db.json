@@ -26,7 +26,12 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "sourceType": "admin",
+      "likes": 0,
+      "dislikes": 1,
+      "userReactions": {
+        "web_pvt1yyt0bmkvgoknj": "dislike"
+      }
     },
     {
       "id": 28,
