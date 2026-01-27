@@ -1,6 +1,38 @@
 {
   "posts": [
     {
+      "id": 30,
+      "text": "И опять у нас авария… ищите пути объезда…",
+      "textHTML": "И опять у нас авария… ищите пути объезда…",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-27T15:07:02.235Z",
+      "timestamp": "2026-01-27T15:07:02.235Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICjml41JWPk88k6Kha66Z-2lSH2-n1AALWEGsb3AfISx6H6DB8VltEAQADAgADeAADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICjml41JWPk88k6Kha66Z-2lSH2-n1AALWEGsb3AfISx6H6DB8VltEAQADAgADeAADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICjml41JWPk88k6Kha66Z-2lSH2-n1AALWEGsb3AfISx6H6DB8VltEAQADAgADeAADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8979,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8979"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 29,
       "text": "982 не ходит, на Калужском шоссе люди выходят и идут пешком.",
       "authorId": 273473755,
