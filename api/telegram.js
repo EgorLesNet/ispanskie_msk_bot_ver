@@ -34,6 +34,84 @@ function isAdmin(ctx) {
   return byUsername || byId;
 }
 
+/**
+ * Конвертирует Telegram entities в HTML
+ * Поддерживает: ссылки, жирный, курсив, код, pre
+ */
+function entitiesToHTML(text, entities) {
+  if (!text || !Array.isArray(entities) || entities.length === 0) {
+    return text || '';
+  }
+
+  // Сортируем entities по offset для правильной обработки
+  const sorted = [...entities].sort((a, b) => a.offset - b.offset);
+  
+  let result = '';
+  let lastPos = 0;
+
+  for (const entity of sorted) {
+    const { offset, length, type, url } = entity;
+    
+    // Добавляем текст до текущей entity
+    if (offset > lastPos) {
+      result += escapeHtml(text.substring(lastPos, offset));
+    }
+
+    // Извлекаем текст entity
+    const entityText = text.substring(offset, offset + length);
+
+    // Оборачиваем в HTML в зависимости от типа
+    switch (type) {
+      case 'text_link':
+        result += `<a href="${escapeHtml(url)}">${escapeHtml(entityText)}</a>`;
+        break;
+      case 'url':
+        result += `<a href="${escapeHtml(entityText)}">${escapeHtml(entityText)}</a>`;
+        break;
+      case 'bold':
+        result += `<b>${escapeHtml(entityText)}</b>`;
+        break;
+      case 'italic':
+        result += `<i>${escapeHtml(entityText)}</i>`;
+        break;
+      case 'code':
+        result += `<code>${escapeHtml(entityText)}</code>`;
+        break;
+      case 'pre':
+        result += `<pre>${escapeHtml(entityText)}</pre>`;
+        break;
+      case 'underline':
+        result += `<u>${escapeHtml(entityText)}</u>`;
+        break;
+      case 'strikethrough':
+        result += `<s>${escapeHtml(entityText)}</s>`;
+        break;
+      default:
+        // Неизвестный тип - просто текст
+        result += escapeHtml(entityText);
+    }
+
+    lastPos = offset + length;
+  }
+
+  // Добавляем оставшийся текст
+  if (lastPos < text.length) {
+    result += escapeHtml(text.substring(lastPos));
+  }
+
+  return result;
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function getForwardSource(msg) {
   if (!msg) return null;
 
@@ -130,9 +208,10 @@ function getBestPhotoSize(photos) {
 // Database Operations
 // =========================
 
-async function submitNews({ text, author, admin, media, source }) {
+async function submitNews({ text, textHTML, author, admin, media, source }) {
   console.log('[SUBMIT_NEWS] Starting...', {
     text: text?.substring(0, 50),
+    hasHTML: !!textHTML,
     authorId: author?.id,
     admin,
     mediaCount: media?.length || 0
@@ -150,6 +229,7 @@ async function submitNews({ text, author, admin, media, source }) {
       const base = {
         id,
         text: String(text || '').trim(),
+        textHTML: textHTML || null,  // Сохраняем HTML версию
         authorId: author?.id ?? null,
         authorName: [author?.first_name, author?.last_name].filter(Boolean).join(' ').trim(),
         authorUsername: author?.username || null,
@@ -333,7 +413,10 @@ async function notifyAdmin(ctx, post) {
 async function handleMedia(ctx, item) {
   const admin = isAdmin(ctx);
   const msg = ctx.message;
-  const caption = (msg.caption || '').trim();
+  const rawCaption = msg.caption || '';
+  const captionEntities = msg.caption_entities || [];
+  const caption = rawCaption.trim();
+  const captionHTML = entitiesToHTML(rawCaption, captionEntities);
   const mediaGroupId = msg.media_group_id || null;
   const source = getForwardSource(msg);
 
@@ -344,17 +427,22 @@ async function handleMedia(ctx, item) {
       postId: null,
       media: [],
       caption: null,
+      captionHTML: null,
       source: source || null
     };
 
     cur.media.push(item);
-    if (caption) cur.caption = caption;
+    if (caption) {
+      cur.caption = caption;
+      cur.captionHTML = captionHTML;
+    }
     if (source && !cur.source) cur.source = source;
 
     // Если есть подпись и пост еще не создан
     if (!cur.postId && cur.caption) {
       const post = await submitNews({
         text: cur.caption,
+        textHTML: cur.captionHTML,
         author: ctx.from,
         admin,
         media: cur.media,
@@ -392,6 +480,7 @@ async function handleMedia(ctx, item) {
   if (caption) {
     const post = await submitNews({
       text: caption,
+      textHTML: captionHTML,
       author: ctx.from,
       admin,
       media: [item],
@@ -508,7 +597,8 @@ bot.on('text', async (ctx, next) => {
   console.log('[TEXT] Received text from:', ctx.from?.username || ctx.from?.id);
   
   try {
-    const text = (ctx.message.text || '').trim();
+    const rawText = ctx.message.text || '';
+    const text = rawText.trim();
     if (!text) return;
 
     if (text.startsWith('/')) {
@@ -519,6 +609,11 @@ bot.on('text', async (ctx, next) => {
     const admin = isAdmin(ctx);
     console.log('[TEXT] Is admin:', admin);
     
+    // Конвертируем entities в HTML
+    const entities = ctx.message.entities || [];
+    const textHTML = entitiesToHTML(rawText, entities);
+    console.log('[TEXT] Converted to HTML:', !!textHTML);
+    
     const st = userStates.get(ctx.from.id);
     userStates.delete(ctx.from.id);
 
@@ -527,6 +622,7 @@ bot.on('text', async (ctx, next) => {
 
     const post = await submitNews({
       text,
+      textHTML,
       author: ctx.from,
       admin,
       media,
