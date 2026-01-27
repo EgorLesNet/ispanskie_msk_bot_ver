@@ -120,6 +120,10 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
         
+        .construction-box.hidden {
+            display: none;
+        }
+        
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -135,6 +139,8 @@
             font-size: 80px;
             margin-bottom: 20px;
             animation: bounce 2s ease-in-out infinite;
+            cursor: pointer;
+            user-select: none;
         }
         
         @keyframes bounce {
@@ -228,6 +234,112 @@
         
         body[data-theme="dark"] .contact-link {
             background: #0a84ff;
+        }
+        
+        /* Unlock Modal */
+        .unlock-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .unlock-modal.active {
+            display: flex;
+        }
+        
+        .unlock-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        body[data-theme="dark"] .unlock-content {
+            background: #1e1e1e;
+        }
+        
+        .unlock-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .unlock-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 16px;
+        }
+        
+        body[data-theme="dark"] .unlock-input {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #fff;
+        }
+        
+        .unlock-input:focus {
+            border-color: #007aff;
+        }
+        
+        .unlock-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .unlock-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .unlock-btn-primary {
+            background: #007aff;
+            color: white;
+        }
+        
+        .unlock-btn-primary:hover {
+            background: #0051d5;
+            transform: translateY(-2px);
+        }
+        
+        .unlock-btn-secondary {
+            background: #f0f2f5;
+            color: #333;
+        }
+        
+        body[data-theme="dark"] .unlock-btn-secondary {
+            background: #2a2a2a;
+            color: #ccc;
+        }
+        
+        .unlock-error {
+            color: #ff3b30;
+            font-size: 13px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            text-align: center;
         }
         
         /* Navigation */
@@ -362,8 +474,8 @@
 
     <!-- Main Content -->
     <main class="content">
-        <div class="construction-box">
-            <div class="construction-icon">🚧</div>
+        <div class="construction-box" id="constructionBox">
+            <div class="construction-icon" id="unlockTrigger" onclick="handleIconClick()">🚧</div>
             <h1 class="construction-title">Раздел в разработке</h1>
             <p class="construction-text">
                 Мы работаем над созданием уникального раздела с рекомендациями от жителей района. 
@@ -389,6 +501,22 @@
             </a>
         </div>
     </main>
+
+    <!-- Unlock Modal -->
+    <div class="unlock-modal" id="unlockModal">
+        <div class="unlock-content">
+            <h2 class="unlock-title">🔓 Разблокировать страницу</h2>
+            <p class="construction-text" style="margin-bottom: 16px; font-size: 14px;">
+                Введите ключ доступа
+            </p>
+            <input type="password" class="unlock-input" id="unlockInput" placeholder="Business Key">
+            <div class="unlock-error" id="unlockError"></div>
+            <div class="unlock-actions">
+                <button class="unlock-btn unlock-btn-primary" onclick="checkUnlockKey()">Продолжить</button>
+                <button class="unlock-btn unlock-btn-secondary" onclick="closeUnlockModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Navigation -->
     <nav class="nav liquid-glass">
@@ -429,8 +557,97 @@
             }
         }
 
+        // Hidden unlock feature
+        let clickCount = 0;
+        let clickTimer = null;
+
+        function handleIconClick() {
+            clickCount++;
+            
+            if (clickTimer) clearTimeout(clickTimer);
+            
+            if (clickCount >= 3) {
+                clickCount = 0;
+                openUnlockModal();
+            } else {
+                clickTimer = setTimeout(() => {
+                    clickCount = 0;
+                }, 800);
+            }
+        }
+
+        function openUnlockModal() {
+            document.getElementById('unlockModal').classList.add('active');
+            document.getElementById('unlockInput').focus();
+            
+            // Load saved key if exists
+            const savedKey = localStorage.getItem('businessAdminKey');
+            if (savedKey) {
+                document.getElementById('unlockInput').value = savedKey;
+            }
+        }
+
+        function closeUnlockModal() {
+            document.getElementById('unlockModal').classList.remove('active');
+            document.getElementById('unlockInput').value = '';
+            document.getElementById('unlockError').textContent = '';
+        }
+
+        async function checkUnlockKey() {
+            const key = document.getElementById('unlockInput').value;
+            const errorEl = document.getElementById('unlockError');
+            
+            if (!key) {
+                errorEl.textContent = 'Введите ключ';
+                return;
+            }
+
+            // Verify key by checking with business API
+            try {
+                const res = await fetch('/api/businesses', {
+                    method: 'HEAD',
+                    headers: { 'X-Business-Key': key }
+                });
+
+                if (res.ok) {
+                    localStorage.setItem('businessAdminKey', key);
+                    localStorage.setItem('recommendationsUnlocked', 'true');
+                    document.getElementById('constructionBox').classList.add('hidden');
+                    closeUnlockModal();
+                } else {
+                    errorEl.textContent = 'Неверный ключ';
+                }
+            } catch (err) {
+                // If verification fails, try simple check against saved key
+                const savedKey = localStorage.getItem('businessAdminKey');
+                if (savedKey && key === savedKey) {
+                    localStorage.setItem('recommendationsUnlocked', 'true');
+                    document.getElementById('constructionBox').classList.add('hidden');
+                    closeUnlockModal();
+                } else {
+                    errorEl.textContent = 'Ошибка проверки';
+                }
+            }
+        }
+
+        // Check if already unlocked
+        function checkUnlocked() {
+            const isUnlocked = localStorage.getItem('recommendationsUnlocked') === 'true';
+            if (isUnlocked) {
+                document.getElementById('constructionBox').classList.add('hidden');
+            }
+        }
+
+        // Enter key support
+        document.getElementById('unlockInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkUnlockKey();
+            }
+        });
+
         // Initialize
         initTheme();
+        checkUnlocked();
     </script>
 </body>
 </html>
