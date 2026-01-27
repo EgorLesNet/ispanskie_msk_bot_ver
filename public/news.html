@@ -199,40 +199,64 @@
       align-items: center;
       gap: 6px;
       padding: 8px 14px;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      background: rgba(255, 255, 255, 0.6);
+      border: 2px solid rgba(0, 0, 0, 0.12);
+      background: rgba(255, 255, 255, 0.8);
       border-radius: 12px;
       cursor: pointer;
       font-size: 14px;
-      transition: all 0.2s;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
+      position: relative;
     }
     body[data-theme="dark"] .reaction-btn {
-      background: rgba(50, 50, 50, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(50, 50, 50, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.15);
     }
-    .reaction-btn:hover {
+    .reaction-btn:active {
+      transform: scale(0.95);
+    }
+    .reaction-btn:hover:not(.active) {
       transform: scale(1.05);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+    body[data-theme="dark"] .reaction-btn:hover:not(.active) {
+      border-color: rgba(255, 255, 255, 0.25);
     }
     .reaction-btn.active {
-      background: rgba(0, 122, 255, 0.15);
+      background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
       border-color: #007aff;
-      color: #007aff;
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+      transform: scale(1.05);
     }
     body[data-theme="dark"] .reaction-btn.active {
-      background: rgba(10, 132, 255, 0.2);
+      background: linear-gradient(135deg, #0a84ff 0%, #007aff 100%);
       border-color: #0a84ff;
-      color: #0a84ff;
+      box-shadow: 0 4px 12px rgba(10, 132, 255, 0.5);
     }
     .reaction-btn .emoji {
-      font-size: 18px;
+      font-size: 20px;
       line-height: 1;
+      transition: transform 0.2s;
+    }
+    .reaction-btn.active .emoji {
+      transform: scale(1.2);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
     }
     .reaction-btn .count {
-      font-weight: 500;
-      min-width: 16px;
+      font-weight: 600;
+      min-width: 20px;
       text-align: center;
+      font-size: 15px;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    .reaction-btn.animating {
+      animation: pulse 0.3s ease-out;
     }
     .loading {
       text-align: center;
@@ -501,16 +525,55 @@
       return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
     }
 
-    // Reactions
+    // Haptic feedback for mobile
+    function vibrate() {
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    }
+
+    // Reactions - INSTANT UPDATE
     async function handleReaction(postId, type, event) {
       const btn = event.currentTarget;
       const userId = getUserId();
-      
-      // Optimistic UI update
-      const wasActive = btn.classList.contains('active');
       const otherType = type === 'like' ? 'dislike' : 'like';
       const otherBtn = btn.parentElement.querySelector(`[data-type="${otherType}"]`);
       
+      const wasActive = btn.classList.contains('active');
+      const otherWasActive = otherBtn.classList.contains('active');
+      
+      // МГНОВЕННОЕ ОБНОВЛЕНИЕ UI
+      vibrate();
+      btn.classList.add('animating');
+      setTimeout(() => btn.classList.remove('animating'), 300);
+      
+      let newLikes = parseInt(btn.parentElement.querySelector('[data-type="like"] .count').textContent);
+      let newDislikes = parseInt(btn.parentElement.querySelector('[data-type="dislike"] .count').textContent);
+      
+      // Обновляем счетчики локально сразу
+      if (wasActive) {
+        // Убираем реакцию
+        btn.classList.remove('active');
+        if (type === 'like') newLikes = Math.max(0, newLikes - 1);
+        else newDislikes = Math.max(0, newDislikes - 1);
+      } else {
+        // Добавляем реакцию
+        if (otherWasActive) {
+          // Убираем противоположную
+          otherBtn.classList.remove('active');
+          if (type === 'like') newDislikes = Math.max(0, newDislikes - 1);
+          else newLikes = Math.max(0, newLikes - 1);
+        }
+        btn.classList.add('active');
+        if (type === 'like') newLikes++;
+        else newDislikes++;
+      }
+      
+      // Обновляем отображение
+      btn.parentElement.querySelector('[data-type="like"] .count').textContent = newLikes;
+      btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = newDislikes;
+      
+      // Отправляем на сервер в фоне
       try {
         const res = await fetch('/api/reactions', {
           method: 'POST',
@@ -524,20 +587,37 @@
         
         const data = await res.json();
         
-        // Update UI
+        // Синхронизируем с сервером (на случай рассинхронизации)
+        btn.parentElement.querySelector('[data-type="like"] .count').textContent = data.likes || 0;
+        btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = data.dislikes || 0;
+        
         const likeBtn = btn.parentElement.querySelector('[data-type="like"]');
         const dislikeBtn = btn.parentElement.querySelector('[data-type="dislike"]');
-        
-        likeBtn.querySelector('.count').textContent = data.likes || 0;
-        dislikeBtn.querySelector('.count').textContent = data.dislikes || 0;
         
         likeBtn.classList.toggle('active', data.userReaction === 'like');
         dislikeBtn.classList.toggle('active', data.userReaction === 'dislike');
         
       } catch (error) {
         console.error('Reaction error:', error);
-        // Revert optimistic update
-        btn.classList.toggle('active', wasActive);
+        // При ошибке откатываем изменения
+        btn.parentElement.querySelector('[data-type="like"]').classList.toggle('active', wasActive && type === 'like');
+        btn.parentElement.querySelector('[data-type="dislike"]').classList.toggle('active', wasActive && type === 'dislike');
+        otherBtn.classList.toggle('active', otherWasActive);
+        
+        // Восстанавливаем старые значения
+        if (wasActive) {
+          if (type === 'like') newLikes++;
+          else newDislikes++;
+        } else {
+          if (type === 'like') newLikes--;
+          else newDislikes--;
+          if (otherWasActive) {
+            if (type === 'like') newDislikes++;
+            else newLikes++;
+          }
+        }
+        btn.parentElement.querySelector('[data-type="like"] .count').textContent = Math.max(0, newLikes);
+        btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = Math.max(0, newDislikes);
       }
     }
 
@@ -616,7 +696,6 @@
       if (!append) renderNews();
       
       try {
-        // Добавляем timestamp для обхода кэша браузера
         const url = `/api/news?limit=${LIMIT}&offset=${currentOffset}&t=${Date.now()}`;
         const res = await fetch(url, { 
           cache: 'no-store',
@@ -655,7 +734,7 @@
       await loadNews({ append: true });
     }
 
-    // Auto-refresh first page - сокращено до 2 секунд для мгновенных обновлений
+    // Auto-refresh
     setInterval(async () => {
       if (document.visibilityState === 'visible' && !isLoading) {
         const url = `/api/news?limit=${LIMIT}&offset=0&t=${Date.now()}`;
@@ -664,7 +743,6 @@
           if (res.ok) {
             const data = await res.json();
             const newPosts = Array.isArray(data.posts) ? data.posts : [];
-            // Проверяем любые изменения в первых новостях
             if (newPosts.length > 0) {
               const hasChanges = newPosts[0].id !== allNews[0]?.id || newPosts.length !== allNews.slice(0, LIMIT).length;
               if (hasChanges) {
@@ -678,7 +756,7 @@
           console.error('Auto-refresh failed:', e);
         }
       }
-    }, 2000); // 2 секунды вместо 5
+    }, 3000);
 
     // Init
     initTheme();
