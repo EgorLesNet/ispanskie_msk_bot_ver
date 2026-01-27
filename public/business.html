@@ -109,19 +109,20 @@
             border-radius: 0;
         }
         
-        /* Search Bar */
+        /* Search Bar - перемещена ниже */
         .search-container {
             position: fixed;
-            top: calc(92px + env(safe-area-inset-top));
+            bottom: calc(102px + env(safe-area-inset-bottom));
             left: 12px;
             right: 12px;
             z-index: 900;
             display: flex;
+            flex-direction: column;
             gap: 8px;
         }
         
         .search-input {
-            flex: 1;
+            width: 100%;
             padding: 12px 16px;
             border: none;
             border-radius: 16px;
@@ -135,19 +136,35 @@
         }
         
         .category-select {
+            width: 100%;
             padding: 12px 16px;
             border: none;
             border-radius: 16px;
             font-size: 14px;
             outline: none;
             cursor: pointer;
-            min-width: 120px;
+        }
+        
+        /* Desktop: горизонтальное расположение */
+        @media (min-width: 768px) {
+            .search-container {
+                flex-direction: row;
+                top: calc(92px + env(safe-area-inset-top));
+                bottom: auto;
+            }
+            .search-input {
+                flex: 1;
+            }
+            .category-select {
+                min-width: 180px;
+                width: auto;
+            }
         }
         
         /* Floating Action Button */
         .fab {
             position: fixed;
-            bottom: calc(102px + env(safe-area-inset-bottom));
+            bottom: calc(232px + env(safe-area-inset-bottom));
             right: 20px;
             z-index: 900;
             width: 60px;
@@ -163,6 +180,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        
+        @media (min-width: 768px) {
+            .fab {
+                bottom: calc(102px + env(safe-area-inset-bottom));
+            }
         }
         
         .fab:hover {
