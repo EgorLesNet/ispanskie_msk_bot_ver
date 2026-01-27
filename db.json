@@ -1,6 +1,35 @@
 {
   "posts": [
     {
+      "id": 32,
+      "text": "Николо-Хованская улица сейчас",
+      "textHTML": "Николо-Хованская улица сейчас",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-27T17:25:39.802Z",
+      "timestamp": "2026-01-27T17:25:39.802Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICkml49RIgM_J6ZtJkRl7HjoNir1qOAALejwAC3AfISzpiNLBHVQwmOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8984,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8984"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 31,
       "text": "Пробка не рассасывается",
       "textHTML": "<b>Пробка не рассасывается</b>",
