@@ -1117,9 +1117,9 @@
       "category": "Другое",
       "lat": 55.59073913341623,
       "lng": 37.451190948486335,
-      "description": "Сбор, сбербанк, банкоматы",
+      "description": "Сбер, Сбербанк, банкоматы. \n24/7",
       "address": "",
-      "url": null,
+      "url": "https://www.sberbank.ru/ru/person?segment=all",
       "reviews": [],
       "createdAt": "2026-01-26T15:46:41.497Z"
     }
