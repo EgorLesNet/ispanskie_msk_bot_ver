@@ -1,6 +1,35 @@
 {
   "posts": [
     {
+      "id": 31,
+      "text": "Пробка не рассасывается",
+      "textHTML": "<b>Пробка не рассасывается</b>",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-27T15:07:11.600Z",
+      "timestamp": "2026-01-27T15:07:11.600Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICkGl41J4UEvLdqZCTqcHAoVG6VKHNAAJEjgAC3AfIS-kHlV1pGnWVOAQ"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 8981,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/8981"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 30,
       "text": "И опять у нас авария… ищите пути объезда…",
       "textHTML": "И опять у нас авария… ищите пути объезда…",
