@@ -602,31 +602,39 @@
                 return;
             }
 
-            // Verify key by checking with business API
+            // Проверяем ключ через API businesses
             try {
+                const testData = {
+                    secret: key,
+                    name: '__test__',
+                    category: 'test',
+                    lat: 0,
+                    lng: 0
+                };
+
                 const res = await fetch('/api/businesses', {
-                    method: 'HEAD',
-                    headers: { 'X-Business-Key': key }
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
                 });
 
+                // Если вернулось 400 с ошибкой secret - ключ неверный
+                const result = await res.json();
+                
                 if (res.ok) {
+                    // Ключ верный, сохраняем
                     localStorage.setItem('businessAdminKey', key);
                     localStorage.setItem('recommendationsUnlocked', 'true');
                     document.getElementById('constructionBox').classList.add('hidden');
                     closeUnlockModal();
-                } else {
+                } else if (result.error && result.error.toLowerCase().includes('secret')) {
                     errorEl.textContent = 'Неверный ключ';
-                }
-            } catch (err) {
-                // If verification fails, try simple check against saved key
-                const savedKey = localStorage.getItem('businessAdminKey');
-                if (savedKey && key === savedKey) {
-                    localStorage.setItem('recommendationsUnlocked', 'true');
-                    document.getElementById('constructionBox').classList.add('hidden');
-                    closeUnlockModal();
                 } else {
                     errorEl.textContent = 'Ошибка проверки';
                 }
+            } catch (err) {
+                console.error('Unlock error:', err);
+                errorEl.textContent = 'Ошибка связи с сервером';
             }
         }
 
