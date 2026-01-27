@@ -28,9 +28,10 @@
       "status": "approved",
       "sourceType": "admin",
       "likes": 0,
-      "dislikes": 1,
+      "dislikes": 2,
       "userReactions": {
-        "web_pvt1yyt0bmkvgoknj": "dislike"
+        "web_pvt1yyt0bmkvgoknj": "dislike",
+        "web_mm3qax6d1mkvggcey": "dislike"
       }
     },
     {
