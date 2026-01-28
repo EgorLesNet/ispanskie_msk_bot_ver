@@ -18,12 +18,17 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAICnWl6R49mD17Zwri2Jyj0Ek0Qj7fJAAKjE2sbPtnQS1i1Yuu6MdGvAQADAgADeAADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICnml6R4-txaXeFOblxx2hEpL2144tAAKkE2sbPtnQSxdHHM_aNr_oAQADAgADeAADOAQ"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAICnGl6R4_cuLNtSfWn28yGsXX1IqnzAAKiE2sbPtnQS_xNSIsisdz6AQADAgADeAADOAQ",
       "photoFileIds": [
         "AgACAgIAAxkBAAICnGl6R4_cuLNtSfWn28yGsXX1IqnzAAKiE2sbPtnQS_xNSIsisdz6AQADAgADeAADOAQ",
-        "AgACAgIAAxkBAAICnWl6R49mD17Zwri2Jyj0Ek0Qj7fJAAKjE2sbPtnQS1i1Yuu6MdGvAQADAgADeAADOAQ"
+        "AgACAgIAAxkBAAICnWl6R49mD17Zwri2Jyj0Ek0Qj7fJAAKjE2sbPtnQS1i1Yuu6MdGvAQADAgADeAADOAQ",
+        "AgACAgIAAxkBAAICnml6R4-txaXeFOblxx2hEpL2144tAAKkE2sbPtnQSxdHHM_aNr_oAQADAgADeAADOAQ"
       ],
       "source": {
         "title": "Бармашев.ONLINE",
