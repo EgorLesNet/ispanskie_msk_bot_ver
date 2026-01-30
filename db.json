@@ -30,6 +30,10 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAICqml9JxULCRD3c1EdwaZ0BYZC9EsDAALuD2sbSdboS_-rkwABQRZncwEAAwIAA3gAAzgE"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICq2l9JxVJYV0DyNK3qZDmV3Zp9AxHAALvD2sbSdboS24OTMJRvHerAQADAgADeAADOAQ"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAICpml9JxUeb9-vueUc6NQW3BSxCRXUAALpD2sbSdboS_Z4jIg_iC7nAQADAgADeAADOAQ",
@@ -38,7 +42,8 @@
         "AgACAgIAAxkBAAICp2l9JxUtMcIMIsxTBLlY8yrfAAHgDwAC6w9rG0nW6EupPiNtRefR1AEAAwIAA3gAAzgE",
         "AgACAgIAAxkBAAICqGl9JxWGnpmhg6L-LkyKpfE93fP0AALsD2sbSdboS2qJqf4B8u_aAQADAgADeAADOAQ",
         "AgACAgIAAxkBAAICqWl9JxViCCxOFIFfe8oeCczx49cvAALtD2sbSdboS827BewNrVAWAQADAgADeAADOAQ",
-        "AgACAgIAAxkBAAICqml9JxULCRD3c1EdwaZ0BYZC9EsDAALuD2sbSdboS_-rkwABQRZncwEAAwIAA3gAAzgE"
+        "AgACAgIAAxkBAAICqml9JxULCRD3c1EdwaZ0BYZC9EsDAALuD2sbSdboS_-rkwABQRZncwEAAwIAA3gAAzgE",
+        "AgACAgIAAxkBAAICq2l9JxVJYV0DyNK3qZDmV3Zp9AxHAALvD2sbSdboS24OTMJRvHerAQADAgADeAADOAQ"
       ],
       "source": {
         "title": "Николай Садов",
