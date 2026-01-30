@@ -1,6 +1,38 @@
 {
   "posts": [
     {
+      "id": 36,
+      "text": "Соседи!\nПриступили к очистке территории между домами по Магеллана 5 и Севильский 3 и между домами по Магеллана 4 и Магеллана 5. Также осуществляется вывоз снега.",
+      "textHTML": "Соседи!\nПриступили к очистке территории между домами по Магеллана 5 и Севильский 3 и между домами по Магеллана 4 и Магеллана 5. Также осуществляется вывоз снега.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-30T21:48:06.784Z",
+      "timestamp": "2026-01-30T21:48:06.784Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICpml9JxUeb9-vueUc6NQW3BSxCRXUAALpD2sbSdboS_Z4jIg_iC7nAQADAgADeAADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICpml9JxUeb9-vueUc6NQW3BSxCRXUAALpD2sbSdboS_Z4jIg_iC7nAQADAgADeAADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICpml9JxUeb9-vueUc6NQW3BSxCRXUAALpD2sbSdboS_Z4jIg_iC7nAQADAgADeAADOAQ"
+      ],
+      "source": {
+        "title": "Николай Садов",
+        "username": "nicksadov",
+        "chatId": -1001613129162,
+        "messageId": 1424,
+        "chatUrl": "https://t.me/nicksadov",
+        "postUrl": "https://t.me/nicksadov/1424"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 35,
       "text": "Странного цвета следы обнаружены в ИК2\n\nВ последнее время очень много новостей было про догхантеров \n\nэта розовая жидкость, возможно яд для собак или что-то такое\n\nНа фоне последних новостей с догхантерами в ЖК Homecity относительно недалеко от нас.",
       "textHTML": "<b>Странного цвета следы обнаружены в ИК2</b>\n\nВ последнее время очень много новостей было про догхантеров \n\nэта розовая жидкость, возможно яд для собак или что-то такое\n\nНа фоне последних <a href=\"https://t.me/+vpySCJI7P99hOGI6\">новостей</a> с догхантерами в ЖК Homecity относительно недалеко от нас.",
