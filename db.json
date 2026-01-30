@@ -1,6 +1,38 @@
 {
   "posts": [
     {
+      "id": 35,
+      "text": "Странного цвета следы обнаружены в ИК2\n\nВ последнее время очень много новостей было про догхантеров \n\nэта розовая жидкость, возможно яд для собак или что-то такое\n\nНа фоне последних новостей с догхантерами в ЖК Homecity относительно недалеко от нас.",
+      "textHTML": "<b>Странного цвета следы обнаружены в ИК2</b>\n\nВ последнее время очень много новостей было про догхантеров \n\nэта розовая жидкость, возможно яд для собак или что-то такое\n\nНа фоне последних <a href=\"https://t.me/+vpySCJI7P99hOGI6\">новостей</a> с догхантерами в ЖК Homecity относительно недалеко от нас.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-01-30T10:30:03.758Z",
+      "timestamp": "2026-01-30T10:30:03.758Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAICpGl8iCrKEDjA2KEMu6Et0k3iAAFeNAACfgxrGwto6UtZIUcDpQ_4dQEAAwIAA3gAAzgE"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAICpGl8iCrKEDjA2KEMu6Et0k3iAAFeNAACfgxrGwto6UtZIUcDpQ_4dQEAAwIAA3gAAzgE",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAICpGl8iCrKEDjA2KEMu6Et0k3iAAFeNAACfgxrGwto6UtZIUcDpQ_4dQEAAwIAA3gAAzgE"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 9032,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/9032"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 34,
       "text": "❄️ Дублер Калужки в сторону МКАД опять стоит из-за застрявших фур. На месте ГИБДД, тягач и даже гусеничный тягач МЧС, но с ожиданиями автобуса на теплом стане могут быть проблемы.",
       "textHTML": "❄️ Дублер Калужки в сторону МКАД опять стоит из-за застрявших фур. На месте ГИБДД, тягач и даже гусеничный тягач МЧС, но с ожиданиями автобуса на теплом стане могут быть проблемы.",
