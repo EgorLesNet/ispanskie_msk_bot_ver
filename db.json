@@ -1301,7 +1301,17 @@
       "description": "Кофейня Cofix — это уютное место, где можно насладиться ароматным кофе и легкими десертами.\n\n07:00 - 22:00",
       "address": null,
       "url": null,
-      "reviews": [],
+      "reviews": [
+        {
+          "id": 1,
+          "tgId": 273473755,
+          "userName": "fusuges",
+          "photoUrl": "https://t.me/i/userpic/320/4pcdUMCpmNfbCIumI87TcYDY2tbxIffdmKBDT_yv15A.svg",
+          "rating": 5,
+          "comment": "Хороший, вкусный кофе. Рядом с метро, что очень удобно",
+          "createdAt": "2026-01-31T23:47:39.582Z"
+        }
+      ],
       "createdAt": "2026-01-20T13:57:56.659Z"
     },
     {
