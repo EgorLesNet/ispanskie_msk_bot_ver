@@ -75,6 +75,24 @@
             color: #999;
         }
         
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+        
         .theme-toggle {
             background: transparent;
             border: none;
@@ -345,6 +363,21 @@
             background: #e1e4e8;
         }
         
+        /* Auth Prompt */
+        .auth-prompt {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .auth-prompt p {
+            margin-bottom: 16px;
+            color: #666;
+        }
+        
+        .auth-prompt .btn {
+            width: 100%;
+        }
+        
         /* Reviews Styles */
         .reviews-section {
             margin-top: 20px;
@@ -387,6 +420,10 @@
             background: #2a2a2a;
         }
         
+        .review-item.own-review {
+            border: 2px solid #007aff;
+        }
+        
         .review-header {
             display: flex;
             justify-content: space-between;
@@ -397,6 +434,15 @@
         .review-author {
             font-weight: 600;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .review-author img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
         }
         
         .review-rating {
@@ -638,9 +684,12 @@
                 <div class="subtitle">Карта бизнеса</div>
             </div>
         </a>
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
-            <span id="theme-icon">🌙</span>
-        </button>
+        <div class="header-actions">
+            <img id="userAvatar" class="user-avatar" style="display: none;" onclick="window.location.href='profile.html'" />
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
     </header>
 
     <!-- Search Bar -->
@@ -729,13 +778,15 @@
                 </div>
                 <div id="reviewsList"></div>
                 
+                <!-- Auth Prompt -->
+                <div id="authPrompt" class="auth-prompt" style="display: none;">
+                    <p>Для добавления отзыва необходимо войти через Telegram</p>
+                    <button class="btn btn-primary" onclick="window.location.href='profile.html'">Войти через Telegram</button>
+                </div>
+                
                 <!-- Add Review Form -->
                 <div id="addReviewForm" style="display: none;">
                     <h3 style="margin-bottom: 16px; font-size: 16px;">Ваш отзыв</h3>
-                    <div class="form-group">
-                        <label>Ваше имя *</label>
-                        <input type="text" id="reviewUserName" required>
-                    </div>
                     <div class="form-group">
                         <label>Оценка *</label>
                         <div class="star-rating" id="starRating">
@@ -774,6 +825,10 @@
                 <span>⭐</span>
                 <span class="nav-text">Рекомендации</span>
             </a>
+            <a href="profile.html" class="nav-btn">
+                <span>👤</span>
+                <span class="nav-text">Профиль</span>
+            </a>
         </div>
     </nav>
 
@@ -793,6 +848,16 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Get current user from localStorage
+        const currentUser = JSON.parse(localStorage.getItem('tgUser') || 'null');
+        
+        // Show user avatar if logged in
+        if (currentUser && currentUser.photoUrl) {
+            const avatar = document.getElementById('userAvatar');
+            avatar.src = currentUser.photoUrl;
+            avatar.style.display = 'block';
+        }
+        
         // Theme Management
         function toggleTheme() {
             const body = document.body;
@@ -811,16 +876,6 @@
                 document.body.setAttribute('data-theme', 'dark');
                 document.getElementById('theme-icon').textContent = '☀️';
             }
-        }
-
-        // User ID
-        function getUserId() {
-            let userId = localStorage.getItem('businessUserId');
-            if (!userId) {
-                userId = 'web_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-                localStorage.setItem('businessUserId', userId);
-            }
-            return userId;
         }
 
         // Map Setup
@@ -994,6 +1049,7 @@
             document.getElementById('reviewsBusinessName').textContent = businessName;
             document.getElementById('reviewsModal').classList.add('active');
             document.getElementById('addReviewForm').style.display = 'none';
+            document.getElementById('authPrompt').style.display = 'none';
             await loadReviews();
         }
 
@@ -1007,7 +1063,8 @@
             if (!currentBusinessId) return;
             
             try {
-                const res = await fetch(`/api/reviews?businessId=${currentBusinessId}`);
+                const userTgId = currentUser ? currentUser.tgId : null;
+                const res = await fetch(`/api/reviews?businessId=${currentBusinessId}${userTgId ? '&userTgId=' + userTgId : ''}`);
                 const data = await res.json();
                 
                 const reviewsList = document.getElementById('reviewsList');
@@ -1021,10 +1078,15 @@
                 reviewsList.innerHTML = data.reviews.map(review => {
                     const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
                     const date = new Date(review.createdAt).toLocaleDateString('ru-RU');
+                    const ownClass = review.isOwn ? ' own-review' : '';
                     return `
-                        <div class="review-item">
+                        <div class="review-item${ownClass}">
                             <div class="review-header">
-                                <span class="review-author">${escapeHtml(review.userName)}</span>
+                                <span class="review-author">
+                                    ${review.photoUrl ? `<img src="${escapeHtml(review.photoUrl)}" alt="">` : ''}
+                                    ${escapeHtml(review.userName)}
+                                    ${review.isOwn ? ' (вы)' : ''}
+                                </span>
                                 <span class="review-rating">${stars}</span>
                             </div>
                             ${review.comment ? `<div class="review-comment">${escapeHtml(review.comment)}</div>` : ''}
@@ -1039,17 +1101,17 @@
         }
 
         function showAddReviewForm() {
-            document.getElementById('addReviewForm').style.display = 'block';
-            // Load saved username
-            const savedName = localStorage.getItem('businessUserName');
-            if (savedName) {
-                document.getElementById('reviewUserName').value = savedName;
+            // Check if user is logged in
+            if (!currentUser) {
+                document.getElementById('authPrompt').style.display = 'block';
+                return;
             }
+            
+            document.getElementById('addReviewForm').style.display = 'block';
         }
 
         function hideAddReviewForm() {
             document.getElementById('addReviewForm').style.display = 'none';
-            document.getElementById('reviewUserName').value = '';
             document.getElementById('reviewComment').value = '';
             currentRating = 0;
             updateStars();
@@ -1077,24 +1139,24 @@
         }
 
         async function submitReview() {
-            const userName = document.getElementById('reviewUserName').value.trim();
-            const comment = document.getElementById('reviewComment').value.trim();
-            
-            if (!userName) {
-                alert('Пожалуйста, укажите ваше имя');
+            if (!currentUser) {
+                alert('Войдите через Telegram для добавления отзыва');
+                window.location.href = 'profile.html';
                 return;
             }
+            
+            const comment = document.getElementById('reviewComment').value.trim();
             
             if (currentRating === 0) {
                 alert('Пожалуйста, поставьте оценку');
                 return;
             }
             
-            const userId = getUserId();
             const data = {
                 businessId: currentBusinessId,
-                userId,
-                userName,
+                tgId: currentUser.tgId,
+                userName: currentUser.displayName,
+                photoUrl: currentUser.photoUrl || null,
                 rating: currentRating,
                 comment
             };
@@ -1109,9 +1171,6 @@
                 const result = await res.json();
                 
                 if (res.ok) {
-                    // Save username
-                    localStorage.setItem('businessUserName', userName);
-                    
                     alert('Спасибо за отзыв!');
                     hideAddReviewForm();
                     await loadReviews();
