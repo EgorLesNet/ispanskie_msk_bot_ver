@@ -8,7 +8,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; min-height: 100vh; background: #f0f2f5; color: #1a1a1a; transition: background 0.3s ease, color 0.3s ease; padding-top: calc(80px + env(safe-area-inset-top)); padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
     body[data-theme="dark"] { background: #0e0e0e; color: #fff; }
-    .header { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 20px; }
+    .header { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 24px; }
     .logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
     .logo-img { width: 40px; height: 40px; border-radius: 10px; transition: transform 0.3s; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
     .logo-img:hover { transform: scale(1.1) rotate(5deg); }
@@ -53,109 +53,21 @@
     .load-more-btn { background: #007aff; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
     .load-more-btn:hover { background: #0051d5; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4); }
     
-    /* Telegram-style Navigation */
-    .nav {
-      position: fixed;
-      bottom: calc(12px + env(safe-area-inset-bottom));
-      left: calc(12px + env(safe-area-inset-left));
-      right: calc(12px + env(safe-area-inset-right));
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 8px;
-    }
-    
-    .nav-block {
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 20px;
-      padding: 6px;
-      display: flex;
-      gap: 6px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    body[data-theme="dark"] .nav-block {
-      background: rgba(30, 30, 30, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    }
-    
-    .nav-block.left {
-      flex: 1;
-      max-width: 420px;
-    }
-    
-    .nav-block.right {
-      flex-shrink: 0;
-    }
-    
-    .nav-btn {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 10px 16px;
-      border-radius: 14px;
-      cursor: pointer;
-      text-decoration: none;
-      color: #666;
-      transition: all 0.2s ease;
-      background: transparent;
-      border: none;
-      min-width: 0;
-    }
-    
-    body[data-theme="dark"] .nav-btn {
-      color: #aaa;
-    }
-    
-    .nav-btn:hover {
-      background: rgba(0, 0, 0, 0.06);
-      transform: scale(1.05);
-    }
-    
-    body[data-theme="dark"] .nav-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
-    
-    .nav-btn.active {
-      background: rgba(0, 122, 255, 0.15);
-      color: #007aff;
-    }
-    
-    body[data-theme="dark"] .nav-btn.active {
-      background: rgba(10, 132, 255, 0.2);
-      color: #0a84ff;
-    }
-    
-    .nav-btn .nav-emoji {
-      font-size: 26px;
-      line-height: 1;
-    }
-    
-    .nav-btn .nav-label {
-      font-size: 11px;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-    }
-    
-    @media (max-width: 500px) {
-      .nav-btn .nav-label {
-        font-size: 10px;
-      }
-      .nav-btn {
-        padding: 8px 12px;
-      }
-    }
+    /* Telegram Navigation */
+    .nav { position: fixed; bottom: calc(12px + env(safe-area-inset-bottom)); left: calc(12px + env(safe-area-inset-left)); right: calc(12px + env(safe-area-inset-right)); z-index: 100; display: flex; justify-content: space-between; gap: 8px; padding: 8px; }
+    .nav-block { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 24px; padding: 6px; display: flex; gap: 6px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+    body[data-theme="dark"] .nav-block { background: rgba(30, 30, 30, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
+    .nav-block.left { flex: 1; max-width: 420px; }
+    .nav-block.right { flex-shrink: 0; }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 16px; border-radius: 18px; cursor: pointer; text-decoration: none; color: #666; transition: all 0.2s ease; background: transparent; border: none; min-width: 0; }
+    body[data-theme="dark"] .nav-btn { color: #aaa; }
+    .nav-btn:hover { background: rgba(0, 0, 0, 0.06); transform: scale(1.05); }
+    body[data-theme="dark"] .nav-btn:hover { background: rgba(255, 255, 255, 0.08); }
+    .nav-btn.active { background: rgba(0, 122, 255, 0.15); color: #007aff; }
+    body[data-theme="dark"] .nav-btn.active { background: rgba(10, 132, 255, 0.2); color: #0a84ff; }
+    .nav-btn .nav-emoji { font-size: 26px; line-height: 1; }
+    .nav-btn .nav-label { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    @media (max-width: 500px) { .nav-btn .nav-label { font-size: 10px; } .nav-btn { padding: 8px 12px; } }
     
     .liquid-glass { backdrop-filter: blur(20px) saturate(180%) brightness(1.1); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1); }
     .header.liquid-glass { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.5); }
@@ -164,45 +76,11 @@
   </style>
 </head>
 <body>
-  <header class="header liquid-glass">
-    <a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener">
-      <img class="logo-img" src="logo.png" alt="Лого" />
-      <div><h3>Агрегатор для района</h3><div class="subtitle">by Испанские Кварталы | Прокшино</div></div>
-    </a>
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button>
-  </header>
-
+  <header class="header liquid-glass"><a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener"><img class="logo-img" src="logo.png" alt="Лого" /><div><h3>Агрегатор для района</h3><div class="subtitle">by Испанские Кварталы | Прокшино</div></div></a><button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button></header>
   <main class="feed" id="feed"><div class="loading">Загрузка новостей...</div></main>
-
-  <nav class="nav">
-    <div class="nav-block left">
-      <a href="news.html" class="nav-btn active">
-        <span class="nav-emoji">📰</span>
-        <span class="nav-label">Новости</span>
-      </a>
-      <a href="business.html" class="nav-btn">
-        <span class="nav-emoji">💼</span>
-        <span class="nav-label">Бизнес</span>
-      </a>
-      <a href="recommendations.html" class="nav-btn">
-        <span class="nav-emoji">⭐</span>
-        <span class="nav-label">Рекоменд.</span>
-      </a>
-    </div>
-    <div class="nav-block right">
-      <a href="profile.html" class="nav-btn">
-        <span class="nav-emoji">👤</span>
-        <span class="nav-label">Профиль</span>
-      </a>
-    </div>
-  </nav>
-
-  <script type="text/javascript">
-      (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');
-      ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
-  </script>
+  <nav class="nav"><div class="nav-block left"><a href="news.html" class="nav-btn active"><span class="nav-emoji">📰</span><span class="nav-label">Новости</span></a><a href="business.html" class="nav-btn"><span class="nav-emoji">💼</span><span class="nav-label">Бизнес</span></a><a href="recommendations.html" class="nav-btn"><span class="nav-emoji">⭐</span><span class="nav-label">Рекоменд.</span></a></div><div class="nav-block right"><a href="profile.html" class="nav-btn"><span class="nav-emoji">👤</span><span class="nav-label">Профиль</span></a></div></nav>
+  <script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
   <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-
   <script>
     function getUserId() { let userId = localStorage.getItem('newsUserId'); if (!userId) { userId = 'web_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); localStorage.setItem('newsUserId', userId); } return userId; }
     function toggleTheme() { const body = document.body; const icon = document.getElementById('theme-icon'); const isDark = body.getAttribute('data-theme') === 'dark'; body.setAttribute('data-theme', isDark ? '' : 'dark'); icon.textContent = isDark ? '🌙' : '☀️'; localStorage.setItem('theme', isDark ? 'light' : 'dark'); }
