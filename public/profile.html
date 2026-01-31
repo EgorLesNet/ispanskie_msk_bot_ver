@@ -18,11 +18,11 @@
         .profile-info h2 { font-size: 24px; margin-bottom: 4px; }
         .profile-info .username { color: #666; font-size: 14px; }
         body[data-theme="dark"] .profile-info .username { color: #999; }
-        .logout-btn { background: linear-gradient(135deg, #ff3b30 0%, #d62d20 100%); color: white; border: none; padding: 14px 28px; border-radius: 28px; cursor: pointer; font-size: 15px; margin-top: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600; box-shadow: 0 8px 24px rgba(255,59,48,0.35); }
+        .logout-btn { background: linear-gradient(135deg, #ff3b30 0%, #d62d20 100%); color: white; border: none; padding: 14px 28px; border-radius: 32px; cursor: pointer; font-size: 15px; margin-top: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600; box-shadow: 0 8px 24px rgba(255,59,48,0.35); }
         .logout-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(255,59,48,0.5); }
         .logout-btn:active { transform: translateY(-1px); }
         .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
-        .review-item { background: #f8f9fa; border-radius: 24px; padding: 16px; margin-bottom: 12px; }
+        .review-item { background: #f8f9fa; border-radius: 28px; padding: 16px; margin-bottom: 12px; }
         body[data-theme="dark"] .review-item { background: #2a2a2a; }
         .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .business-name { font-weight: 600; font-size: 15px; }
@@ -37,7 +37,7 @@
         .auth-card h2 { margin-bottom: 16px; font-size: 34px; font-weight: 700; }
         .auth-card p { color: #666; margin-bottom: 32px; line-height: 1.6; font-size: 16px; }
         body[data-theme="dark"] .auth-card p { color: #999; }
-        .auth-btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: linear-gradient(135deg, #0088cc 0%, #0066aa 100%); color: white; border: none; padding: 18px 44px; border-radius: 28px; font-size: 17px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 12px 32px rgba(0,136,204,0.4); }
+        .auth-btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: linear-gradient(135deg, #0088cc 0%, #0066aa 100%); color: white; border: none; padding: 18px 44px; border-radius: 32px; font-size: 17px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 12px 32px rgba(0,136,204,0.4); }
         .auth-btn:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,136,204,0.6); }
         .auth-btn:active { transform: translateY(-1px); }
         .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -45,15 +45,15 @@
         .loading-text { color: #666; margin-top: 24px; font-size: 14px; }
         body[data-theme="dark"] .loading-text { color: #999; }
         .error-text { color: #ff3b30; margin-top: 16px; font-size: 14px; font-weight: 500; }
-        .theme-toggle-btn { position: fixed; top: calc(20px + env(safe-area-inset-top)); right: 20px; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border: none; width: 48px; height: 48px; border-radius: 24px; cursor: pointer; font-size: 22px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-        body[data-theme="dark"] .theme-toggle-btn { background: rgba(30,30,30,0.8); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+        .theme-toggle-btn { position: fixed; top: calc(20px + env(safe-area-inset-top)); right: 20px; background: rgba(255,255,255,0.65); backdrop-filter: blur(20px) saturate(180%) brightness(1.1); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1); border: 1px solid rgba(255, 255, 255, 0.4); width: 48px; height: 48px; border-radius: 32px; cursor: pointer; font-size: 22px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+        body[data-theme="dark"] .theme-toggle-btn { background: rgba(30,30,30,0.65); border: 1px solid rgba(255, 255, 255, 0.18); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
         .theme-toggle-btn:hover { transform: scale(1.15) rotate(20deg); }
         .nav { position: fixed; bottom: calc(12px + env(safe-area-inset-bottom)); left: calc(12px + env(safe-area-inset-left)); right: calc(12px + env(safe-area-inset-right)); z-index: 1000; display: flex; justify-content: space-between; gap: 8px; padding: 8px; }
-        .nav-block { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 32px; padding: 8px; display: flex; gap: 6px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15); }
-        body[data-theme="dark"] .nav-block { background: rgba(30, 30, 30, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5); }
+        .nav-block { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 40px; padding: 8px; display: flex; gap: 6px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15); }
+        body[data-theme="dark"] .nav-block { background: rgba(30, 30, 30, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5); }
         .nav-block.left { flex: 1; max-width: 420px; }
         .nav-block.right { flex-shrink: 0; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 16px; border-radius: 24px; cursor: pointer; text-decoration: none; color: #666; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); background: transparent; border: none; min-width: 0; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 16px; border-radius: 28px; cursor: pointer; text-decoration: none; color: #666; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); background: transparent; border: none; min-width: 0; }
         body[data-theme="dark"] .nav-btn { color: #aaa; }
         .nav-btn:hover { background: rgba(0, 0, 0, 0.06); transform: scale(1.05); }
         body[data-theme="dark"] .nav-btn:hover { background: rgba(255, 255, 255, 0.08); }
@@ -146,12 +146,10 @@
                 return;
             }
 
-            // Попробуем использовать initData (строка для валидации на сервере)
             if (tg.initData) {
                 console.log('Using initData for authentication');
                 authenticateWithInitData(tg.initData);
             } 
-            // Fallback на initDataUnsafe для локального тестирования
             else if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 console.log('Using initDataUnsafe fallback');
                 const tgUser = tg.initDataUnsafe.user;
