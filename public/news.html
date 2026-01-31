@@ -5,336 +5,55 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Новости - Агрегатор для района</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      background: #f0f2f5;
-      color: #1a1a1a;
-      transition: background 0.3s ease, color 0.3s ease;
-      padding-top: calc(80px + env(safe-area-inset-top));
-      padding-bottom: calc(90px + env(safe-area-inset-bottom));
-    }
-    body[data-theme="dark"] {
-      background: #0e0e0e;
-      color: #fff;
-    }
-    .header {
-      position: fixed;
-      top: calc(12px + env(safe-area-inset-top));
-      left: 12px;
-      right: 12px;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 18px;
-      border-radius: 20px;
-    }
-    .logo-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: inherit;
-    }
-    .logo-img {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      transition: transform 0.3s;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    .logo-img:hover {
-      transform: scale(1.1) rotate(5deg);
-    }
-    h3 {
-      font-size: 17px;
-      font-weight: 600;
-      margin: 0;
-    }
-    .subtitle {
-      font-size: 12px;
-      color: #666;
-      margin-top: 3px;
-    }
-    body[data-theme="dark"] .subtitle {
-      color: #999;
-    }
-    .theme-toggle {
-      background: transparent;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 50%;
-      transition: transform 0.3s, background 0.2s;
-    }
-    .theme-toggle:hover {
-      transform: scale(1.15) rotate(15deg);
-      background: rgba(0, 0, 0, 0.05);
-    }
-    body[data-theme="dark"] .theme-toggle:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
-    .feed {
-      display: grid;
-      gap: 16px;
-      width: min(680px, 92vw);
-      margin: 20px auto;
-    }
-    .card {
-      padding: 18px;
-      border-radius: 20px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.65);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s, box-shadow 0.3s;
-      animation: fadeIn 0.5s ease-out;
-    }
-    body[data-theme="dark"] .card {
-      background: rgba(30, 30, 30, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-    }
-    body[data-theme="dark"] .card:hover {
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-    }
-    .card-meta {
-      font-size: 11px;
-      color: #888;
-      margin-bottom: 10px;
-      line-height: 1.4;
-    }
-    .card-meta a {
-      color: inherit;
-      text-decoration: underline;
-    }
-    .card-meta a:hover {
-      opacity: 0.85;
-    }
-    .card-text {
-      font-size: 15px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-    .card-text a {
-      color: #007aff;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .card-text a:hover {
-      text-decoration: underline;
-      color: #0051d5;
-    }
-    body[data-theme="dark"] .card-text a {
-      color: #0a84ff;
-    }
-    .card-text b {
-      font-weight: 600;
-    }
-    .card-text i {
-      font-style: italic;
-    }
-    .card-text code {
-      background: rgba(0, 0, 0, 0.05);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-    }
-    body[data-theme="dark"] .card-text code {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    .card-text pre {
-      background: rgba(0, 0, 0, 0.05);
-      padding: 12px;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      margin: 8px 0;
-    }
-    body[data-theme="dark"] .card-text pre {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    .card-media-scroll {
-      display: flex !important;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      gap: 10px;
-      overflow-x: scroll;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      margin: 12px -18px;
-      padding: 0 18px;
-      scrollbar-width: none;
-    }
-    .card-media-scroll::-webkit-scrollbar {
-      display: none;
-    }
-    .card-media-scroll img,
-    .card-media-scroll video {
-      flex-shrink: 0;
-      width: 80vw;
-      max-width: 400px;
-      height: auto;
-      max-height: 400px;
-      border-radius: 12px;
-      object-fit: cover;
-      scroll-snap-align: center;
-      display: block;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; min-height: 100vh; background: #f0f2f5; color: #1a1a1a; transition: background 0.3s ease, color 0.3s ease; padding-top: calc(80px + env(safe-area-inset-top)); padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
+    body[data-theme="dark"] { background: #0e0e0e; color: #fff; }
+    .header { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 20px; }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    .logo-img { width: 40px; height: 40px; border-radius: 10px; transition: transform 0.3s; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+    .logo-img:hover { transform: scale(1.1) rotate(5deg); }
+    h3 { font-size: 17px; font-weight: 600; margin: 0; }
+    .subtitle { font-size: 12px; color: #666; margin-top: 3px; }
+    body[data-theme="dark"] .subtitle { color: #999; }
+    .theme-toggle { background: transparent; border: none; font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%; transition: transform 0.3s, background 0.2s; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(15deg); background: rgba(0, 0, 0, 0.05); }
+    body[data-theme="dark"] .theme-toggle:hover { background: rgba(255, 255, 255, 0.08); }
+    .feed { display: grid; gap: 16px; width: min(680px, 92vw); margin: 20px auto; }
+    .card { padding: 18px; border-radius: 20px; overflow: hidden; background: rgba(255, 255, 255, 0.65); border: 1px solid rgba(0, 0, 0, 0.08); transition: transform 0.3s, box-shadow 0.3s; animation: fadeIn 0.5s ease-out; }
+    body[data-theme="dark"] .card { background: rgba(30, 30, 30, 0.65); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15); }
+    body[data-theme="dark"] .card:hover { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5); }
+    .card-meta { font-size: 11px; color: #888; margin-bottom: 10px; line-height: 1.4; }
+    .card-meta a { color: inherit; text-decoration: underline; }
+    .card-text { font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+    .card-text a { color: #007aff; text-decoration: none; transition: color 0.2s; }
+    .card-text a:hover { text-decoration: underline; color: #0051d5; }
+    body[data-theme="dark"] .card-text a { color: #0a84ff; }
+    .card-media-scroll { display: flex !important; flex-direction: row; flex-wrap: nowrap; gap: 10px; overflow-x: scroll; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; margin: 12px -18px; padding: 0 18px; scrollbar-width: none; }
+    .card-media-scroll::-webkit-scrollbar { display: none; }
+    .card-media-scroll img, .card-media-scroll video { flex-shrink: 0; width: 80vw; max-width: 400px; height: auto; max-height: 400px; border-radius: 12px; object-fit: cover; scroll-snap-align: center; display: block; }
     @media (min-width: 768px) {
-      .card-media-scroll {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
-        overflow-x: visible;
-        margin: 12px 0;
-        padding: 0;
-        scroll-snap-type: none;
-      }
-      .card-media-scroll img,
-      .card-media-scroll video {
-        flex: none;
-        max-width: 100%;
-        width: 100%;
-      }
+      .card-media-scroll { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; overflow-x: visible; margin: 12px 0; padding: 0; scroll-snap-type: none; }
+      .card-media-scroll img, .card-media-scroll video { flex: none; max-width: 100%; width: 100%; }
     }
-    .card-reactions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(0, 0, 0, 0.08);
-    }
-    body[data-theme="dark"] .card-reactions {
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .reaction-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border: 2px solid rgba(0, 0, 0, 0.12);
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-      user-select: none;
-      position: relative;
-    }
-    body[data-theme="dark"] .reaction-btn {
-      background: rgba(50, 50, 50, 0.8);
-      border: 2px solid rgba(255, 255, 255, 0.15);
-    }
-    .reaction-btn:active {
-      transform: scale(0.95);
-    }
-    .reaction-btn:hover:not(.active) {
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      border-color: rgba(0, 0, 0, 0.2);
-    }
-    body[data-theme="dark"] .reaction-btn:hover:not(.active) {
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-    .reaction-btn.active {
-      background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
-      border-color: #007aff;
-      color: #fff;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
-      transform: scale(1.05);
-    }
-    body[data-theme="dark"] .reaction-btn.active {
-      background: linear-gradient(135deg, #0a84ff 0%, #007aff 100%);
-      border-color: #0a84ff;
-      box-shadow: 0 4px 12px rgba(10, 132, 255, 0.5);
-    }
-    .reaction-btn .emoji {
-      font-size: 20px;
-      line-height: 1;
-      transition: transform 0.2s;
-    }
-    .reaction-btn.active .emoji {
-      transform: scale(1.2);
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-    }
-    .reaction-btn .count {
-      font-weight: 600;
-      min-width: 20px;
-      text-align: center;
-      font-size: 15px;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.15); }
-    }
-    .reaction-btn.animating {
-      animation: pulse 0.3s ease-out;
-    }
-    .loading {
-      text-align: center;
-      color: #999;
-      padding: 40px 20px;
-      font-size: 15px;
-    }
-    .no-news {
-      text-align: center;
-      color: #999;
-      padding: 40px 20px;
-      font-size: 15px;
-    }
-    .error-msg {
-      text-align: center;
-      color: #ff3b30;
-      padding: 40px 20px;
-      font-size: 15px;
-      background: rgba(255, 59, 48, 0.1);
-      border-radius: 12px;
-      margin: 20px;
-    }
-    body[data-theme="dark"] .error-msg {
-      color: #ff453a;
-      background: rgba(255, 69, 58, 0.15);
-    }
-    .load-more {
-      text-align: center;
-      padding: 20px;
-    }
-    .load-more-btn {
-      background: #007aff;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .load-more-btn:hover {
-      background: #0051d5;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
-    }
-    .load-more-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .card-reactions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0, 0, 0, 0.08); }
+    body[data-theme="dark"] .card-reactions { border-top: 1px solid rgba(255, 255, 255, 0.1); }
+    .reaction-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 2px solid rgba(0, 0, 0, 0.12); background: rgba(255, 255, 255, 0.8); border-radius: 12px; cursor: pointer; font-size: 14px; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); user-select: none; position: relative; }
+    body[data-theme="dark"] .reaction-btn { background: rgba(50, 50, 50, 0.8); border: 2px solid rgba(255, 255, 255, 0.15); }
+    .reaction-btn:active { transform: scale(0.95); }
+    .reaction-btn:hover:not(.active) { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); border-color: rgba(0, 0, 0, 0.2); }
+    .reaction-btn.active { background: linear-gradient(135deg, #007aff 0%, #0051d5 100%); border-color: #007aff; color: #fff; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4); transform: scale(1.05); }
+    .reaction-btn .emoji { font-size: 20px; line-height: 1; transition: transform 0.2s; }
+    .reaction-btn.active .emoji { transform: scale(1.2); filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)); }
+    .reaction-btn .count { font-weight: 600; min-width: 20px; text-align: center; font-size: 15px; }
+    .loading { text-align: center; color: #999; padding: 40px 20px; font-size: 15px; }
+    .no-news { text-align: center; color: #999; padding: 40px 20px; font-size: 15px; }
+    .error-msg { text-align: center; color: #ff3b30; padding: 40px 20px; font-size: 15px; background: rgba(255, 59, 48, 0.1); border-radius: 12px; margin: 20px; }
+    .load-more { text-align: center; padding: 20px; }
+    .load-more-btn { background: #007aff; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+    .load-more-btn:hover { background: #0051d5; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4); }
+    
+    /* Telegram-style Navigation */
     .nav {
       position: fixed;
       bottom: calc(12px + env(safe-area-inset-bottom));
@@ -342,359 +61,164 @@
       right: calc(12px + env(safe-area-inset-right));
       z-index: 100;
       display: flex;
-      justify-content: center;
-      padding: 10px;
-      border-radius: 22px;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px;
     }
-    .nav-inner {
+    
+    .nav-block {
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      padding: 6px;
       display: flex;
       gap: 6px;
-      justify-content: center;
-      width: 100%;
-      max-width: 600px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
+    
+    body[data-theme="dark"] .nav-block {
+      background: rgba(30, 30, 30, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .nav-block.left {
+      flex: 1;
+      max-width: 420px;
+    }
+    
+    .nav-block.right {
+      flex-shrink: 0;
+    }
+    
     .nav-btn {
-      background: rgba(255, 255, 255, 0.6);
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      padding: 10px 18px;
-      border-radius: 18px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      transition: all 0.3s;
-      color: #333;
-      white-space: nowrap;
-      text-decoration: none;
+      flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 5px;
+      justify-content: center;
+      gap: 4px;
+      padding: 10px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #666;
+      transition: all 0.2s ease;
+      background: transparent;
+      border: none;
+      min-width: 0;
     }
+    
     body[data-theme="dark"] .nav-btn {
-      background: rgba(50, 50, 50, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      color: #ccc;
+      color: #aaa;
     }
+    
     .nav-btn:hover {
-      background: rgba(255, 255, 255, 0.9);
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      background: rgba(0, 0, 0, 0.06);
+      transform: scale(1.05);
     }
+    
     body[data-theme="dark"] .nav-btn:hover {
-      background: rgba(70, 70, 70, 0.9);
+      background: rgba(255, 255, 255, 0.08);
     }
+    
     .nav-btn.active {
-      background: #007aff;
-      color: #fff;
-      border-color: #007aff;
-      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+      background: rgba(0, 122, 255, 0.15);
+      color: #007aff;
     }
+    
     body[data-theme="dark"] .nav-btn.active {
-      background: #0a84ff;
-      border-color: #0a84ff;
-      box-shadow: 0 4px 12px rgba(10, 132, 255, 0.4);
+      background: rgba(10, 132, 255, 0.2);
+      color: #0a84ff;
     }
+    
     .nav-btn .nav-emoji {
-      font-size: 18px;
+      font-size: 26px;
+      line-height: 1;
     }
-    .nav-btn.profile-btn .nav-text {
-      display: none;
+    
+    .nav-btn .nav-label {
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
-    .liquid-glass {
-      backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
-      -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
-    }
-    .header.liquid-glass {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.5);
-    }
-    body[data-theme="dark"] .header.liquid-glass {
-      background: rgba(20, 20, 20, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.15);
-    }
-    .nav.liquid-glass {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
-    }
-    body[data-theme="dark"] .nav.liquid-glass {
-      background: rgba(20, 20, 20, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
-    }
-    @media (max-width: 650px) {
-      .nav-btn:not(.profile-btn) .nav-text {
-        display: none;
+    
+    @media (max-width: 500px) {
+      .nav-btn .nav-label {
+        font-size: 10px;
       }
       .nav-btn {
-        padding: 10px 14px;
+        padding: 8px 12px;
       }
     }
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    
+    .liquid-glass { backdrop-filter: blur(20px) saturate(180%) brightness(1.1); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1); }
+    .header.liquid-glass { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.5); }
+    body[data-theme="dark"] .header.liquid-glass { background: rgba(20, 20, 20, 0.7); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.15); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
   <header class="header liquid-glass">
     <a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener">
       <img class="logo-img" src="logo.png" alt="Лого" />
-      <div>
-        <h3>Агрегатор для района</h3>
-        <div class="subtitle">by Испанские Кварталы | Прокшино</div>
-      </div>
+      <div><h3>Агрегатор для района</h3><div class="subtitle">by Испанские Кварталы | Прокшино</div></div>
     </a>
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
-      <span id="theme-icon">🌙</span>
-    </button>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button>
   </header>
 
-  <main class="feed" id="feed">
-    <div class="loading">Загрузка новостей...</div>
-  </main>
+  <main class="feed" id="feed"><div class="loading">Загрузка новостей...</div></main>
 
-  <nav class="nav liquid-glass">
-    <div class="nav-inner">
+  <nav class="nav">
+    <div class="nav-block left">
       <a href="news.html" class="nav-btn active">
         <span class="nav-emoji">📰</span>
-        <span class="nav-text">Новости</span>
+        <span class="nav-label">Новости</span>
       </a>
       <a href="business.html" class="nav-btn">
         <span class="nav-emoji">💼</span>
-        <span class="nav-text">Бизнес</span>
+        <span class="nav-label">Бизнес</span>
       </a>
       <a href="recommendations.html" class="nav-btn">
         <span class="nav-emoji">⭐</span>
-        <span class="nav-text">Рекоменд.</span>
+        <span class="nav-label">Рекоменд.</span>
       </a>
-      <a href="profile.html" class="nav-btn profile-btn">
+    </div>
+    <div class="nav-block right">
+      <a href="profile.html" class="nav-btn">
         <span class="nav-emoji">👤</span>
-        <span class="nav-text">Профиль</span>
+        <span class="nav-label">Профиль</span>
       </a>
     </div>
   </nav>
 
   <script type="text/javascript">
-      (function(m,e,t,r,i,k,a){
-          m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-          m[i].l=1*new Date();
-          for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-          k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-      })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');
+      (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');
       ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
   </script>
   <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 
   <script>
-    function getUserId() {
-      let userId = localStorage.getItem('newsUserId');
-      if (!userId) {
-        userId = 'web_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-        localStorage.setItem('newsUserId', userId);
-      }
-      return userId;
-    }
-    function toggleTheme() {
-      const body = document.body;
-      const icon = document.getElementById('theme-icon');
-      const isDark = body.getAttribute('data-theme') === 'dark';
-      body.setAttribute('data-theme', isDark ? '' : 'dark');
-      icon.textContent = isDark ? '🌙' : '☀️';
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    }
-    function initTheme() {
-      const saved = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const useDark = saved === 'dark' || (!saved && prefersDark);
-      if (useDark) {
-        document.body.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-icon').textContent = '☀️';
-      }
-    }
-    function escapeHtml(s) {
-      return String(s || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
-    }
-    function formatText(n) {
-      if (n.textHTML) return n.textHTML;
-      const safe = escapeHtml(n.text || '');
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-    }
-    function formatDate(ts) {
-      if (!ts) return '';
-      const d = new Date(ts);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-      return `${day}.${month}.${year}, ${hours}:${minutes}`;
-    }
-    function buildSourceLine(n) {
-      const s = n && n.source ? n.source : null;
-      if (!s) return '';
-      const url = s.postUrl || s.chatUrl || '';
-      const title = s.title || (s.username ? '@' + s.username : 'Источник');
-      if (!url) return ` · Источник: ${escapeHtml(title)}`;
-      return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
-    }
-    function vibrate() {
-      if (navigator.vibrate) navigator.vibrate(10);
-    }
-    async function handleReaction(postId, type, event) {
-      const btn = event.currentTarget;
-      const userId = getUserId();
-      const otherType = type === 'like' ? 'dislike' : 'like';
-      const otherBtn = btn.parentElement.querySelector(`[data-type="${otherType}"]`);
-      const wasActive = btn.classList.contains('active');
-      const otherWasActive = otherBtn.classList.contains('active');
-      vibrate();
-      btn.classList.add('animating');
-      setTimeout(() => btn.classList.remove('animating'), 300);
-      let newLikes = parseInt(btn.parentElement.querySelector('[data-type="like"] .count').textContent);
-      let newDislikes = parseInt(btn.parentElement.querySelector('[data-type="dislike"] .count').textContent);
-      if (wasActive) {
-        btn.classList.remove('active');
-        if (type === 'like') newLikes = Math.max(0, newLikes - 1);
-        else newDislikes = Math.max(0, newDislikes - 1);
-      } else {
-        if (otherWasActive) {
-          otherBtn.classList.remove('active');
-          if (type === 'like') newDislikes = Math.max(0, newDislikes - 1);
-          else newLikes = Math.max(0, newLikes - 1);
-        }
-        btn.classList.add('active');
-        if (type === 'like') newLikes++;
-        else newDislikes++;
-      }
-      btn.parentElement.querySelector('[data-type="like"] .count').textContent = newLikes;
-      btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = newDislikes;
-      try {
-        const res = await fetch('/api/reactions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ postId, type, userId })
-        });
-        if (!res.ok) throw new Error('Failed to update reaction');
-        const data = await res.json();
-        btn.parentElement.querySelector('[data-type="like"] .count').textContent = data.likes || 0;
-        btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = data.dislikes || 0;
-        const likeBtn = btn.parentElement.querySelector('[data-type="like"]');
-        const dislikeBtn = btn.parentElement.querySelector('[data-type="dislike"]');
-        likeBtn.classList.toggle('active', data.userReaction === 'like');
-        dislikeBtn.classList.toggle('active', data.userReaction === 'dislike');
-      } catch (error) {
-        console.error('Reaction error:', error);
-        btn.parentElement.querySelector('[data-type="like"]').classList.toggle('active', wasActive && type === 'like');
-        btn.parentElement.querySelector('[data-type="dislike"]').classList.toggle('active', wasActive && type === 'dislike');
-        otherBtn.classList.toggle('active', otherWasActive);
-        if (wasActive) {
-          if (type === 'like') newLikes++; else newDislikes++;
-        } else {
-          if (type === 'like') newLikes--; else newDislikes--;
-          if (otherWasActive) { if (type === 'like') newDislikes++; else newLikes++; }
-        }
-        btn.parentElement.querySelector('[data-type="like"] .count').textContent = Math.max(0, newLikes);
-        btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = Math.max(0, newDislikes);
-      }
-    }
-    let allNews = [];
-    let isLoading = false;
-    let hasMore = true;
-    let currentOffset = 0;
-    const LIMIT = 10;
-    function renderNews() {
-      const feed = document.getElementById('feed');
-      const filtered = allNews.filter(n => (n.category || 'all') !== 'reco');
-      const userId = getUserId();
-      if (!filtered.length && !hasMore) {
-        feed.innerHTML = '<div class="no-news">Пока нет новостей! Отправьте первую новость боту.</div>';
-        return;
-      }
-      const cardsHtml = filtered.map(n => {
-        const ts = n.timestamp || n.createdAt || null;
-        let html = '<div class="card">';
-        html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`;
-        const media = n.media || [];
-        const mediaItems = media.filter(m => m && m.fileId && (m.type === 'photo' || m.type === 'video'));
-        if (mediaItems.length > 0) {
-          html += '<div class="card-media-scroll">';
-          mediaItems.forEach(item => {
-            const mediaUrl = `/api/media?fileId=${encodeURIComponent(item.fileId)}`;
-            if (item.type === 'photo') {
-              html += `<img src="${mediaUrl}" loading="lazy" alt="Фото" onerror="this.style.display='none'"/>`;
-            } else if (item.type === 'video') {
-              html += `<video controls preload="metadata" playsinline onerror="this.style.display='none'"><source src="${mediaUrl}" type="video/mp4">Ваш браузер не поддерживает видео.</video>`;
-            }
-          });
-          html += '</div>';
-        }
-        html += `<div class="card-text">${formatText(n)}</div>`;
-        const likes = n.likes || 0;
-        const dislikes = n.dislikes || 0;
-        const userReaction = n.userReactions?.[userId] || null;
-        html += '<div class="card-reactions">';
-        html += `<div class="reaction-btn ${userReaction === 'like' ? 'active' : ''}" data-type="like" onclick="handleReaction(${n.id}, 'like', event)"><span class="emoji">👍</span><span class="count">${likes}</span></div>`;
-        html += `<div class="reaction-btn ${userReaction === 'dislike' ? 'active' : ''}" data-type="dislike" onclick="handleReaction(${n.id}, 'dislike', event)"><span class="emoji">👎</span><span class="count">${dislikes}</span></div>`;
-        html += '</div></div>';
-        return html;
-      }).join('');
-      let loadMoreHtml = '';
-      if (hasMore) {
-        loadMoreHtml = `<div class="load-more"><button class="load-more-btn" onclick="loadMore()" ${isLoading ? 'disabled' : ''}>${isLoading ? 'Загрузка...' : 'Загрузить ещё'}</button></div>`;
-      }
-      feed.innerHTML = cardsHtml + loadMoreHtml;
-    }
-    async function loadNews({ append = false } = {}) {
-      if (isLoading) return;
-      isLoading = true;
-      if (!append) renderNews();
-      try {
-        const url = `/api/news?limit=${LIMIT}&offset=${currentOffset}&t=${Date.now()}`;
-        const res = await fetch(url, { cache: 'no-store', headers: { 'Accept': 'application/json' } });
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        const data = await res.json();
-        const newPosts = Array.isArray(data.posts) ? data.posts : [];
-        if (append) allNews = [...allNews, ...newPosts]; else allNews = newPosts;
-        hasMore = data.hasMore || false;
-        currentOffset = allNews.length;
-        renderNews();
-      } catch (e) {
-        console.error('Failed to load news:', e);
-        if (!allNews.length) {
-          document.getElementById('feed').innerHTML = `<div class="error-msg">Ошибка загрузки новостей: ${escapeHtml(e.message)}<br><br><button onclick="loadNews()" style="padding:8px 16px;border-radius:8px;border:none;background:#007aff;color:#fff;cursor:pointer;">Повторить</button></div>`;
-        }
-      } finally {
-        isLoading = false;
-      }
-    }
+    function getUserId() { let userId = localStorage.getItem('newsUserId'); if (!userId) { userId = 'web_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); localStorage.setItem('newsUserId', userId); } return userId; }
+    function toggleTheme() { const body = document.body; const icon = document.getElementById('theme-icon'); const isDark = body.getAttribute('data-theme') === 'dark'; body.setAttribute('data-theme', isDark ? '' : 'dark'); icon.textContent = isDark ? '🌙' : '☀️'; localStorage.setItem('theme', isDark ? 'light' : 'dark'); }
+    function initTheme() { const saved = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; const useDark = saved === 'dark' || (!saved && prefersDark); if (useDark) { document.body.setAttribute('data-theme', 'dark'); document.getElementById('theme-icon').textContent = '☀️'; } }
+    function escapeHtml(s) { return String(s || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;'); }
+    function formatText(n) { if (n.textHTML) return n.textHTML; const safe = escapeHtml(n.text || ''); const urlRegex = /(https?:\/\/[^\s]+)/g; return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
+    function formatDate(ts) { if (!ts) return ''; const d = new Date(ts); const day = String(d.getDate()).padStart(2, '0'); const month = String(d.getMonth() + 1).padStart(2, '0'); const year = d.getFullYear(); const hours = String(d.getHours()).padStart(2, '0'); const minutes = String(d.getMinutes()).padStart(2, '0'); return `${day}.${month}.${year}, ${hours}:${minutes}`; }
+    function buildSourceLine(n) { const s = n && n.source ? n.source : null; if (!s) return ''; const url = s.postUrl || s.chatUrl || ''; const title = s.title || (s.username ? '@' + s.username : 'Источник'); if (!url) return ` · Источник: ${escapeHtml(title)}`; return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`; }
+    function vibrate() { if (navigator.vibrate) navigator.vibrate(10); }
+    async function handleReaction(postId, type, event) { const btn = event.currentTarget; const userId = getUserId(); const otherType = type === 'like' ? 'dislike' : 'like'; const otherBtn = btn.parentElement.querySelector(`[data-type="${otherType}"]`); const wasActive = btn.classList.contains('active'); const otherWasActive = otherBtn.classList.contains('active'); vibrate(); btn.classList.add('animating'); setTimeout(() => btn.classList.remove('animating'), 300); let newLikes = parseInt(btn.parentElement.querySelector('[data-type="like"] .count').textContent); let newDislikes = parseInt(btn.parentElement.querySelector('[data-type="dislike"] .count').textContent); if (wasActive) { btn.classList.remove('active'); if (type === 'like') newLikes = Math.max(0, newLikes - 1); else newDislikes = Math.max(0, newDislikes - 1); } else { if (otherWasActive) { otherBtn.classList.remove('active'); if (type === 'like') newDislikes = Math.max(0, newDislikes - 1); else newLikes = Math.max(0, newLikes - 1); } btn.classList.add('active'); if (type === 'like') newLikes++; else newDislikes++; } btn.parentElement.querySelector('[data-type="like"] .count').textContent = newLikes; btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = newDislikes; try { const res = await fetch('/api/reactions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postId, type, userId }) }); if (!res.ok) throw new Error('Failed to update reaction'); const data = await res.json(); btn.parentElement.querySelector('[data-type="like"] .count').textContent = data.likes || 0; btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = data.dislikes || 0; const likeBtn = btn.parentElement.querySelector('[data-type="like"]'); const dislikeBtn = btn.parentElement.querySelector('[data-type="dislike"]'); likeBtn.classList.toggle('active', data.userReaction === 'like'); dislikeBtn.classList.toggle('active', data.userReaction === 'dislike'); } catch (error) { console.error('Reaction error:', error); } }
+    let allNews = []; let isLoading = false; let hasMore = true; let currentOffset = 0; const LIMIT = 10;
+    function renderNews() { const feed = document.getElementById('feed'); const filtered = allNews.filter(n => (n.category || 'all') !== 'reco'); const userId = getUserId(); if (!filtered.length && !hasMore) { feed.innerHTML = '<div class="no-news">Пока нет новостей! Отправьте первую новость боту.</div>'; return; } const cardsHtml = filtered.map(n => { const ts = n.timestamp || n.createdAt || null; let html = '<div class="card">'; html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`; const media = n.media || []; const mediaItems = media.filter(m => m && m.fileId && (m.type === 'photo' || m.type === 'video')); if (mediaItems.length > 0) { html += '<div class="card-media-scroll">'; mediaItems.forEach(item => { const mediaUrl = `/api/media?fileId=${encodeURIComponent(item.fileId)}`; if (item.type === 'photo') { html += `<img src="${mediaUrl}" loading="lazy" alt="Фото" onerror="this.style.display='none'"/>`; } else if (item.type === 'video') { html += `<video controls preload="metadata" playsinline onerror="this.style.display='none'"><source src="${mediaUrl}" type="video/mp4">Ваш браузер не поддерживает видео.</video>`; } }); html += '</div>'; } html += `<div class="card-text">${formatText(n)}</div>`; const likes = n.likes || 0; const dislikes = n.dislikes || 0; const userReaction = n.userReactions?.[userId] || null; html += '<div class="card-reactions">'; html += `<div class="reaction-btn ${userReaction === 'like' ? 'active' : ''}" data-type="like" onclick="handleReaction(${n.id}, 'like', event)"><span class="emoji">👍</span><span class="count">${likes}</span></div>`; html += `<div class="reaction-btn ${userReaction === 'dislike' ? 'active' : ''}" data-type="dislike" onclick="handleReaction(${n.id}, 'dislike', event)"><span class="emoji">👎</span><span class="count">${dislikes}</span></div>`; html += '</div></div>'; return html; }).join(''); let loadMoreHtml = ''; if (hasMore) { loadMoreHtml = `<div class="load-more"><button class="load-more-btn" onclick="loadMore()" ${isLoading ? 'disabled' : ''}>${isLoading ? 'Загрузка...' : 'Загрузить ещё'}</button></div>`; } feed.innerHTML = cardsHtml + loadMoreHtml; }
+    async function loadNews({ append = false } = {}) { if (isLoading) return; isLoading = true; if (!append) renderNews(); try { const url = `/api/news?limit=${LIMIT}&offset=${currentOffset}&t=${Date.now()}`; const res = await fetch(url, { cache: 'no-store', headers: { 'Accept': 'application/json' } }); if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`); const data = await res.json(); const newPosts = Array.isArray(data.posts) ? data.posts : []; if (append) allNews = [...allNews, ...newPosts]; else allNews = newPosts; hasMore = data.hasMore || false; currentOffset = allNews.length; renderNews(); } catch (e) { console.error('Failed to load news:', e); if (!allNews.length) { document.getElementById('feed').innerHTML = `<div class="error-msg">Ошибка загрузки новостей: ${escapeHtml(e.message)}<br><br><button onclick="loadNews()" style="padding:8px 16px;border-radius:8px;border:none;background:#007aff;color:#fff;cursor:pointer;">Повторить</button></div>`; } } finally { isLoading = false; } }
     async function loadMore() { await loadNews({ append: true }); }
-    setInterval(async () => {
-      if (document.visibilityState === 'visible' && !isLoading) {
-        const url = `/api/news?limit=${LIMIT}&offset=0&t=${Date.now()}`;
-        try {
-          const res = await fetch(url, { cache: 'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            const newPosts = Array.isArray(data.posts) ? data.posts : [];
-            if (newPosts.length > 0) {
-              const hasChanges = newPosts[0].id !== allNews[0]?.id || newPosts.length !== allNews.slice(0, LIMIT).length;
-              if (hasChanges) { console.log('[AUTO-REFRESH] New content detected, reloading...'); currentOffset = 0; await loadNews(); }
-            }
-          }
-        } catch (e) { console.error('Auto-refresh failed:', e); }
-      }
-    }, 3000);
-    initTheme();
-    loadNews();
+    setInterval(async () => { if (document.visibilityState === 'visible' && !isLoading) { const url = `/api/news?limit=${LIMIT}&offset=0&t=${Date.now()}`; try { const res = await fetch(url, { cache: 'no-store' }); if (res.ok) { const data = await res.json(); const newPosts = Array.isArray(data.posts) ? data.posts : []; if (newPosts.length > 0) { const hasChanges = newPosts[0].id !== allNews[0]?.id || newPosts.length !== allNews.slice(0, LIMIT).length; if (hasChanges) { console.log('[AUTO-REFRESH] New content detected, reloading...'); currentOffset = 0; await loadNews(); } } } } catch (e) { console.error('Auto-refresh failed:', e); } } }, 3000);
+    initTheme(); loadNews();
   </script>
 </body>
 </html>
