@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Рекомендации - Агрегатор для района</title>
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f0f2f5;
@@ -20,13 +15,7 @@
             display: flex;
             flex-direction: column;
         }
-        
-        body[data-theme="dark"] {
-            background: #0e0e0e;
-            color: #fff;
-        }
-        
-        /* Header */
+        body[data-theme="dark"] { background: #0e0e0e; color: #fff; }
         .header {
             position: fixed;
             top: calc(12px + env(safe-area-inset-top));
@@ -39,310 +28,33 @@
             padding: 14px 18px;
             border-radius: 20px;
         }
-        
-        .logo-wrap {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: inherit;
-        }
-        
-        .logo-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            transition: transform 0.3s;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        .logo-img:hover {
-            transform: scale(1.1) rotate(5deg);
-        }
-        
-        h3 {
-            font-size: 17px;
-            font-weight: 600;
-            margin: 0;
-        }
-        
-        .subtitle {
-            font-size: 12px;
-            color: #666;
-            margin-top: 3px;
-        }
-        
-        body[data-theme="dark"] .subtitle {
-            color: #999;
-        }
-        
-        .theme-toggle {
-            background: transparent;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: transform 0.3s, background 0.2s;
-        }
-        
-        .theme-toggle:hover {
-            transform: scale(1.15) rotate(15deg);
-            background: rgba(0, 0, 0, 0.05);
-        }
-        
-        body[data-theme="dark"] .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        
-        /* Main Content */
-        .content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: calc(80px + env(safe-area-inset-top)) 20px calc(90px + env(safe-area-inset-bottom)) 20px;
-        }
-        
-        .construction-box {
-            text-align: center;
-            max-width: 500px;
-            padding: 40px 30px;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        body[data-theme="dark"] .construction-box {
-            background: #1e1e1e;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        }
-        
-        .construction-box.hidden {
-            display: none;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .construction-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            animation: bounce 2s ease-in-out infinite;
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .construction-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #1a1a1a;
-        }
-        
-        body[data-theme="dark"] .construction-title {
-            color: #fff;
-        }
-        
-        .construction-text {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #666;
-            margin-bottom: 24px;
-        }
-        
-        body[data-theme="dark"] .construction-text {
-            color: #999;
-        }
-        
-        .construction-features {
-            text-align: left;
-            margin: 30px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 16px;
-        }
-        
-        body[data-theme="dark"] .construction-features {
-            background: #2a2a2a;
-        }
-        
-        .construction-features h4 {
-            font-size: 18px;
-            margin-bottom: 12px;
-            color: #007aff;
-        }
-        
-        body[data-theme="dark"] .construction-features h4 {
-            color: #0a84ff;
-        }
-        
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .feature-list li {
-            padding: 8px 0;
-            color: #555;
-            font-size: 15px;
-        }
-        
-        body[data-theme="dark"] .feature-list li {
-            color: #aaa;
-        }
-        
-        .feature-list li:before {
-            content: "✓ ";
-            color: #34c759;
-            font-weight: bold;
-            margin-right: 8px;
-        }
-        
-        .contact-link {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #007aff;
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 500;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .contact-link:hover {
-            background: #0051d5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
-        }
-        
-        body[data-theme="dark"] .contact-link {
-            background: #0a84ff;
-        }
-        
-        /* Unlock Modal */
-        .unlock-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 2000;
-            backdrop-filter: blur(10px);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .unlock-modal.active {
-            display: flex;
-        }
-        
-        .unlock-content {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        body[data-theme="dark"] .unlock-content {
-            background: #1e1e1e;
-        }
-        
-        .unlock-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        
-        .unlock-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-            margin-bottom: 16px;
-        }
-        
-        body[data-theme="dark"] .unlock-input {
-            background: #2a2a2a;
-            border-color: #444;
-            color: #fff;
-        }
-        
-        .unlock-input:focus {
-            border-color: #007aff;
-        }
-        
-        .unlock-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .unlock-btn {
-            flex: 1;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .unlock-btn-primary {
-            background: #007aff;
-            color: white;
-        }
-        
-        .unlock-btn-primary:hover {
-            background: #0051d5;
-            transform: translateY(-2px);
-        }
-        
-        .unlock-btn-secondary {
-            background: #f0f2f5;
-            color: #333;
-        }
-        
-        body[data-theme="dark"] .unlock-btn-secondary {
-            background: #2a2a2a;
-            color: #ccc;
-        }
-        
-        .unlock-error {
-            color: #ff3b30;
-            font-size: 13px;
-            margin-top: -10px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        /* Navigation */
+        .logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+        .logo-img { width: 40px; height: 40px; border-radius: 10px; transition: transform 0.3s; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        .logo-img:hover { transform: scale(1.1) rotate(5deg); }
+        h3 { font-size: 17px; font-weight: 600; margin: 0; }
+        .subtitle { font-size: 12px; color: #666; margin-top: 3px; }
+        body[data-theme="dark"] .subtitle { color: #999; }
+        .theme-toggle { background: transparent; border: none; font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%; transition: transform 0.3s, background 0.2s; }
+        .theme-toggle:hover { transform: scale(1.15) rotate(15deg); background: rgba(0, 0, 0, 0.05); }
+        body[data-theme="dark"] .theme-toggle:hover { background: rgba(255, 255, 255, 0.08); }
+        .content { flex: 1; display: flex; align-items: center; justify-content: center; padding: calc(80px + env(safe-area-inset-top)) 20px calc(90px + env(safe-area-inset-bottom)) 20px; }
+        .construction-box { text-align: center; max-width: 500px; padding: 40px 30px; background: white; border-radius: 24px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); animation: fadeIn 0.6s ease-out; }
+        body[data-theme="dark"] .construction-box { background: #1e1e1e; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .construction-icon { font-size: 80px; margin-bottom: 20px; animation: bounce 2s ease-in-out infinite; cursor: pointer; user-select: none; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .construction-title { font-size: 28px; font-weight: 700; margin-bottom: 16px; }
+        .construction-text { font-size: 16px; line-height: 1.6; color: #666; margin-bottom: 24px; }
+        body[data-theme="dark"] .construction-text { color: #999; }
+        .construction-features { text-align: left; margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 16px; }
+        body[data-theme="dark"] .construction-features { background: #2a2a2a; }
+        .construction-features h4 { font-size: 18px; margin-bottom: 12px; color: #007aff; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li { padding: 8px 0; color: #555; font-size: 15px; }
+        body[data-theme="dark"] .feature-list li { color: #aaa; }
+        .feature-list li:before { content: "✓ "; color: #34c759; font-weight: bold; margin-right: 8px; }
+        .contact-link { display: inline-block; padding: 12px 30px; background: #007aff; color: white; text-decoration: none; border-radius: 12px; font-weight: 500; transition: all 0.3s; margin-top: 10px; }
+        .contact-link:hover { background: #0051d5; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4); }
         .nav {
             position: fixed;
             bottom: calc(12px + env(safe-area-inset-bottom));
@@ -354,22 +66,14 @@
             padding: 10px;
             border-radius: 22px;
         }
-        
-        .nav-inner {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            width: 100%;
-            max-width: 600px;
-        }
-        
+        .nav-inner { display: flex; gap: 6px; justify-content: center; width: 100%; max-width: 600px; }
         .nav-btn {
             background: rgba(255, 255, 255, 0.6);
             border: 1px solid rgba(0, 0, 0, 0.12);
-            padding: 11px 24px;
+            padding: 10px 18px;
             border-radius: 18px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
             transition: all 0.3s;
             color: #333;
@@ -377,111 +81,43 @@
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
-        
-        body[data-theme="dark"] .nav-btn {
-            background: rgba(50, 50, 50, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: #ccc;
-        }
-        
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.9);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-        }
-        
-        body[data-theme="dark"] .nav-btn:hover {
-            background: rgba(70, 70, 70, 0.9);
-        }
-        
-        .nav-btn.active {
-            background: #007aff;
-            color: #fff;
-            border-color: #007aff;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
-        }
-        
-        body[data-theme="dark"] .nav-btn.active {
-            background: #0a84ff;
-            border-color: #0a84ff;
-        }
-        
-        /* Liquid Glass Effect */
-        .liquid-glass {
-            backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
-            -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
-        }
-        
-        .header.liquid-glass {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.5);
-        }
-        
-        body[data-theme="dark"] .header.liquid-glass {
-            background: rgba(20, 20, 20, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.15);
-        }
-        
-        .nav.liquid-glass {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
-        }
-        
-        body[data-theme="dark"] .nav.liquid-glass {
-            background: rgba(20, 20, 20, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
-        }
-        
-        @media (max-width: 550px) {
-            .nav-btn .nav-text {
-                display: none;
-            }
-            .nav-btn {
-                padding: 11px 16px;
-            }
-            .construction-box {
-                padding: 30px 20px;
-            }
-            .construction-icon {
-                font-size: 60px;
-            }
-            .construction-title {
-                font-size: 24px;
-            }
+        body[data-theme="dark"] .nav-btn { background: rgba(50, 50, 50, 0.6); border: 1px solid rgba(255, 255, 255, 0.18); color: #ccc; }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.9); transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); }
+        body[data-theme="dark"] .nav-btn:hover { background: rgba(70, 70, 70, 0.9); }
+        .nav-btn.active { background: #007aff; color: #fff; border-color: #007aff; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4); }
+        body[data-theme="dark"] .nav-btn.active { background: #0a84ff; border-color: #0a84ff; }
+        .nav-btn .nav-emoji { font-size: 18px; }
+        .nav-btn.profile-btn .nav-text { display: none; }
+        .liquid-glass { backdrop-filter: blur(20px) saturate(180%) brightness(1.1); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1); }
+        .header.liquid-glass { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.5); }
+        body[data-theme="dark"] .header.liquid-glass { background: rgba(20, 20, 20, 0.7); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.15); }
+        .nav.liquid-glass { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12); }
+        body[data-theme="dark"] .nav.liquid-glass { background: rgba(20, 20, 20, 0.7); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4); }
+        @media (max-width: 650px) {
+            .nav-btn:not(.profile-btn) .nav-text { display: none; }
+            .nav-btn { padding: 10px 14px; }
+            .construction-box { padding: 30px 20px; }
+            .construction-icon { font-size: 60px; }
+            .construction-title { font-size: 24px; }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header liquid-glass">
         <a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener">
             <img class="logo-img" src="logo.png" alt="Лого" />
-            <div>
-                <h3>Агрегатор для района</h3>
-                <div class="subtitle">Рекомендации</div>
-            </div>
+            <div><h3>Агрегатор для района</h3><div class="subtitle">Рекомендации</div></div>
         </a>
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
-            <span id="theme-icon">🌙</span>
-        </button>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button>
     </header>
 
-    <!-- Main Content -->
     <main class="content">
-        <div class="construction-box" id="constructionBox">
-            <div class="construction-icon" id="unlockTrigger" onclick="handleIconClick()">🚧</div>
+        <div class="construction-box">
+            <div class="construction-icon">🚀</div>
             <h1 class="construction-title">Раздел в разработке</h1>
-            <p class="construction-text">
-                Мы работаем над созданием уникального раздела с рекомендациями от жителей района. 
-                Скоро здесь появится что-то особенное!
-            </p>
-            
+            <p class="construction-text">Мы работаем над созданием уникального раздела с рекомендациями от жителей района. Скоро здесь появится что-то особенное!</p>
             <div class="construction-features">
                 <h4>🌟 Что вас ждёт:</h4>
                 <ul class="feature-list">
@@ -491,53 +127,21 @@
                     <li>Отзывы и рейтинги от соседей</li>
                 </ul>
             </div>
-            
-            <p class="construction-text">
-                Есть идеи или предложения? Напишите нам!
-            </p>
-            
-            <a href="https://t.me/ispanskie_msk" target="_blank" rel="noopener" class="contact-link">
-                💬 Связаться с нами
-            </a>
+            <p class="construction-text">Есть идеи или предложения? Напишите нам!</p>
+            <a href="https://t.me/ispanskie_msk" target="_blank" rel="noopener" class="contact-link">💬 Связаться с нами</a>
         </div>
     </main>
 
-    <!-- Unlock Modal -->
-    <div class="unlock-modal" id="unlockModal">
-        <div class="unlock-content">
-            <h2 class="unlock-title">🔓 Разблокировать страницу</h2>
-            <p class="construction-text" style="margin-bottom: 16px; font-size: 14px;">
-                Введите ключ доступа
-            </p>
-            <input type="password" class="unlock-input" id="unlockInput" placeholder="Business Key">
-            <div class="unlock-error" id="unlockError"></div>
-            <div class="unlock-actions">
-                <button class="unlock-btn unlock-btn-primary" onclick="checkUnlockKey()">Продолжить</button>
-                <button class="unlock-btn unlock-btn-secondary" onclick="closeUnlockModal()">Отмена</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Navigation -->
     <nav class="nav liquid-glass">
         <div class="nav-inner">
-            <a href="news.html" class="nav-btn">
-                <span>📰</span>
-                <span class="nav-text"> Новости</span>
-            </a>
-            <a href="business.html" class="nav-btn">
-                <span>💼</span>
-                <span class="nav-text"> Бизнес</span>
-            </a>
-            <a href="recommendations.html" class="nav-btn active">
-                <span>⭐</span>
-                <span class="nav-text"> Рекомендации</span>
-            </a>
+            <a href="news.html" class="nav-btn"><span class="nav-emoji">📰</span> <span class="nav-text">Новости</span></a>
+            <a href="business.html" class="nav-btn"><span class="nav-emoji">💼</span> <span class="nav-text">Бизнес</span></a>
+            <a href="recommendations.html" class="nav-btn active"><span class="nav-emoji">⭐</span> <span class="nav-text">Рекоменд.</span></a>
+            <a href="profile.html" class="nav-btn profile-btn"><span class="nav-emoji">👤</span> <span class="nav-text">Профиль</span></a>
         </div>
     </nav>
 
     <script>
-        // Theme Management
         function toggleTheme() {
             const body = document.body;
             const icon = document.getElementById('theme-icon');
@@ -546,116 +150,13 @@
             icon.textContent = isDark ? '🌙' : '☀️';
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
-
         function initTheme() {
             const saved = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const useDark = saved === 'dark' || (!saved && prefersDark);
-            if (useDark) {
-                document.body.setAttribute('data-theme', 'dark');
-                document.getElementById('theme-icon').textContent = '☀️';
-            }
+            if (useDark) { document.body.setAttribute('data-theme', 'dark'); document.getElementById('theme-icon').textContent = '☀️'; }
         }
-
-        // Hidden unlock feature
-        let clickCount = 0;
-        let clickTimer = null;
-
-        function handleIconClick() {
-            clickCount++;
-            
-            if (clickTimer) clearTimeout(clickTimer);
-            
-            if (clickCount >= 3) {
-                clickCount = 0;
-                openUnlockModal();
-            } else {
-                clickTimer = setTimeout(() => {
-                    clickCount = 0;
-                }, 800);
-            }
-        }
-
-        function openUnlockModal() {
-            document.getElementById('unlockModal').classList.add('active');
-            document.getElementById('unlockInput').focus();
-            
-            // Load saved key if exists
-            const savedKey = localStorage.getItem('businessAdminKey');
-            if (savedKey) {
-                document.getElementById('unlockInput').value = savedKey;
-            }
-        }
-
-        function closeUnlockModal() {
-            document.getElementById('unlockModal').classList.remove('active');
-            document.getElementById('unlockInput').value = '';
-            document.getElementById('unlockError').textContent = '';
-        }
-
-        async function checkUnlockKey() {
-            const key = document.getElementById('unlockInput').value;
-            const errorEl = document.getElementById('unlockError');
-            
-            if (!key) {
-                errorEl.textContent = 'Введите ключ';
-                return;
-            }
-
-            // Проверяем ключ через API businesses
-            try {
-                const testData = {
-                    secret: key,
-                    name: '__test__',
-                    category: 'test',
-                    lat: 0,
-                    lng: 0
-                };
-
-                const res = await fetch('/api/businesses', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(testData)
-                });
-
-                // Если вернулось 400 с ошибкой secret - ключ неверный
-                const result = await res.json();
-                
-                if (res.ok) {
-                    // Ключ верный, сохраняем
-                    localStorage.setItem('businessAdminKey', key);
-                    localStorage.setItem('recommendationsUnlocked', 'true');
-                    document.getElementById('constructionBox').classList.add('hidden');
-                    closeUnlockModal();
-                } else if (result.error && result.error.toLowerCase().includes('secret')) {
-                    errorEl.textContent = 'Неверный ключ';
-                } else {
-                    errorEl.textContent = 'Ошибка проверки';
-                }
-            } catch (err) {
-                console.error('Unlock error:', err);
-                errorEl.textContent = 'Ошибка связи с сервером';
-            }
-        }
-
-        // Check if already unlocked
-        function checkUnlocked() {
-            const isUnlocked = localStorage.getItem('recommendationsUnlocked') === 'true';
-            if (isUnlocked) {
-                document.getElementById('constructionBox').classList.add('hidden');
-            }
-        }
-
-        // Enter key support
-        document.getElementById('unlockInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                checkUnlockKey();
-            }
-        });
-
-        // Initialize
         initTheme();
-        checkUnlocked();
     </script>
 </body>
 </html>
