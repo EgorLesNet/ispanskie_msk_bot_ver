@@ -36,7 +36,7 @@
         .fab:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0, 122, 255, 0.6); }
         body[data-theme="dark"] .fab { background: #0a84ff; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
+        .modal.active { display: flex !important; }
         .modal-content { background: white; border-radius: 24px; padding: 30px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
         body[data-theme="dark"] .modal-content { background: #1e1e1e; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -114,11 +114,110 @@
 </head>
 <body>
     <header class="header liquid-glass"><a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener"><img class="logo-img" src="logo.png" alt="Лого" /><div><h3>Агрегатор для района</h3><div class="subtitle">Карта бизнеса</div></div></a><div class="header-actions"><img id="userAvatar" class="user-avatar" style="display: none;" onclick="window.location.href='profile.html'" /><button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button></div></header>
-    <div class="search-container"><input type="text" class="search-input liquid-glass" id="searchInput" placeholder="🔍 Поиск бизнеса..."><select class="category-select liquid-glass" id="categoryFilter"><option value="">Все категории</option><option value="Кафе/Рестораны">Кафе/Рестораны</option><option value="Магазины">Магазины</option><option value="Услуги">Услуги</option><option value="Дети">Дети</option><option value="Другое">Другое</option></select></div>
+    <div class="search-container">
+        <input type="text" class="search-input liquid-glass" id="searchInput" placeholder="🔍 Поиск бизнеса...">
+        <select class="category-select liquid-glass" id="categoryFilter">
+            <option value="">Все категории</option>
+            <option value="Кафе/Рестораны">🍽️ Кафе/Рестораны</option>
+            <option value="Магазины продуктов">🛒 Магазины продуктов</option>
+            <option value="Аптеки">💊 Аптеки</option>
+            <option value="Салоны красоты">💅 Салоны красоты</option>
+            <option value="Фитнес/Спорт">🏋️ Фитнес/Спорт</option>
+            <option value="Медицина">🏥 Медицина</option>
+            <option value="Детские центры">👶 Детские центры</option>
+            <option value="Образование">📚 Образование</option>
+            <option value="Ремонт">🔧 Ремонт</option>
+            <option value="Автосервисы">🚗 Автосервисы</option>
+            <option value="Химчистка/Прачечная">🧺 Химчистка/Прачечная</option>
+            <option value="Доставка еды">🍕 Доставка еды</option>
+            <option value="Парикмахерские">💇 Парикмахерские</option>
+            <option value="Банки/Банкоматы">🏦 Банки/Банкоматы</option>
+            <option value="Другое">📦 Другое</option>
+        </select>
+    </div>
     <div class="map-container"><div id="map"></div></div>
     <button class="fab" onclick="openModal()" aria-label="Добавить бизнес">+</button>
-    <div id="addBusinessModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Добавить бизнес</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><form id="addBusinessForm"><div class="form-group"><label>Название *</label><input type="text" id="name" required></div><div class="form-group"><label>Категория *</label><select id="category" required><option value="">Выберите категорию</option><option value="Кафе/Рестораны">Кафе/Рестораны</option><option value="Магазины">Магазины</option><option value="Услуги">Услуги</option><option value="Дети">Дети</option><option value="Другое">Другое</option></select></div><div class="form-group"><label>Описание</label><textarea id="description"></textarea></div><div class="form-group"><label>Адрес</label><input type="text" id="address"></div><div class="form-group"><label>Сайт/Ссылка</label><input type="url" id="url"></div><div class="form-group"><label>Координаты (нажмите на карте)</label><input type="text" id="coordinates" readonly></div><div class="form-group"><label>Секретный ключ *</label><input type="password" id="secret" required placeholder="Получите у администратора"></div><div class="form-actions"><button type="submit" class="btn btn-primary">Добавить</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button></div></form></div></div>
-    <div id="reviewsModal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="reviewsBusinessName">Отзывы</h2><button class="close-btn" onclick="closeReviewsModal()">&times;</button></div><div class="reviews-section"><div class="reviews-header"><h3>Отзывы <span id="reviewCount">(0)</span></h3><button class="add-review-btn" onclick="showAddReviewForm()">Добавить</button></div><div id="reviewsList"></div><div id="authPrompt" class="auth-prompt" style="display: none;"><p>Для добавления отзыва необходимо войти через Telegram</p><button class="btn btn-primary" onclick="window.location.href='profile.html'">Войти через Telegram</button></div><div id="addReviewForm" style="display: none;"><h3 style="margin-bottom: 16px; font-size: 16px;">Ваш отзыв</h3><div class="form-group"><label>Оценка *</label><div class="star-rating" id="starRating"><span class="star inactive" data-rating="1">★</span><span class="star inactive" data-rating="2">★</span><span class="star inactive" data-rating="3">★</span><span class="star inactive" data-rating="4">★</span><span class="star inactive" data-rating="5">★</span></div></div><div class="form-group"><label>Комментарий</label><textarea id="reviewComment" placeholder="Расскажите о вашем опыте..."></textarea></div><div class="form-actions"><button type="button" class="btn btn-primary" onclick="submitReview()">Отправить</button><button type="button" class="btn btn-secondary" onclick="hideAddReviewForm()">Отмена</button></div></div></div></div></div>
+    <div id="addBusinessModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Добавить бизнес</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="addBusinessForm">
+                <div class="form-group"><label>Название *</label><input type="text" id="name" required></div>
+                <div class="form-group">
+                    <label>Категория *</label>
+                    <select id="category" required>
+                        <option value="">Выберите категорию</option>
+                        <option value="Кафе/Рестораны">🍽️ Кафе/Рестораны</option>
+                        <option value="Магазины продуктов">🛒 Магазины продуктов</option>
+                        <option value="Аптеки">💊 Аптеки</option>
+                        <option value="Салоны красоты">💅 Салоны красоты</option>
+                        <option value="Фитнес/Спорт">🏋️ Фитнес/Спорт</option>
+                        <option value="Медицина">🏥 Медицина</option>
+                        <option value="Детские центры">👶 Детские центры</option>
+                        <option value="Образование">📚 Образование</option>
+                        <option value="Ремонт">🔧 Ремонт</option>
+                        <option value="Автосервисы">🚗 Автосервисы</option>
+                        <option value="Химчистка/Прачечная">🧺 Химчистка/Прачечная</option>
+                        <option value="Доставка еды">🍕 Доставка еды</option>
+                        <option value="Парикмахерские">💇 Парикмахерские</option>
+                        <option value="Банки/Банкоматы">🏦 Банки/Банкоматы</option>
+                        <option value="Другое">📦 Другое</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Описание</label><textarea id="description"></textarea></div>
+                <div class="form-group"><label>Адрес</label><input type="text" id="address"></div>
+                <div class="form-group"><label>Сайт/Ссылка</label><input type="url" id="url"></div>
+                <div class="form-group"><label>Координаты (нажмите на карте)</label><input type="text" id="coordinates" readonly></div>
+                <div class="form-group"><label>Секретный ключ *</label><input type="password" id="secret" required placeholder="Получите у администратора"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="reviewsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="reviewsBusinessName">Отзывы</h2>
+                <button class="close-btn" onclick="closeReviewsModal()">&times;</button>
+            </div>
+            <div class="reviews-section">
+                <div class="reviews-header">
+                    <h3>Отзывы <span id="reviewCount">(0)</span></h3>
+                    <button class="add-review-btn" onclick="showAddReviewForm()">Добавить</button>
+                </div>
+                <div id="reviewsList"></div>
+                <div id="authPrompt" class="auth-prompt" style="display: none;">
+                    <p>Для добавления отзыва необходимо войти через Telegram</p>
+                    <button class="btn btn-primary" onclick="window.location.href='profile.html'">Войти через Telegram</button>
+                </div>
+                <div id="addReviewForm" style="display: none;">
+                    <h3 style="margin-bottom: 16px; font-size: 16px;">Ваш отзыв</h3>
+                    <div class="form-group">
+                        <label>Оценка *</label>
+                        <div class="star-rating" id="starRating">
+                            <span class="star inactive" data-rating="1">★</span>
+                            <span class="star inactive" data-rating="2">★</span>
+                            <span class="star inactive" data-rating="3">★</span>
+                            <span class="star inactive" data-rating="4">★</span>
+                            <span class="star inactive" data-rating="5">★</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Комментарий</label>
+                        <textarea id="reviewComment" placeholder="Расскажите о вашем опыте..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="submitReview()">Отправить</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddReviewForm()">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <nav class="nav"><div class="nav-block left"><a href="news.html" class="nav-btn"><span class="nav-emoji">📰</span><span class="nav-label">Новости</span></a><a href="business.html" class="nav-btn active"><span class="nav-emoji">💼</span><span class="nav-label">Бизнес</span></a><a href="recommendations.html" class="nav-btn"><span class="nav-emoji">⭐</span><span class="nav-label">Рекоменд.</span></a></div><div class="nav-block right"><a href="profile.html" class="nav-btn"><span class="nav-emoji">👤</span><span class="nav-label">Профиль</span></a></div></nav>
     <script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
     <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
@@ -134,7 +233,42 @@
         let selectedCoords = null; let tempMarker = null; let allBusinesses = []; let markers = []; let currentBusinessId = null; let currentRating = 0;
         map.on('click', function(e) { selectedCoords = e.latlng; document.getElementById('coordinates').value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`; if (tempMarker) map.removeLayer(tempMarker); tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41]})}).addTo(map); if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); });
         async function loadBusinesses() { try { const res = await fetch('/api/businesses'); const data = await res.json(); allBusinesses = data.businesses || []; displayBusinesses(allBusinesses); } catch (err) { console.error('Ошибка загрузки бизнесов:', err); } }
-        function displayBusinesses(businesses) { markers.forEach(m => map.removeLayer(m)); markers = []; businesses.forEach(biz => { const marker = L.marker([biz.lat, biz.lng]).addTo(map); const popupContent = `<div class="business-popup"><h3>${escapeHtml(biz.name)}</h3><div class="category">${escapeHtml(biz.category)}</div>${biz.avgRating ? `<div class="rating">⭐ ${biz.avgRating} (${biz.reviewCount} отзывов)</div>` : ''}${biz.description ? `<div class="description">${escapeHtml(biz.description)}</div>` : ''}${biz.address ? `<div class="address">📍 ${escapeHtml(biz.address)}</div>` : ''}${biz.url ? `<div><a href="${escapeHtml(biz.url)}" target="_blank">Перейти →</a></div>` : ''}<a class="view-reviews-btn" onclick="openReviewsModal(${biz.id}, '${escapeHtml(biz.name).replace(/'/g, "\\'")}')">📝 Отзывы</a></div>`; marker.bindPopup(popupContent); markers.push(marker); }); }
+        
+        // FIX: Create button element for review modal opener
+        function createReviewButton(bizId, bizName) {
+            const btn = document.createElement('button');
+            btn.className = 'view-reviews-btn';
+            btn.textContent = '📝 Отзывы';
+            btn.style.cssText = 'display: inline-block; margin-top: 8px; padding: 6px 12px; background: #007aff; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer;';
+            btn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openReviewsModal(bizId, bizName);
+            };
+            return btn;
+        }
+        
+        function displayBusinesses(businesses) { 
+            markers.forEach(m => map.removeLayer(m)); 
+            markers = []; 
+            businesses.forEach(biz => { 
+                const marker = L.marker([biz.lat, biz.lng]).addTo(map); 
+                const popupDiv = document.createElement('div');
+                popupDiv.className = 'business-popup';
+                popupDiv.innerHTML = `
+                    <h3>${escapeHtml(biz.name)}</h3>
+                    <div class="category">${escapeHtml(biz.category)}</div>
+                    ${biz.avgRating ? `<div class="rating">⭐ ${biz.avgRating} (${biz.reviewCount} отзывов)</div>` : ''}
+                    ${biz.description ? `<div class="description">${escapeHtml(biz.description)}</div>` : ''}
+                    ${biz.address ? `<div class="address">📍 ${escapeHtml(biz.address)}</div>` : ''}
+                    ${biz.url ? `<div><a href="${escapeHtml(biz.url)}" target="_blank">Перейти →</a></div>` : ''}
+                `;
+                popupDiv.appendChild(createReviewButton(biz.id, biz.name));
+                marker.bindPopup(popupDiv);
+                markers.push(marker); 
+            }); 
+        }
+        
         function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
         const searchInput = document.getElementById('searchInput'); const categoryFilter = document.getElementById('categoryFilter');
         function filterBusinesses() { const searchTerm = searchInput.value.toLowerCase(); const selectedCategory = categoryFilter.value; const filtered = allBusinesses.filter(biz => { const matchesSearch = !searchTerm || biz.name.toLowerCase().includes(searchTerm) || (biz.description && biz.description.toLowerCase().includes(searchTerm)) || (biz.address && biz.address.toLowerCase().includes(searchTerm)); const matchesCategory = !selectedCategory || biz.category === selectedCategory; return matchesSearch && matchesCategory; }); displayBusinesses(filtered); }
@@ -142,14 +276,14 @@
         function openModal() { document.getElementById('addBusinessModal').classList.add('active'); const savedSecret = localStorage.getItem('businessAdminKey'); if (savedSecret) { document.getElementById('secret').value = savedSecret; } if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); }
         function closeModal() { document.getElementById('addBusinessModal').classList.remove('active'); document.getElementById('addBusinessForm').reset(); if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } selectedCoords = null; }
         document.getElementById('addBusinessForm').addEventListener('submit', async (e) => { e.preventDefault(); if (!selectedCoords) { alert('Пожалуйста, выберите место на карте'); return; } const secretKey = document.getElementById('secret').value; const data = {secret: secretKey, name: document.getElementById('name').value, category: document.getElementById('category').value, description: document.getElementById('description').value, address: document.getElementById('address').value, url: document.getElementById('url').value, lat: selectedCoords.lat, lng: selectedCoords.lng}; try { const res = await fetch('/api/businesses', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)}); const result = await res.json(); if (res.ok) { localStorage.setItem('businessAdminKey', secretKey); alert('Бизнес успешно добавлен!'); closeModal(); window.location.reload(); } else { alert('Ошибка: ' + (result.error || 'Неизвестная ошибка')); } } catch (err) { alert('Ошибка сети: ' + err.message); } });
-        async function openReviewsModal(businessId, businessName) { currentBusinessId = businessId; document.getElementById('reviewsBusinessName').textContent = businessName; document.getElementById('reviewsModal').classList.add('active'); document.getElementById('addReviewForm').style.display = 'none'; document.getElementById('authPrompt').style.display = 'none'; await loadReviews(); }
+        async function openReviewsModal(businessId, businessName) { currentBusinessId = businessId; document.getElementById('reviewsBusinessName').textContent = businessName; document.getElementById('reviewsModal').classList.add('active'); document.getElementById('addReviewForm').style.display = 'none'; document.getElementById('authPrompt').style.display = 'none'; await loadReviews(); if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); }
         function closeReviewsModal() { document.getElementById('reviewsModal').classList.remove('active'); currentBusinessId = null; currentRating = 0; }
         async function loadReviews() { if (!currentBusinessId) return; try { const userTgId = currentUser ? currentUser.tgId : null; const res = await fetch(`/api/reviews?businessId=${currentBusinessId}${userTgId ? '&userTgId=' + userTgId : ''}`); const data = await res.json(); const reviewsList = document.getElementById('reviewsList'); document.getElementById('reviewCount').textContent = `(${data.reviewCount})`; if (data.reviews.length === 0) { reviewsList.innerHTML = '<div class="no-reviews">Пока нет отзывов. Будьте первым!</div>'; return; } reviewsList.innerHTML = data.reviews.map(review => { const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating); const date = new Date(review.createdAt).toLocaleDateString('ru-RU'); const ownClass = review.isOwn ? ' own-review' : ''; return `<div class="review-item${ownClass}"><div class="review-header"><span class="review-author">${review.photoUrl ? `<img src="${escapeHtml(review.photoUrl)}" alt="">` : ''}${escapeHtml(review.userName)}${review.isOwn ? ' (вы)' : ''}</span><span class="review-rating">${stars}</span></div>${review.comment ? `<div class="review-comment">${escapeHtml(review.comment)}</div>` : ''}<div class="review-date">${date}</div></div>`; }).join(''); } catch (err) { console.error('Ошибка загрузки отзывов:', err); document.getElementById('reviewsList').innerHTML = '<div class="no-reviews">Ошибка загрузки отзывов</div>'; } }
-        function showAddReviewForm() { if (!currentUser) { document.getElementById('authPrompt').style.display = 'block'; return; } document.getElementById('addReviewForm').style.display = 'block'; }
+        function showAddReviewForm() { if (!currentUser) { document.getElementById('authPrompt').style.display = 'block'; return; } document.getElementById('addReviewForm').style.display = 'block'; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
         function hideAddReviewForm() { document.getElementById('addReviewForm').style.display = 'none'; document.getElementById('reviewComment').value = ''; currentRating = 0; updateStars(); }
         document.querySelectorAll('#starRating .star').forEach(star => { star.addEventListener('click', function() { currentRating = parseInt(this.getAttribute('data-rating')); updateStars(); if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }); });
         function updateStars() { document.querySelectorAll('#starRating .star').forEach(star => { const rating = parseInt(star.getAttribute('data-rating')); if (rating <= currentRating) { star.classList.add('active'); star.classList.remove('inactive'); } else { star.classList.add('inactive'); star.classList.remove('active'); } }); }
-        async function submitReview() { if (!currentUser) { alert('Войдите через Telegram для добавления отзыва'); window.location.href = 'profile.html'; return; } const comment = document.getElementById('reviewComment').value.trim(); if (currentRating === 0) { alert('Пожалуйста, поставьте оценку'); return; } const data = {businessId: currentBusinessId, tgId: currentUser.tgId, userName: currentUser.displayName, photoUrl: currentUser.photoUrl || null, rating: currentRating, comment}; try { const res = await fetch('/api/reviews', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)}); const result = await res.json(); if (res.ok) { alert('Спасибо за отзыв!'); hideAddReviewForm(); await loadReviews(); await loadBusinesses(); } else { alert('Ошибка: ' + (result.error || 'Неизвестная ошибка')); } } catch (err) { alert('Ошибка сети: ' + err.message); } }
+        async function submitReview() { if (!currentUser) { alert('Войдите через Telegram для добавления отзыва'); window.location.href = 'profile.html'; return; } const comment = document.getElementById('reviewComment').value.trim(); if (currentRating === 0) { alert('Пожалуйста, поставьте оценку'); return; } const data = {businessId: currentBusinessId, tgId: currentUser.tgId, userName: currentUser.displayName, photoUrl: currentUser.photoUrl || null, rating: currentRating, comment}; try { const res = await fetch('/api/reviews', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)}); const result = await res.json(); if (res.ok) { alert('Спасибо за отзыв!'); hideAddReviewForm(); await loadReviews(); await loadBusinesses(); if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); } else { alert('Ошибка: ' + (result.error || 'Неизвестная ошибка')); } } catch (err) { alert('Ошибка сети: ' + err.message); } }
         initTheme(); loadBusinesses();
     </script>
 </body>
