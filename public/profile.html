@@ -152,6 +152,11 @@
             color: #fff;
             border-color: #007aff;
         }
+        @media (max-width: 550px) {
+            .nav-btn span:last-child {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -160,7 +165,7 @@
             <h2>Войдите через Telegram</h2>
             <p>Авторизация через Telegram позволит вам оставлять отзывы и видеть свою историю</p>
             <script async src="https://telegram.org/js/telegram-widget.js?22" 
-                data-telegram-login="YOUR_BOT_USERNAME" 
+                data-telegram-login="ispanskie_msk_bot" 
                 data-size="large" 
                 data-onauth="onTelegramAuth(user)" 
                 data-request-access="write">
@@ -188,10 +193,10 @@
 
     <nav class="nav">
         <div class="nav-inner">
-            <a href="news.html" class="nav-btn"><span>📰</span> Новости</a>
-            <a href="business.html" class="nav-btn"><span>💼</span> Бизнес</a>
-            <a href="recommendations.html" class="nav-btn"><span>⭐</span> Рекомендации</a>
-            <a href="profile.html" class="nav-btn active"><span>👤</span> Профиль</a>
+            <a href="news.html" class="nav-btn"><span>📰</span> <span>Новости</span></a>
+            <a href="business.html" class="nav-btn"><span>💼</span> <span>Бизнес</span></a>
+            <a href="recommendations.html" class="nav-btn"><span>⭐</span> <span>Рекомендации</span></a>
+            <a href="profile.html" class="nav-btn active"><span>👤</span> <span>Профиль</span></a>
         </div>
     </nav>
 
