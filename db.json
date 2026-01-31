@@ -104,10 +104,10 @@
       "moderationMessage": null,
       "status": "approved",
       "sourceType": "admin",
-      "likes": 1,
-      "dislikes": 0,
+      "likes": 0,
+      "dislikes": 1,
       "userReactions": {
-        "web_pvt1yyt0bmkvgoknj": "like"
+        "web_pvt1yyt0bmkvgoknj": "dislike"
       }
     },
     {
