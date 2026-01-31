@@ -1,4 +1,4 @@
-// api/reviews.js - API для работы с отзывами бизнесов
+// api/reviews.js - API для работы с отзывами бизнесов (с Telegram авторизацией)
 const { readDB, updateDB } = require('./_db');
 
 function sanitizeText(text) {
@@ -13,8 +13,8 @@ function sanitizeText(text) {
 module.exports = async (req, res) => {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -25,6 +25,7 @@ module.exports = async (req, res) => {
     try {
       const url = new URL(req.url, `http://${req.headers.host}`);
       const businessId = parseInt(url.searchParams.get('businessId'));
+      const userTgId = url.searchParams.get('userTgId'); // Optional: для подсветки своих отзывов
       
       if (!businessId) {
         return res.status(400).json({ error: 'businessId required' });
@@ -38,7 +39,10 @@ module.exports = async (req, res) => {
         return res.status(404).json({ error: 'Business not found' });
       }
       
-      const reviews = business.reviews || [];
+      const reviews = (business.reviews || []).map(review => ({
+        ...review,
+        isOwn: userTgId && review.tgId && String(review.tgId) === String(userTgId)
+      }));
       
       // Вычисляем средний рейтинг
       const avgRating = reviews.length > 0
@@ -56,9 +60,17 @@ module.exports = async (req, res) => {
     }
   }
 
-  // POST - добавить новый отзыв
+  // POST - добавить новый отзыв (требуется Telegram авторизация)
   if (req.method === 'POST') {
-    const { businessId, userId, userName, rating, comment } = req.body;
+    const { businessId, tgId, userName, rating, comment, photoUrl } = req.body;
+    
+    // Проверка авторизации Telegram
+    if (!tgId || !userName) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        message: 'Войдите через Telegram, чтобы оставить отзыв'
+      });
+    }
     
     if (!businessId) {
       return res.status(400).json({ error: 'businessId required' });
@@ -67,10 +79,6 @@ module.exports = async (req, res) => {
     const numBusinessId = parseInt(businessId);
     if (!Number.isInteger(numBusinessId)) {
       return res.status(400).json({ error: 'Invalid businessId' });
-    }
-    
-    if (!userId || !userName) {
-      return res.status(400).json({ error: 'userId and userName required' });
     }
     
     const numRating = parseInt(rating);
@@ -89,16 +97,17 @@ module.exports = async (req, res) => {
         
         if (!business.reviews) business.reviews = [];
         
-        // Проверяем, не оставлял ли пользователь уже отзыв
-        const existingReview = business.reviews.find(r => r.userId === userId);
+        // Проверяем, не оставлял ли пользователь уже отзыв (по tgId)
+        const existingReview = business.reviews.find(r => String(r.tgId) === String(tgId));
         if (existingReview) {
           throw new Error('User already reviewed this business');
         }
         
         const review = {
           id: business.reviews.length > 0 ? Math.max(...business.reviews.map(r => r.id)) + 1 : 1,
-          userId: String(userId).trim(),
+          tgId: parseInt(tgId),
           userName: sanitizeText(userName),
+          photoUrl: photoUrl || null,
           rating: numRating,
           comment: sanitizeText(comment),
           createdAt: new Date().toISOString()
@@ -115,9 +124,44 @@ module.exports = async (req, res) => {
         return res.status(404).json({ error: 'Business not found' });
       }
       if (error.message === 'User already reviewed this business') {
-        return res.status(409).json({ error: 'You already reviewed this business' });
+        return res.status(409).json({ error: 'Вы уже оставили отзыв на этот бизнес' });
       }
       return res.status(500).json({ error: 'Failed to create review' });
+    }
+  }
+
+  // DELETE - удалить свой отзыв
+  if (req.method === 'DELETE') {
+    try {
+      const url = new URL(req.url, `http://${req.headers.host}`);
+      const businessId = parseInt(url.searchParams.get('businessId'));
+      const tgId = url.searchParams.get('tgId');
+      
+      if (!businessId || !tgId) {
+        return res.status(400).json({ error: 'businessId and tgId required' });
+      }
+      
+      const deleted = await updateDB(async (db) => {
+        if (!db.businesses) return false;
+        
+        const business = db.businesses.find(b => b.id === businessId);
+        if (!business || !business.reviews) return false;
+        
+        const reviewIndex = business.reviews.findIndex(r => String(r.tgId) === String(tgId));
+        if (reviewIndex === -1) return false;
+        
+        business.reviews.splice(reviewIndex, 1);
+        return true;
+      });
+      
+      if (!deleted) {
+        return res.status(404).json({ error: 'Review not found' });
+      }
+      
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      console.error('[API/REVIEWS] DELETE error:', error);
+      return res.status(500).json({ error: 'Failed to delete review' });
     }
   }
   
