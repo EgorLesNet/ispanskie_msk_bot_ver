@@ -41,10 +41,9 @@
       "moderationMessage": null,
       "status": "approved",
       "sourceType": "admin",
-      "likes": 2,
+      "likes": 1,
       "dislikes": 0,
       "userReactions": {
-        "web_pvt1yyt0bmkvgoknj": "like",
         "web_mm3qax6d1mkvggcey": "like"
       }
     },
