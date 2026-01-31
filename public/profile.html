@@ -13,10 +13,7 @@
             padding: 20px;
             padding-bottom: 100px;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        .container { max-width: 600px; margin: 0 auto; }
         .profile-card {
             background: white;
             border-radius: 20px;
@@ -36,14 +33,8 @@
             border-radius: 50%;
             object-fit: cover;
         }
-        .profile-info h2 {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-        .profile-info .username {
-            color: #666;
-            font-size: 14px;
-        }
+        .profile-info h2 { font-size: 24px; margin-bottom: 4px; }
+        .profile-info .username { color: #666; font-size: 14px; }
         .logout-btn {
             background: #ff3b30;
             color: white;
@@ -54,11 +45,7 @@
             font-size: 14px;
             margin-top: 20px;
         }
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
+        .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
         .review-item {
             background: #f8f9fa;
             border-radius: 12px;
@@ -71,28 +58,11 @@
             align-items: center;
             margin-bottom: 8px;
         }
-        .business-name {
-            font-weight: 600;
-            font-size: 15px;
-        }
-        .review-rating {
-            color: #f39c12;
-        }
-        .review-comment {
-            font-size: 14px;
-            line-height: 1.4;
-            color: #555;
-            margin-bottom: 8px;
-        }
-        .review-date {
-            font-size: 12px;
-            color: #999;
-        }
-        .no-reviews {
-            text-align: center;
-            color: #999;
-            padding: 40px;
-        }
+        .business-name { font-weight: 600; font-size: 15px; }
+        .review-rating { color: #f39c12; }
+        .review-comment { font-size: 14px; line-height: 1.4; color: #555; margin-bottom: 8px; }
+        .review-date { font-size: 12px; color: #999; }
+        .no-reviews { text-align: center; color: #999; padding: 40px; }
         .auth-card {
             background: white;
             border-radius: 20px;
@@ -100,13 +70,9 @@
             text-align: center;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
-        .auth-card h2 {
-            margin-bottom: 16px;
-        }
-        .auth-card p {
-            color: #666;
-            margin-bottom: 24px;
-        }
+        .auth-card h2 { margin-bottom: 16px; }
+        .auth-card p { color: #666; margin-bottom: 24px; line-height: 1.6; }
+        .tg-login-container { display: flex; justify-content: center; }
         .nav {
             position: fixed;
             bottom: 12px;
@@ -123,7 +89,7 @@
         }
         .nav-inner {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             justify-content: center;
             width: 100%;
             max-width: 600px;
@@ -131,17 +97,17 @@
         .nav-btn {
             background: rgba(255, 255, 255, 0.6);
             border: 1px solid rgba(0, 0, 0, 0.12);
-            padding: 11px 24px;
+            padding: 10px 18px;
             border-radius: 18px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
             transition: all 0.3s;
             color: #333;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
         .nav-btn:hover {
             background: rgba(255, 255, 255, 0.9);
@@ -152,24 +118,28 @@
             color: #fff;
             border-color: #007aff;
         }
-        @media (max-width: 550px) {
-            .nav-btn span:last-child {
-                display: none;
-            }
+        .nav-btn .nav-emoji { font-size: 18px; }
+        .nav-btn.profile-btn .nav-text { display: none; }
+        @media (max-width: 650px) {
+            .nav-btn:not(.profile-btn) .nav-text { display: none; }
+            .nav-btn { padding: 10px 14px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="authView" class="auth-card" style="display: none;">
-            <h2>Войдите через Telegram</h2>
-            <p>Авторизация через Telegram позволит вам оставлять отзывы и видеть свою историю</p>
-            <script async src="https://telegram.org/js/telegram-widget.js?22" 
-                data-telegram-login="ispanskie_msk_bot" 
-                data-size="large" 
-                data-onauth="onTelegramAuth(user)" 
-                data-request-access="write">
-            </script>
+            <h2>👋 Войдите через Telegram</h2>
+            <p>Авторизация позволит вам оставлять отзывы на бизнесы и видеть свою историю. Это быстро и безопасно!</p>
+            <div class="tg-login-container">
+                <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                    data-telegram-login="ispanskie_msk_bot" 
+                    data-size="large" 
+                    data-radius="12"
+                    data-onauth="onTelegramAuth(user)" 
+                    data-request-access="write">
+                </script>
+            </div>
         </div>
 
         <div id="profileView" style="display: none;">
@@ -193,25 +163,18 @@
 
     <nav class="nav">
         <div class="nav-inner">
-            <a href="news.html" class="nav-btn"><span>📰</span> <span>Новости</span></a>
-            <a href="business.html" class="nav-btn"><span>💼</span> <span>Бизнес</span></a>
-            <a href="recommendations.html" class="nav-btn"><span>⭐</span> <span>Рекомендации</span></a>
-            <a href="profile.html" class="nav-btn active"><span>👤</span> <span>Профиль</span></a>
+            <a href="news.html" class="nav-btn"><span class="nav-emoji">📰</span> <span class="nav-text">Новости</span></a>
+            <a href="business.html" class="nav-btn"><span class="nav-emoji">💼</span> <span class="nav-text">Бизнес</span></a>
+            <a href="recommendations.html" class="nav-btn"><span class="nav-emoji">⭐</span> <span class="nav-text">Рекоменд.</span></a>
+            <a href="profile.html" class="nav-btn profile-btn active"><span class="nav-emoji">👤</span> <span class="nav-text">Профиль</span></a>
         </div>
     </nav>
 
     <script>
-        // Check if user is logged in
         const user = JSON.parse(localStorage.getItem('tgUser') || 'null');
-        
-        if (user) {
-            showProfile();
-        } else {
-            document.getElementById('authView').style.display = 'block';
-        }
+        if (user) { showProfile(); } else { document.getElementById('authView').style.display = 'block'; }
 
         function onTelegramAuth(tgUser) {
-            // Verify auth with backend
             fetch('/api/auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -224,58 +187,41 @@
                     location.reload();
                 }
             })
-            .catch(err => {
-                alert('Ошибка авторизации');
-            });
+            .catch(err => { alert('Ошибка авторизации'); });
         }
 
         function showProfile() {
             document.getElementById('authView').style.display = 'none';
             document.getElementById('profileView').style.display = 'block';
-            
-            // Display user info
             document.getElementById('profileName').textContent = user.displayName;
             document.getElementById('profileUsername').textContent = user.username ? '@' + user.username : 'ID: ' + user.tgId;
-            
             if (user.photoUrl) {
                 document.getElementById('profilePhoto').src = user.photoUrl;
             } else {
                 document.getElementById('profilePhoto').src = 'https://via.placeholder.com/80/007aff/ffffff?text=' + user.displayName.charAt(0);
             }
-            
-            // Load user reviews
             loadUserReviews();
         }
 
         async function loadUserReviews() {
             try {
-                // Load all businesses to find user's reviews
                 const bizRes = await fetch('/api/businesses');
                 const bizData = await bizRes.json();
                 const businesses = bizData.businesses || [];
-                
                 const userReviews = [];
-                
                 for (const biz of businesses) {
                     if (biz.reviews) {
                         const userReview = biz.reviews.find(r => String(r.tgId) === String(user.tgId));
                         if (userReview) {
-                            userReviews.push({
-                                ...userReview,
-                                businessName: biz.name,
-                                businessId: biz.id
-                            });
+                            userReviews.push({ ...userReview, businessName: biz.name, businessId: biz.id });
                         }
                     }
                 }
-                
                 const reviewsList = document.getElementById('reviewsList');
-                
                 if (userReviews.length === 0) {
                     reviewsList.innerHTML = '<div class="no-reviews">Вы ещё не оставили отзывов</div>';
                     return;
                 }
-                
                 reviewsList.innerHTML = userReviews.map(review => {
                     const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
                     const date = new Date(review.createdAt).toLocaleDateString('ru-RU');
@@ -290,9 +236,7 @@
                         </div>
                     `;
                 }).join('');
-            } catch (err) {
-                console.error('Error loading reviews:', err);
-            }
+            } catch (err) { console.error('Error loading reviews:', err); }
         }
 
         function logout() {
