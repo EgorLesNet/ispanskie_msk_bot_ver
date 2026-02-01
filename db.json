@@ -1,6 +1,35 @@
 {
   "posts": [
     {
+      "id": 39,
+      "text": "Дети облюбовали горы снега, с которых можно скатываться вбок, а можно прямо на дорогу. Около забора Николина парка напротив детсада. Перешлите, пжста, в Николин парк.",
+      "textHTML": "Дети облюбовали горы снега, с которых можно скатываться вбок, а можно прямо на дорогу. Около забора Николина парка напротив детсада. Перешлите, пжста, в Николин парк.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-02-01T18:25:43.929Z",
+      "timestamp": "2026-02-01T18:25:43.929Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "video",
+          "fileId": "BAACAgIAAxkBAAICs2l_mqapjwp9y5JTXAS10-X3W322AAK2igACZlEAAUjkmCZgtfU7gDgE"
+        }
+      ],
+      "photoFileId": null,
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 9057,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/9057"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 38,
       "text": "Ура, до нас доехали дворники…",
       "textHTML": "Ура, до нас доехали дворники…",
