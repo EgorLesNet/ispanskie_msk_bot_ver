@@ -130,7 +130,12 @@
       },
       "moderationMessage": null,
       "status": "approved",
-      "sourceType": "admin"
+      "sourceType": "admin",
+      "likes": 1,
+      "dislikes": 0,
+      "userReactions": {
+        "web_4venzlj1lmkvhbiey": "like"
+      }
     },
     {
       "id": 37,
