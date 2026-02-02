@@ -21,17 +21,32 @@ function loadNews() {
 }
 
 /**
- * Фильтровать новости за текущую дату
+ * Фильтровать новости за текущую дату (с учетом московского времени UTC+3)
  */
 function filterTodayNews(posts) {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  // Получаем текущее время в Москве (UTC+3)
+  const MOSCOW_OFFSET = 3 * 60 * 60 * 1000; // 3 часа в миллисекундах
+  const nowUTC = new Date();
+  const nowMoscow = new Date(nowUTC.getTime() + MOSCOW_OFFSET);
+  
+  // Начало и конец сегодняшнего дня по московскому времени
+  const todayStartMoscow = new Date(nowMoscow.getFullYear(), nowMoscow.getMonth(), nowMoscow.getDate());
+  const tomorrowStartMoscow = new Date(todayStartMoscow);
+  tomorrowStartMoscow.setDate(tomorrowStartMoscow.getDate() + 1);
+  
+  // Конвертируем границы обратно в UTC для сравнения
+  const todayStartUTC = new Date(todayStartMoscow.getTime() - MOSCOW_OFFSET);
+  const tomorrowStartUTC = new Date(tomorrowStartMoscow.getTime() - MOSCOW_OFFSET);
+  
+  console.log('[API/SUMMARY] Filtering for Moscow date:', {
+    moscowNow: nowMoscow.toISOString(),
+    todayStart: todayStartUTC.toISOString(),
+    tomorrowStart: tomorrowStartUTC.toISOString()
+  });
   
   return posts.filter(post => {
     const postDate = new Date(post.timestamp || post.createdAt);
-    return postDate >= today && postDate < tomorrow;
+    return postDate >= todayStartUTC && postDate < tomorrowStartUTC;
   });
 }
 
@@ -54,7 +69,8 @@ async function generateSummaryGroq(posts) {
     const source = post.source?.title || post.source?.username || 'Неизвестный источник';
     const time = new Date(post.timestamp || post.createdAt).toLocaleTimeString('ru-RU', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: 'Europe/Moscow'
     });
     return `${idx + 1}. [${time}] ${text}\nИсточник: ${source}`;
   }).join('\n\n');
@@ -140,7 +156,8 @@ function generateFallbackSummary(posts) {
     const text = (post.text || '').substring(0, 100);
     const time = new Date(post.timestamp || post.createdAt).toLocaleTimeString('ru-RU', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: 'Europe/Moscow'
     });
     summary += `${idx + 1}. [${time}] ${text}${text.length >= 100 ? '...' : ''}\n\n`;
   });
@@ -173,7 +190,7 @@ module.exports = async (req, res) => {
     const db = loadNews();
     const allPosts = db.posts || [];
     
-    // Фильтровать новости за сегодня
+    // Фильтровать новости за сегодня (по московскому времени)
     const todayPosts = filterTodayNews(allPosts);
     
     console.log(`[API/SUMMARY] Found ${todayPosts.length} posts today`);
@@ -183,7 +200,7 @@ module.exports = async (req, res) => {
         success: true,
         summary: '🤷 Сегодня в районе пока всё спокойно! Новостей нет, но день ещё не закончился.',
         count: 0,
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' }),
         method: 'empty'
       });
     }
@@ -206,7 +223,7 @@ module.exports = async (req, res) => {
       success: true,
       summary,
       count: todayPosts.length,
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' }),
       method
     });
     
