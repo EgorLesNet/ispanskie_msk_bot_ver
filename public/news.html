@@ -20,6 +20,25 @@
     .theme-toggle { background: transparent; border: none; font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%; transition: transform 0.3s, background 0.2s; }
     .theme-toggle:hover { transform: scale(1.15) rotate(15deg); background: rgba(0, 0, 0, 0.05); }
     body[data-theme="dark"] .theme-toggle:hover { background: rgba(255, 255, 255, 0.08); }
+    
+    /* AI Summary Button */
+    .summary-container { width: min(680px, 92vw); margin: 0 auto 16px; }
+    .summary-btn { width: 100%; padding: 16px 24px; border: none; border-radius: 40px; background: linear-gradient(135deg, #007aff 0%, #0051d5 100%); color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 24px rgba(0, 122, 255, 0.35); }
+    .summary-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0, 122, 255, 0.5); }
+    .summary-btn:active { transform: translateY(0px); }
+    .summary-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .summary-card { padding: 24px; border-radius: 40px; background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(0, 0, 0, 0.08); margin-bottom: 16px; animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
+    body[data-theme="dark"] .summary-card { background: rgba(30, 30, 30, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); }
+    .summary-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 18px; font-weight: 700; color: #007aff; }
+    body[data-theme="dark"] .summary-header { color: #0a84ff; }
+    .summary-text { font-size: 15px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+    .summary-footer { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0, 0, 0, 0.08); font-size: 13px; color: #666; display: flex; justify-content: space-between; align-items: center; }
+    body[data-theme="dark"] .summary-footer { border-top: 1px solid rgba(255, 255, 255, 0.1); color: #999; }
+    .summary-close { background: transparent; border: none; color: #666; cursor: pointer; padding: 8px; font-size: 24px; line-height: 1; transition: color 0.2s; }
+    .summary-close:hover { color: #333; }
+    body[data-theme="dark"] .summary-close:hover { color: #fff; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    
     .feed { display: grid; gap: 16px; width: min(680px, 92vw); margin: 20px auto; }
     .card { padding: 20px; border-radius: 40px; overflow: hidden; background: rgba(255, 255, 255, 0.65); border: 1px solid rgba(0, 0, 0, 0.08); transition: transform 0.3s, box-shadow 0.3s; animation: fadeIn 0.5s ease-out; }
     body[data-theme="dark"] .card { background: rgba(30, 30, 30, 0.65); border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -87,6 +106,15 @@
 </head>
 <body>
   <header class="header liquid-glass"><a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener"><img class="logo-img" src="logo.png" alt="Лого" /><div><h3>Агрегатор для района</h3><div class="subtitle">by Испанские Кварталы | Прокшино</div></div></a><button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button></header>
+  
+  <div class="summary-container">
+    <button class="summary-btn" id="summaryBtn" onclick="loadSummary()">
+      <span>🤖</span>
+      <span>Что случилось сегодня?</span>
+    </button>
+    <div id="summaryCard" style="display: none;"></div>
+  </div>
+  
   <main class="feed" id="feed"><div class="loading">Загрузка новостей...</div></main>
   <div class="auth-modal" id="authModal"><div class="auth-modal-content"><h2>🔐 Требуется вход</h2><p>Чтобы оставлять реакции, необходимо войти через Telegram</p><button class="auth-modal-btn" onclick="goToProfile()">✈️ Войти через Telegram</button><button class="auth-modal-btn auth-modal-cancel" onclick="closeAuthModal()">Отмена</button></div></div>
   <nav class="nav"><div class="nav-block left"><a href="news.html" class="nav-btn active"><span class="nav-emoji">📰</span><span class="nav-label">Новости</span></a><a href="business.html" class="nav-btn"><span class="nav-emoji">💼</span><span class="nav-label">Бизнес</span></a><a href="recommendations.html" class="nav-btn"><span class="nav-emoji">⭐</span><span class="nav-label">Рекоменд.</span></a></div><div class="nav-block right"><a href="profile.html" class="nav-btn"><span class="nav-emoji">👤</span><span class="nav-label">Профиль</span></a></div></nav>
@@ -107,6 +135,102 @@
     function formatDate(ts) { if (!ts) return ''; const d = new Date(ts); const day = String(d.getDate()).padStart(2, '0'); const month = String(d.getMonth() + 1).padStart(2, '0'); const year = d.getFullYear(); const hours = String(d.getHours()).padStart(2, '0'); const minutes = String(d.getMinutes()).padStart(2, '0'); return `${day}.${month}.${year}, ${hours}:${minutes}`; }
     function buildSourceLine(n) { const s = n && n.source ? n.source : null; if (!s) return ''; const url = s.postUrl || s.chatUrl || ''; const title = s.title || (s.username ? '@' + s.username : 'Источник'); if (!url) return ` · Источник: ${escapeHtml(title)}`; return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`; }
     function vibrate() { if (navigator.vibrate) navigator.vibrate(10); if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
+    
+    // AI Summary Functions
+    let summaryCache = null;
+    let summaryLoading = false;
+    
+    async function loadSummary() {
+      if (summaryLoading) return;
+      
+      const btn = document.getElementById('summaryBtn');
+      const card = document.getElementById('summaryCard');
+      
+      // Toggle if already loaded
+      if (card.style.display === 'block') {
+        card.style.display = 'none';
+        btn.innerHTML = '<span>🤖</span><span>Что случилось сегодня?</span>';
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        return;
+      }
+      
+      summaryLoading = true;
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span><span>Генерирую сводку...</span>';
+      
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+      
+      try {
+        const res = await fetch('/api/summary', {
+          method: 'GET',
+          cache: 'no-store'
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          summaryCache = data;
+          displaySummary(data);
+          if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        } else {
+          throw new Error(data.message || 'Ошибка генерации');
+        }
+        
+      } catch (error) {
+        console.error('Summary error:', error);
+        card.innerHTML = `
+          <div class="summary-card">
+            <div class="summary-header">
+              <span>⚠️</span>
+              <span>Ошибка</span>
+              <button class="summary-close" onclick="closeSummary()">&times;</button>
+            </div>
+            <div class="summary-text">Не удалось сгенерировать сводку. Попробуйте позже.</div>
+          </div>
+        `;
+        card.style.display = 'block';
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+      } finally {
+        summaryLoading = false;
+        btn.disabled = false;
+        btn.innerHTML = '<span>🤖</span><span>Скрыть сводку</span>';
+      }
+    }
+    
+    function displaySummary(data) {
+      const card = document.getElementById('summaryCard');
+      const today = new Date().toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long'
+      });
+      
+      card.innerHTML = `
+        <div class="summary-card">
+          <div class="summary-header">
+            <span>🤖</span>
+            <span>Сводка за сегодня</span>
+            <button class="summary-close" onclick="closeSummary()">&times;</button>
+          </div>
+          <div class="summary-text">${escapeHtml(data.summary)}</div>
+          <div class="summary-footer">
+            <span>📅 ${today}</span>
+            <span>📰 ${data.count} новост${data.count === 1 ? 'ь' : data.count < 5 ? 'и' : 'ей'}</span>
+          </div>
+        </div>
+      `;
+      card.style.display = 'block';
+    }
+    
+    function closeSummary() {
+      document.getElementById('summaryCard').style.display = 'none';
+      document.getElementById('summaryBtn').innerHTML = '<span>🤖</span><span>Что случилось сегодня?</span>';
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+    
     async function handleReaction(postId, type, event) { if (!isUserAuthenticated()) { showAuthModal(); return; } const btn = event.currentTarget; const userId = getUserId(); const otherType = type === 'like' ? 'dislike' : 'like'; const otherBtn = btn.parentElement.querySelector(`[data-type="${otherType}"]`); const wasActive = btn.classList.contains('active'); const otherWasActive = otherBtn.classList.contains('active'); vibrate(); btn.classList.add('animating'); setTimeout(() => btn.classList.remove('animating'), 300); let newLikes = parseInt(btn.parentElement.querySelector('[data-type="like"] .count').textContent); let newDislikes = parseInt(btn.parentElement.querySelector('[data-type="dislike"] .count').textContent); if (wasActive) { btn.classList.remove('active'); if (type === 'like') newLikes = Math.max(0, newLikes - 1); else newDislikes = Math.max(0, newDislikes - 1); } else { if (otherWasActive) { otherBtn.classList.remove('active'); if (type === 'like') newDislikes = Math.max(0, newDislikes - 1); else newLikes = Math.max(0, newLikes - 1); } btn.classList.add('active'); if (type === 'like') newLikes++; else newDislikes++; } btn.parentElement.querySelector('[data-type="like"] .count').textContent = newLikes; btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = newDislikes; try { const res = await fetch('/api/reactions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postId, type, userId }) }); if (!res.ok) throw new Error('Failed to update reaction'); const data = await res.json(); btn.parentElement.querySelector('[data-type="like"] .count').textContent = data.likes || 0; btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = data.dislikes || 0; const likeBtn = btn.parentElement.querySelector('[data-type="like"]'); const dislikeBtn = btn.parentElement.querySelector('[data-type="dislike"]'); likeBtn.classList.toggle('active', data.userReaction === 'like'); dislikeBtn.classList.toggle('active', data.userReaction === 'dislike'); } catch (error) { console.error('Reaction error:', error); } }
     let allNews = []; let isLoading = false; let hasMore = true; let currentOffset = 0; const LIMIT = 10;
     function renderNews() { const feed = document.getElementById('feed'); const filtered = allNews.filter(n => (n.category || 'all') !== 'reco'); const userId = getUserId(); if (!filtered.length && !hasMore) { feed.innerHTML = '<div class="no-news">Пока нет новостей! Отправьте первую новость боту.</div>'; return; } const cardsHtml = filtered.map(n => { const ts = n.timestamp || n.createdAt || null; let html = '<div class="card">'; html += `<div class="card-meta">#${escapeHtml(n.id)} · ${escapeHtml(formatDate(ts))}${buildSourceLine(n)}</div>`; const media = n.media || []; const mediaItems = media.filter(m => m && m.fileId && (m.type === 'photo' || m.type === 'video')); if (mediaItems.length > 0) { html += '<div class="card-media-scroll">'; mediaItems.forEach(item => { const mediaUrl = `/api/media?fileId=${encodeURIComponent(item.fileId)}`; if (item.type === 'photo') { html += `<img src="${mediaUrl}" loading="lazy" alt="Фото" onerror="this.style.display='none'"/>`; } else if (item.type === 'video') { html += `<video controls preload="metadata" playsinline onerror="this.style.display='none'"><source src="${mediaUrl}" type="video/mp4">Ваш браузер не поддерживает видео.</video>`; } }); html += '</div>'; } html += `<div class="card-text">${formatText(n)}</div>`; const likes = n.likes || 0; const dislikes = n.dislikes || 0; const userReaction = n.userReactions?.[userId] || null; html += '<div class="card-reactions">'; html += `<div class="reaction-btn ${userReaction === 'like' ? 'active' : ''}" data-type="like" onclick="handleReaction(${n.id}, 'like', event)"><span class="emoji">👍</span><span class="count">${likes}</span></div>`; html += `<div class="reaction-btn ${userReaction === 'dislike' ? 'active' : ''}" data-type="dislike" onclick="handleReaction(${n.id}, 'dislike', event)"><span class="emoji">👎</span><span class="count">${dislikes}</span></div>`; html += '</div></div>'; return html; }).join(''); let loadMoreHtml = ''; if (hasMore) { loadMoreHtml = `<div class="load-more"><button class="load-more-btn" onclick="loadMore()" ${isLoading ? 'disabled' : ''}>${isLoading ? 'Загрузка...' : 'Загрузить ещё'}</button></div>`; } feed.innerHTML = cardsHtml + loadMoreHtml; }
