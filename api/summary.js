@@ -21,10 +21,10 @@ function loadNews() {
 }
 
 /**
- * Фильтровать новости за текущую дату (с учетом московского времени UTC+3)
+ * Фильтровать новости за последние 24 часа или за текущий день
+ * Если сегодня меньше 5 новостей - показываем за последние 24 часа
  */
-function filterTodayNews(posts) {
-  // Получаем текущее время в Москве (UTC+3)
+function filterRecentNews(posts) {
   const MOSCOW_OFFSET = 3 * 60 * 60 * 1000; // 3 часа в миллисекундах
   const nowUTC = new Date();
   const nowMoscow = new Date(nowUTC.getTime() + MOSCOW_OFFSET);
@@ -44,10 +44,33 @@ function filterTodayNews(posts) {
     tomorrowStart: tomorrowStartUTC.toISOString()
   });
   
-  return posts.filter(post => {
+  // Сначала пробуем найти новости за сегодня
+  const todayPosts = posts.filter(post => {
     const postDate = new Date(post.timestamp || post.createdAt);
     return postDate >= todayStartUTC && postDate < tomorrowStartUTC;
   });
+  
+  console.log(`[API/SUMMARY] Found ${todayPosts.length} posts today`);
+  
+  // Если сегодня меньше 5 новостей - берём последние 24 часа
+  if (todayPosts.length < 5) {
+    const last24hStart = new Date(nowUTC.getTime() - 24 * 60 * 60 * 1000);
+    const recentPosts = posts.filter(post => {
+      const postDate = new Date(post.timestamp || post.createdAt);
+      return postDate >= last24hStart && postDate < nowUTC;
+    });
+    
+    console.log(`[API/SUMMARY] Extended to last 24h: ${recentPosts.length} posts`);
+    return {
+      posts: recentPosts,
+      period: 'last24h'
+    };
+  }
+  
+  return {
+    posts: todayPosts,
+    period: 'today'
+  };
 }
 
 /**
@@ -56,7 +79,7 @@ function filterTodayNews(posts) {
  * Лимит: 14,400 requests/day, 30 req/min
  * https://console.groq.com
  */
-async function generateSummaryGroq(posts) {
+async function generateSummaryGroq(posts, period) {
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
   
   if (!GROQ_API_KEY) {
@@ -67,17 +90,25 @@ async function generateSummaryGroq(posts) {
   const newsTexts = posts.map((post, idx) => {
     const text = post.text || '';
     const source = post.source?.title || post.source?.username || 'Неизвестный источник';
-    const time = new Date(post.timestamp || post.createdAt).toLocaleTimeString('ru-RU', {
+    const postDate = new Date(post.timestamp || post.createdAt);
+    const time = postDate.toLocaleTimeString('ru-RU', {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: 'Europe/Moscow'
     });
-    return `${idx + 1}. [${time}] ${text}\nИсточник: ${source}`;
+    const date = postDate.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'numeric',
+      timeZone: 'Europe/Moscow'
+    });
+    return `${idx + 1}. [${date} ${time}] ${text}\nИсточник: ${source}`;
   }).join('\n\n');
+  
+  const periodText = period === 'last24h' ? 'за последние сутки' : 'за сегодня';
   
   const systemPrompt = `Ты помощник для жителей района Испанские Кварталы в Москве. Твоя задача - создавать краткие, дружелюбные сводки новостей района.`;
   
-  const userPrompt = `Перед тобой посты из локального новостного агрегатора за сегодня.
+  const userPrompt = `Перед тобой посты из локального новостного агрегатора ${periodText}.
 
 Твоя задача:
 1. Прочитать все новости
@@ -91,8 +122,9 @@ async function generateSummaryGroq(posts) {
 - Начни сразу с самого важного
 - Используй эмодзи для оживления (но не перебарщивай)
 - Пиши от первого лица множественного числа ("сегодня у нас")
+${period === 'last24h' ? '- Упомяни, что это новости за последние сутки' : ''}
 
-Новости за сегодня:
+Новости ${periodText}:
 
 ${newsTexts}
 
@@ -106,7 +138,7 @@ ${newsTexts}
         'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', // Быстрая и качественная модель
+        model: 'llama-3.3-70b-versatile',
         messages: [
           {
             role: 'system',
@@ -143,23 +175,30 @@ ${newsTexts}
 /**
  * Fallback: простая текстовая сводка без AI
  */
-function generateFallbackSummary(posts) {
+function generateFallbackSummary(posts, period) {
   if (posts.length === 0) {
     return '🤷 Сегодня в районе пока всё спокойно! Новостей нет, но день ещё не закончился.';
   }
   
+  const periodText = period === 'last24h' ? 'за последние сутки' : 'сегодня';
   const count = posts.length;
-  let summary = `📰 Сегодня у нас ${count} ${count === 1 ? 'новость' : count < 5 ? 'новости' : 'новостей'}!\n\n`;
+  let summary = `📰 ${periodText.charAt(0).toUpperCase() + periodText.slice(1)} у нас ${count} ${count === 1 ? 'новость' : count < 5 ? 'новости' : 'новостей'}!\n\n`;
   
   // Показываем первые 3 новости
   posts.slice(0, 3).forEach((post, idx) => {
     const text = (post.text || '').substring(0, 100);
-    const time = new Date(post.timestamp || post.createdAt).toLocaleTimeString('ru-RU', {
+    const postDate = new Date(post.timestamp || post.createdAt);
+    const time = postDate.toLocaleTimeString('ru-RU', {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: 'Europe/Moscow'
     });
-    summary += `${idx + 1}. [${time}] ${text}${text.length >= 100 ? '...' : ''}\n\n`;
+    const date = postDate.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'numeric',
+      timeZone: 'Europe/Moscow'
+    });
+    summary += `${idx + 1}. [${date} ${time}] ${text}${text.length >= 100 ? '...' : ''}\n\n`;
   });
   
   if (posts.length > 3) {
@@ -190,17 +229,16 @@ module.exports = async (req, res) => {
     const db = loadNews();
     const allPosts = db.posts || [];
     
-    // Фильтровать новости за сегодня (по московскому времени)
-    const todayPosts = filterTodayNews(allPosts);
+    // Фильтровать новости (сегодня или последние 24ч)
+    const { posts: recentPosts, period } = filterRecentNews(allPosts);
     
-    console.log(`[API/SUMMARY] Found ${todayPosts.length} posts today`);
-    
-    if (todayPosts.length === 0) {
+    if (recentPosts.length === 0) {
       return res.status(200).json({
         success: true,
         summary: '🤷 Сегодня в районе пока всё спокойно! Новостей нет, но день ещё не закончился.',
         count: 0,
         date: new Date().toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' }),
+        period: 'today',
         method: 'empty'
       });
     }
@@ -210,20 +248,21 @@ module.exports = async (req, res) => {
     
     // Попробовать сгенерировать через Groq AI
     try {
-      summary = await generateSummaryGroq(todayPosts);
+      summary = await generateSummaryGroq(recentPosts, period);
       method = 'groq-ai';
       console.log('[API/SUMMARY] Summary generated via Groq AI');
     } catch (aiError) {
       console.error('[API/SUMMARY] Groq AI failed, using fallback:', aiError.message);
       // Если AI не сработал, используем простую сводку
-      summary = generateFallbackSummary(todayPosts);
+      summary = generateFallbackSummary(recentPosts, period);
     }
     
     return res.status(200).json({
       success: true,
       summary,
-      count: todayPosts.length,
+      count: recentPosts.length,
       date: new Date().toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' }),
+      period,
       method
     });
     
