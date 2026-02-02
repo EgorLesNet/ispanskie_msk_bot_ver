@@ -32,10 +32,9 @@
       "status": "approved",
       "sourceType": "admin",
       "likes": 1,
-      "dislikes": 1,
+      "dislikes": 0,
       "userReactions": {
-        "web_4venzlj1lmkvhbiey": "like",
-        "web_pvt1yyt0bmkvgoknj": "dislike"
+        "web_4venzlj1lmkvhbiey": "like"
       }
     },
     {
