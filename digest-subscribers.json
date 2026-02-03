@@ -1,3 +1,10 @@
 {
-  "subscribers": []
+  "subscribers": [
+    {
+      "tgId": 273473755,
+      "digestSubscription": true,
+      "updatedAt": "2026-02-03T16:03:30.509Z",
+      "createdAt": "2026-02-03T16:03:30.509Z"
+    }
+  ]
 }
