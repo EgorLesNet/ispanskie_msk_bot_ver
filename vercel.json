@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/**/*.js": {
+    "api/router.js": {
       "memory": 1024,
       "maxDuration": 10
     }
@@ -9,6 +9,10 @@
     {
       "source": "/",
       "destination": "/news.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/router"
     }
   ],
   "headers": [
