@@ -1,0 +1,36 @@
+name: Send Daily Digest
+
+on:
+  schedule:
+    # Каждый день в 21:00 по московскому времени (18:00 UTC)
+    - cron: '0 18 * * *'
+  
+  # Ручной запуск для тестирования
+  workflow_dispatch:
+
+jobs:
+  send-digest:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Send digest via API
+        run: |
+          echo "Отправка дайджеста..."
+          
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.API_URL }}/send-digest")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          echo "Ответ API: $BODY"
+          echo "HTTP код: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Ошибка при отправке дайджеста!"
+            exit 1
+          fi
+          
+          echo "Дайджест успешно отправлен!"
