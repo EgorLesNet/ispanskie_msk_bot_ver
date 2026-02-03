@@ -3,6 +3,10 @@
     "api/router.js": {
       "memory": 1024,
       "maxDuration": 10
+    },
+    "api/telegram.js": {
+      "memory": 1024,
+      "maxDuration": 10
     }
   },
   "rewrites": [
