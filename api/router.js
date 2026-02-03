@@ -1,17 +1,17 @@
 // api/router.js - Единый роутер для всех API endpoints
 // Решает проблему лимита 12 serverless functions на Vercel Hobby
 
-// Импорт существующих обработчиков
-const authHandler = require('./auth');
-const businessesHandler = require('./businesses');
-const mediaHandler = require('./media');
-const newsHandler = require('./news');
-const reactionsHandler = require('./reactions');
-const reviewsHandler = require('./reviews');
-const summaryHandler = require('./summary');
-const profileHandler = require('./profile');
-const mediaFileHandler = require('./media/[fileId]');
-const photoFileHandler = require('./photo/[fileId]');
+// Импорт модулей с префиксом _ (не являются serverless functions)
+const authHandler = require('./_auth');
+const businessesHandler = require('./_businesses');
+const mediaHandler = require('./_media');
+const newsHandler = require('./_news');
+const reactionsHandler = require('./_reactions');
+const reviewsHandler = require('./_reviews');
+const summaryHandler = require('./_summary');
+const profileHandler = require('./_profile');
+const mediaFileHandler = require('./_media_fileId');
+const photoFileHandler = require('./_photo_fileId');
 
 module.exports = async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
