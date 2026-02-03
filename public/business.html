@@ -72,7 +72,7 @@
         .review-author { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
         .review-author img { width: 24px; height: 24px; border-radius: 50%; }
         .review-rating { color: #f39c12; font-size: 14px; }
-        .review-comment { font-size: 14px; line-height: 1.4; color: #555; }
+        .review-comment { font-size: 14px; line-height: 1.4; color: #555; word-wrap: break-word; white-space: pre-wrap; }
         body[data-theme="dark"] .review-comment { color: #ccc; }
         .review-date { font-size: 12px; color: #999; margin-top: 6px; }
         .no-reviews { text-align: center; color: #999; padding: 20px; font-size: 14px; }
@@ -104,7 +104,7 @@
         .business-popup h3 { margin-bottom: 8px; font-size: 16px; }
         .business-popup .category { color: #666; font-size: 13px; margin-bottom: 8px; }
         .business-popup .rating { color: #f39c12; font-size: 14px; margin-bottom: 8px; }
-        .business-popup .description { font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
+        .business-popup .description { font-size: 14px; margin-bottom: 8px; line-height: 1.4; word-wrap: break-word; }
         .business-popup .address { color: #666; font-size: 12px; margin-bottom: 8px; }
         .business-popup a { color: #007aff; text-decoration: none; }
         .business-popup a:hover { text-decoration: underline; }
@@ -113,7 +113,7 @@
     </style>
 </head>
 <body>
-    <header class="header liquid-glass"><a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener"><img class="logo-img" src="logo.png" alt="Лого" /><div><h3>Агрегатор для района</h3><div class="subtitle">Карта бизнеса</div></div></a><div class="header-actions"><img id="userAvatar" class="user-avatar" style="display: none;" onclick="window.location.href='profile.html'" /><button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button></div></header>
+    <header class="header liquid-glass"><a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener"><img class="logo-img" src="logo.png" alt="Лого" /><div><h3>Испанские Кварталы</h3><div class="subtitle">Карта бизнеса</div></div></a><div class="header-actions"><img id="userAvatar" class="user-avatar" style="display: none;" onclick="window.location.href='profile.html'" /><button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button></div></header>
     <div class="search-container">
         <input type="text" class="search-input liquid-glass" id="searchInput" placeholder="🔍 Поиск бизнеса...">
         <select class="category-select liquid-glass" id="categoryFilter">
@@ -233,8 +233,9 @@
         let map, businesses = [], markers = [], currentBusinessId = null, selectedCoords = null, currentRating = 0;
         
         async function initMap() {
-            const defaultCenter = [55.612522, 37.536318];
-            map = L.map('map', { zoomControl: false }).setView(defaultCenter, 16);
+            // Координаты центра Испанских Кварталов (Южное Тушино, Москва)
+            const defaultCenter = [55.846, 37.440];
+            map = L.map('map', { zoomControl: false }).setView(defaultCenter, 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
             L.control.zoom({ position: 'topright' }).addTo(map);
             
@@ -248,9 +249,10 @@
         
         async function loadBusinesses() {
             try {
-                const res = await fetch('/api/businesses');
+                const res = await fetch('/api/router?path=/api/businesses');
                 const data = await res.json();
                 businesses = data.businesses || [];
+                console.log('Loaded businesses:', businesses);
                 displayBusinesses();
             } catch (err) {
                 console.error('Failed to load businesses:', err);
@@ -270,26 +272,33 @@
                 return true;
             });
             
+            console.log('Filtered businesses:', filtered);
+            
             filtered.forEach(business => {
-                if (!business.coordinates || !business.coordinates.lat || !business.coordinates.lng) return;
+                // Исправлено: координаты хранятся как lat/lng, а не в объекте coordinates
+                if (!business.lat || !business.lng) {
+                    console.warn('Business without coordinates:', business);
+                    return;
+                }
                 
                 const iconHtml = getCategoryIcon(business.category);
                 const icon = L.divIcon({ html: iconHtml, className: 'custom-marker', iconSize: [32, 32] });
                 
-                const marker = L.marker([business.coordinates.lat, business.coordinates.lng], { icon });
+                const marker = L.marker([business.lat, business.lng], { icon });
                 
-                const avgRating = calculateAverageRating(business);
+                const avgRating = business.avgRating || 0;
+                const reviewCount = business.reviewCount || 0;
                 const stars = avgRating > 0 ? '⭐'.repeat(Math.round(avgRating)) : 'Нет отзывов';
                 
                 const popupContent = `
                     <div class="business-popup">
                         <h3>${escapeHtml(business.name)}</h3>
-                        <div class="category">${business.category || 'Без категории'}</div>
+                        <div class="category">${escapeHtml(business.category || 'Без категории')}</div>
                         <div class="rating">${stars} ${avgRating > 0 ? `(${avgRating.toFixed(1)})` : ''}</div>
                         ${business.description ? `<div class="description">${escapeHtml(business.description)}</div>` : ''}
                         ${business.address ? `<div class="address">📍 ${escapeHtml(business.address)}</div>` : ''}
                         ${business.url ? `<div><a href="${escapeHtml(business.url)}" target="_blank" rel="noopener">🔗 Сайт</a></div>` : ''}
-                        <a class="view-reviews-btn" onclick="openReviewsModal(${business.id}); return false;">💬 Отзывы (${(business.reviews || []).length})</a>
+                        <a class="view-reviews-btn" onclick="openReviewsModal(${business.id}); return false;">💬 Отзывы (${reviewCount})</a>
                     </div>
                 `;
                 
@@ -297,6 +306,8 @@
                 marker.addTo(map);
                 markers.push(marker);
             });
+            
+            console.log('Displayed markers:', markers.length);
         }
         
         function getCategoryIcon(category) {
@@ -311,22 +322,15 @@
             return `<div style="font-size: 28px; line-height: 1;">${emoji}</div>`;
         }
         
-        function calculateAverageRating(business) {
-            const reviews = business.reviews || [];
-            if (reviews.length === 0) return 0;
-            const sum = reviews.reduce((acc, r) => acc + (r.rating || 0), 0);
-            return sum / reviews.length;
-        }
-        
         function openReviewsModal(businessId) {
             currentBusinessId = businessId;
             const business = businesses.find(b => b.id === businessId);
             if (!business) return;
             
             document.getElementById('reviewsBusinessName').textContent = business.name;
-            document.getElementById('reviewCount').textContent = `(${(business.reviews || []).length})`;
+            document.getElementById('reviewCount').textContent = `(${business.reviewCount || 0})`;
             
-            displayReviews(business);
+            loadReviews(businessId);
             document.getElementById('reviewsModal').classList.add('active');
         }
         
@@ -335,8 +339,18 @@
             hideAddReviewForm();
         }
         
-        function displayReviews(business) {
-            const reviews = business.reviews || [];
+        async function loadReviews(businessId) {
+            try {
+                const userTgId = currentUser ? currentUser.tgId : null;
+                const res = await fetch(`/api/router?path=/api/reviews&businessId=${businessId}${userTgId ? '&userTgId=' + userTgId : ''}`);
+                const data = await res.json();
+                displayReviews(data.reviews || []);
+            } catch (err) {
+                console.error('Failed to load reviews:', err);
+            }
+        }
+        
+        function displayReviews(reviews) {
             const reviewsList = document.getElementById('reviewsList');
             
             if (reviews.length === 0) {
@@ -347,14 +361,14 @@
             reviewsList.innerHTML = reviews.map(review => {
                 const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
                 const date = new Date(review.createdAt).toLocaleDateString('ru-RU');
-                const isOwnReview = currentUser && String(review.tgId) === String(currentUser.tgId);
+                const isOwnReview = review.isOwn || false;
                 
                 return `
                     <div class="review-item ${isOwnReview ? 'own-review' : ''}">
                         <div class="review-header">
                             <div class="review-author">
-                                ${review.authorPhoto ? `<img src="${escapeHtml(review.authorPhoto)}" alt="" />` : ''}
-                                ${escapeHtml(review.authorName)}
+                                ${review.photoUrl ? `<img src="${escapeHtml(review.photoUrl)}" alt="" />` : ''}
+                                ${escapeHtml(review.userName)}
                             </div>
                             <div class="review-rating">${stars}</div>
                         </div>
@@ -368,14 +382,6 @@
         function showAddReviewForm() {
             if (!currentUser) {
                 document.getElementById('authPrompt').style.display = 'block';
-                return;
-            }
-            
-            const business = businesses.find(b => b.id === currentBusinessId);
-            const userReview = (business.reviews || []).find(r => String(r.tgId) === String(currentUser.tgId));
-            
-            if (userReview) {
-                alert('Вы уже оставили отзыв на этот бизнес!');
                 return;
             }
             
@@ -419,14 +425,14 @@
             const comment = document.getElementById('reviewComment').value.trim();
             
             try {
-                const res = await fetch('/api/reviews', {
+                const res = await fetch('/api/router?path=/api/reviews', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         businessId: currentBusinessId,
                         tgId: currentUser.tgId,
-                        authorName: currentUser.displayName,
-                        authorPhoto: currentUser.photoUrl || null,
+                        userName: currentUser.displayName,
+                        photoUrl: currentUser.photoUrl || null,
                         rating: currentRating,
                         comment: comment || null
                     })
@@ -437,11 +443,10 @@
                 if (data.success) {
                     alert('Отзыв успешно добавлен!');
                     await loadBusinesses();
-                    const business = businesses.find(b => b.id === currentBusinessId);
-                    displayReviews(business);
+                    await loadReviews(currentBusinessId);
                     hideAddReviewForm();
                 } else {
-                    alert(data.message || 'Ошибка добавления отзыва');
+                    alert(data.error || 'Ошибка добавления отзыва');
                 }
             } catch (err) {
                 console.error('Review submission error:', err);
@@ -474,12 +479,13 @@
                 description: document.getElementById('description').value.trim() || null,
                 address: document.getElementById('address').value.trim() || null,
                 url: document.getElementById('url').value.trim() || null,
-                coordinates: { lat: selectedCoords.lat, lng: selectedCoords.lng },
+                lat: selectedCoords.lat,
+                lng: selectedCoords.lng,
                 secret: document.getElementById('secret').value
             };
             
             try {
-                const res = await fetch('/api/businesses', {
+                const res = await fetch('/api/router?path=/api/businesses', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
@@ -492,7 +498,7 @@
                     closeModal();
                     await loadBusinesses();
                 } else {
-                    alert(data.message || 'Ошибка добавления бизнеса');
+                    alert(data.error || 'Ошибка добавления бизнеса');
                 }
             } catch (err) {
                 console.error('Add business error:', err);
@@ -504,6 +510,7 @@
         document.getElementById('categoryFilter').addEventListener('change', displayBusinesses);
         
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
