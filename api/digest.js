@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
       }
       
       // Получаем дайджест за сегодня
-      const apiKey = process.env.OPENAI_API_KEY || null;
+      const apiKey = process.env.GROQ_API_KEY || null;
       const digest = await getTodayDigest(apiKey);
       return res.json({ success: true, digest });
     }
