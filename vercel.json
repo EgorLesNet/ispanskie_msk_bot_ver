@@ -15,7 +15,43 @@
       "destination": "/news.html"
     },
     {
-      "source": "/api/:path*",
+      "source": "/api/auth",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/businesses",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/media",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/media/:fileId",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/news",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/photo/:fileId",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/profile",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/reactions",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/reviews",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/summary",
       "destination": "/api/router"
     }
   ],
