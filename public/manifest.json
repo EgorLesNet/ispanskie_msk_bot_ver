@@ -1,0 +1,46 @@
+{
+  "name": "Испанские кварталы",
+  "short_name": "ИК Прокшино",
+  "description": "Новостной агрегатор для района Испанские кварталы",
+  "start_url": "/news.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#007aff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news", "social"],
+  "lang": "ru",
+  "dir": "ltr",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "Новости",
+      "short_name": "Новости",
+      "description": "Последние новости района",
+      "url": "/news.html",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Бизнес",
+      "short_name": "Бизнес",
+      "description": "Бизнесы на карте",
+      "url": "/business.html",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
