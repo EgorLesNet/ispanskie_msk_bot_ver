@@ -11,19 +11,21 @@ app.use(express.static('public'));
 if (!process.env.VERCEL) {
   console.log('🔧 Local development mode');
   
-  // Прокси к API файлам
-  app.use('/api/news', require('./api/news'));
-  app.use('/api/businesses', require('./api/businesses'));
-  app.use('/api/reactions', require('./api/reactions'));
-  app.use('/api/media', require('./api/media'));
-  app.use('/api/summary', require('./api/summary'));
-  app.use('/api/auth', require('./api/auth'));
-  app.use('/api/reviews', require('./api/reviews'));
-  app.use('/api/profile', require('./api/profile'));
+  // Единый router для всех API endpoints (кроме telegram)
+  const router = require('./api/router');
+  const telegram = require('./api/telegram');
+  
+  // Telegram webhook - отдельная функция
+  app.use('/api/telegram', telegram);
+  
+  // Все остальные API через router
+  app.use('/api', router);
   
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`✅ API router: /api/*`);
+    console.log(`✅ Telegram webhook: /api/telegram`);
   });
 }
 
