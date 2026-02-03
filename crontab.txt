@@ -1,0 +1,11 @@
+# Ежедневная отправка дайджеста в 21:00 по московскому времени
+# Установите эту задачу в cron:
+# crontab -e
+# Затем добавьте следующую строку:
+
+0 21 * * * cd /path/to/ispanskie_msk_bot_ver && /usr/bin/python3 send_digest.py >> /var/log/digest.log 2>&1
+
+# Для Vercel или других облачных платформ используйте:
+# - Vercel Cron Jobs (vercel.json)
+# - GitHub Actions (workflow для запуска по расписанию)
+# - Внешний сервис как cron-job.org
