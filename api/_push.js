@@ -5,7 +5,7 @@ const webpush = require('web-push');
 // VAPID ключи для Web Push (должны быть в .env)
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:admin@ispanskie-msk.ru';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'https://ispanskie-msk.vercel.app';
 
 // Временное хранилище подписок (в продакшене использовать БД)
 const subscriptions = new Map();
