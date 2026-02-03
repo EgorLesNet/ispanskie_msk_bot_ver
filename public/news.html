@@ -3,8 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#007aff" />
   <title>Новости - Агрегатор для района</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  
+  <!-- Telegram WebApp SDK (loaded conditionally) -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <!-- App Adapter - автоматическое определение режима -->
+  <script src="/app-adapter.js"></script>
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { overscroll-behavior-y: contain; touch-action: pan-y; }
@@ -118,11 +128,14 @@
   <main class="feed" id="feed"><div class="loading">Загрузка новостей...</div></main>
   <div class="auth-modal" id="authModal"><div class="auth-modal-content"><h2>🔐 Требуется вход</h2><p>Чтобы оставлять реакции, необходимо войти через Telegram</p><button class="auth-modal-btn" onclick="goToProfile()">✈️ Войти через Telegram</button><button class="auth-modal-btn auth-modal-cancel" onclick="closeAuthModal()">Отмена</button></div></div>
   <nav class="nav"><div class="nav-block left"><a href="news.html" class="nav-btn active"><span class="nav-emoji">📰</span><span class="nav-label">Новости</span></a><a href="business.html" class="nav-btn"><span class="nav-emoji">💼</span><span class="nav-label">Бизнес</span></a><a href="recommendations.html" class="nav-btn"><span class="nav-emoji">⭐</span><span class="nav-label">Рекоменд.</span></a></div><div class="nav-block right"><a href="profile.html" class="nav-btn"><span class="nav-emoji">👤</span><span class="nav-label">Профиль</span></a></div></nav>
+  
+  <!-- Yandex Metrika -->
   <script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
   <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+  
   <script>
-    const tg = window.Telegram?.WebApp;
-    if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes(); tg.setHeaderColor('#f0f2f5'); tg.setBackgroundColor('#f0f2f5'); }
+    // Ждём инициализации адаптера
+    console.log('[NEWS] Waiting for appAdapter...');
     
     // Управление реакциями пользователя (localStorage)
     function getUserReactions() {
@@ -145,18 +158,42 @@
       return reactions[postId] || null;
     }
     
-    function getUserId() { let userId = localStorage.getItem('newsUserId'); if (!userId) { userId = 'web_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); localStorage.setItem('newsUserId', userId); } return userId; }
-    function isUserAuthenticated() { return localStorage.getItem('tgUser') !== null; }
-    function showAuthModal() { document.getElementById('authModal').classList.add('active'); if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning'); }
+    // Используем методы адаптера
+    function isUserAuthenticated() { return window.appAdapter?.isAuthenticated() || false; }
+    function showAuthModal() { document.getElementById('authModal').classList.add('active'); window.appAdapter?.vibrate('warning'); }
     function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); }
     function goToProfile() { window.location.href = 'profile.html'; }
-    function toggleTheme() { const body = document.body; const icon = document.getElementById('theme-icon'); const isDark = body.getAttribute('data-theme') === 'dark'; body.setAttribute('data-theme', isDark ? '' : 'dark'); icon.textContent = isDark ? '🌙' : '☀️'; localStorage.setItem('theme', isDark ? 'light' : 'dark'); if (tg) { tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e'); tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e'); } }
-    function initTheme() { const saved = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; const useDark = saved === 'dark' || (!saved && prefersDark); if (useDark) { document.body.setAttribute('data-theme', 'dark'); document.getElementById('theme-icon').textContent = '☀️'; if (tg) { tg.setHeaderColor('#0e0e0e'); tg.setBackgroundColor('#0e0e0e'); } } }
+    
+    function toggleTheme() { 
+      const body = document.body; 
+      const icon = document.getElementById('theme-icon'); 
+      const isDark = body.getAttribute('data-theme') === 'dark'; 
+      body.setAttribute('data-theme', isDark ? '' : 'dark'); 
+      icon.textContent = isDark ? '🌙' : '☀️'; 
+      localStorage.setItem('theme', isDark ? 'light' : 'dark'); 
+      
+      // Адаптируем для Telegram если в режиме Mini App
+      if (window.appAdapter?.mode === 'telegram-mini-app' && window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e'); 
+        tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e'); 
+      }
+    }
+    
+    function initTheme() { 
+      const saved = localStorage.getItem('theme'); 
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; 
+      const useDark = saved === 'dark' || (!saved && prefersDark); 
+      if (useDark) { 
+        document.body.setAttribute('data-theme', 'dark'); 
+        document.getElementById('theme-icon').textContent = '☀️'; 
+      } 
+    }
+    
     function escapeHtml(s) { return String(s || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;'); }
     function formatText(n) { if (n.textHTML) return n.textHTML; const safe = escapeHtml(n.text || ''); const urlRegex = /(https?:\/\/[^\s]+)/g; return safe.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
     function formatDate(ts) { if (!ts) return ''; const d = new Date(ts); const day = String(d.getDate()).padStart(2, '0'); const month = String(d.getMonth() + 1).padStart(2, '0'); const year = d.getFullYear(); const hours = String(d.getHours()).padStart(2, '0'); const minutes = String(d.getMinutes()).padStart(2, '0'); return `${day}.${month}.${year}, ${hours}:${minutes}`; }
     function buildSourceLine(n) { const s = n && n.source ? n.source : null; if (!s) return ''; const url = s.postUrl || s.chatUrl || ''; const title = s.title || (s.username ? '@' + s.username : 'Источник'); if (!url) return ` · Источник: ${escapeHtml(title)}`; return ` · Источник: <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`; }
-    function vibrate() { if (navigator.vibrate) navigator.vibrate(10); if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
     
     // AI Summary Functions
     let summaryCache = null;
@@ -168,54 +205,40 @@
       const btn = document.getElementById('summaryBtn');
       const card = document.getElementById('summaryCard');
       
-      // Toggle if already loaded
       if (card.style.display === 'block') {
         card.style.display = 'none';
         btn.innerHTML = '<span>🤖</span><span>Что случилось сегодня?</span>';
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        window.appAdapter?.vibrate('light');
         return;
       }
       
       summaryLoading = true;
       btn.disabled = true;
       btn.innerHTML = '<span>⏳</span><span>Генерирую сводку...</span>';
-      
-      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+      window.appAdapter?.vibrate('medium');
       
       try {
-        const res = await fetch('/api/summary', {
-          method: 'GET',
-          cache: 'no-store'
-        });
-        
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        const res = await fetch('/api/summary', { method: 'GET', cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         
         const data = await res.json();
-        
         if (data.success) {
           summaryCache = data;
           displaySummary(data);
-          if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+          window.appAdapter?.vibrate('success');
         } else {
           throw new Error(data.message || 'Ошибка генерации');
         }
-        
       } catch (error) {
         console.error('Summary error:', error);
         card.innerHTML = `
           <div class="summary-card">
-            <div class="summary-header">
-              <span>⚠️</span>
-              <span>Ошибка</span>
-              <button class="summary-close" onclick="closeSummary()">&times;</button>
-            </div>
+            <div class="summary-header"><span>⚠️</span><span>Ошибка</span><button class="summary-close" onclick="closeSummary()">&times;</button></div>
             <div class="summary-text">Не удалось сгенерировать сводку. Попробуйте позже.</div>
           </div>
         `;
         card.style.display = 'block';
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        window.appAdapter?.vibrate('error');
       } finally {
         summaryLoading = false;
         btn.disabled = false;
@@ -225,23 +248,12 @@
     
     function displaySummary(data) {
       const card = document.getElementById('summaryCard');
-      const today = new Date().toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long'
-      });
-      
+      const today = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
       card.innerHTML = `
         <div class="summary-card">
-          <div class="summary-header">
-            <span>🤖</span>
-            <span>Сводка за сегодня</span>
-            <button class="summary-close" onclick="closeSummary()">&times;</button>
-          </div>
+          <div class="summary-header"><span>🤖</span><span>Сводка за сегодня</span><button class="summary-close" onclick="closeSummary()">&times;</button></div>
           <div class="summary-text">${escapeHtml(data.summary)}</div>
-          <div class="summary-footer">
-            <span>📅 ${today}</span>
-            <span>📰 ${data.count} новост${data.count === 1 ? 'ь' : data.count < 5 ? 'и' : 'ей'}</span>
-          </div>
+          <div class="summary-footer"><span>📅 ${today}</span><span>📰 ${data.count} новост${data.count === 1 ? 'ь' : data.count < 5 ? 'и' : 'ей'}</span></div>
         </div>
       `;
       card.style.display = 'block';
@@ -250,7 +262,7 @@
     function closeSummary() {
       document.getElementById('summaryCard').style.display = 'none';
       document.getElementById('summaryBtn').innerHTML = '<span>🤖</span><span>Что случилось сегодня?</span>';
-      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      window.appAdapter?.vibrate('light');
     }
     
     async function handleReaction(postId, type, event) {
@@ -260,31 +272,27 @@
       }
       
       const btn = event.currentTarget;
-      const userId = getUserId();
+      const userId = window.appAdapter?.getUserId() || 'unknown';
       const otherType = type === 'like' ? 'dislike' : 'like';
       const otherBtn = btn.parentElement.querySelector(`[data-type="${otherType}"]`);
       const wasActive = btn.classList.contains('active');
       const otherWasActive = otherBtn.classList.contains('active');
       
-      vibrate();
+      window.appAdapter?.vibrate('light');
       
       btn.classList.add('animating');
       setTimeout(() => btn.classList.remove('animating'), 300);
       
       let newLikes = parseInt(btn.parentElement.querySelector('[data-type="like"] .count').textContent);
       let newDislikes = parseInt(btn.parentElement.querySelector('[data-type="dislike"] .count').textContent);
-      
-      // Определяем новое состояние реакции
       let newReaction = null;
       
       if (wasActive) {
-        // Снимаем текущую реакцию
         btn.classList.remove('active');
         if (type === 'like') newLikes = Math.max(0, newLikes - 1);
         else newDislikes = Math.max(0, newDislikes - 1);
         newReaction = null;
       } else {
-        // Устанавливаем новую реакцию
         if (otherWasActive) {
           otherBtn.classList.remove('active');
           if (type === 'like') newDislikes = Math.max(0, newDislikes - 1);
@@ -296,9 +304,7 @@
         newReaction = type;
       }
       
-      // Сохраняем в localStorage
       saveUserReaction(postId, newReaction);
-      
       btn.parentElement.querySelector('[data-type="like"] .count').textContent = newLikes;
       btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = newDislikes;
       
@@ -310,22 +316,16 @@
         });
         
         if (!res.ok) throw new Error('Failed to update reaction');
-        
         const data = await res.json();
         
-        // Обновляем счетчики из ответа сервера
         btn.parentElement.querySelector('[data-type="like"] .count').textContent = data.likes || 0;
         btn.parentElement.querySelector('[data-type="dislike"] .count').textContent = data.dislikes || 0;
         
         const likeBtn = btn.parentElement.querySelector('[data-type="like"]');
         const dislikeBtn = btn.parentElement.querySelector('[data-type="dislike"]');
-        
         likeBtn.classList.toggle('active', data.userReaction === 'like');
         dislikeBtn.classList.toggle('active', data.userReaction === 'dislike');
-        
-        // Синхронизируем localStorage с сервером
         saveUserReaction(postId, data.userReaction);
-        
       } catch (error) {
         console.error('Reaction error:', error);
       }
@@ -340,7 +340,6 @@
     function renderNews() {
       const feed = document.getElementById('feed');
       const filtered = allNews.filter(n => (n.category || 'all') !== 'reco');
-      const userId = getUserId();
       
       if (!filtered.length && !hasMore) {
         feed.innerHTML = '<div class="no-news">Пока нет новостей! Отправьте первую новость боту.</div>';
@@ -372,8 +371,6 @@
         
         const likes = n.likes || 0;
         const dislikes = n.dislikes || 0;
-        
-        // Получаем сохраненную реакцию пользователя из localStorage
         const userReaction = getUserReactionForPost(n.id);
         
         html += '<div class="card-reactions">';
@@ -427,6 +424,7 @@
       await loadNews({ append: true });
     }
     
+    // Авто-обновление новостей
     setInterval(async () => {
       if (document.visibilityState === 'visible' && !isLoading) {
         const url = `/api/news?limit=${LIMIT}&offset=0&t=${Date.now()}`;
@@ -450,8 +448,19 @@
       }
     }, 3000);
     
+    // Инициализация
     initTheme();
-    loadNews();
+    
+    // Ждём загрузки адаптера перед загрузкой новостей
+    if (window.appAdapter) {
+      console.log('[NEWS] Adapter ready, mode:', window.appAdapter.mode);
+      loadNews();
+    } else {
+      window.addEventListener('DOMContentLoaded', () => {
+        console.log('[NEWS] DOM loaded, starting news load');
+        loadNews();
+      });
+    }
   </script>
 </body>
 </html>
