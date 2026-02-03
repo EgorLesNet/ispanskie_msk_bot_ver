@@ -1,4 +1,4 @@
-// api/auth.js - Telegram Web Login authentication
+// api/auth.js - Authentication & Profile Management
 require('dotenv/config');
 const crypto = require('crypto');
 
@@ -10,15 +10,12 @@ if (!BOT_TOKEN) {
 
 /**
  * Parse Telegram initData string into object
- * @param {string} initData - Raw initData string from Telegram
- * @returns {object} Parsed data object
  */
 function parseInitData(initData) {
   const params = new URLSearchParams(initData);
   const result = {};
   
   for (const [key, value] of params.entries()) {
-    // Parse nested JSON (like user object)
     if (key === 'user') {
       try {
         result[key] = JSON.parse(value);
@@ -35,7 +32,6 @@ function parseInitData(initData) {
 
 /**
  * Verify Telegram Web App initData
- * https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
  */
 function verifyTelegramWebAppData(initData) {
   try {
@@ -47,33 +43,26 @@ function verifyTelegramWebAppData(initData) {
       return { valid: false, error: 'Missing hash in initData' };
     }
     
-    // Create data-check-string from sorted params
     const dataCheckString = Array.from(urlParams.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, value]) => `${key}=${value}`)
       .join('\n');
     
-    // Create secret key: HMAC_SHA256("WebAppData", bot_token)
     const secretKey = crypto
       .createHmac('sha256', 'WebAppData')
       .update(BOT_TOKEN)
       .digest();
     
-    // Calculate hash: HMAC_SHA256(secret_key, data_check_string)
     const calculatedHash = crypto
       .createHmac('sha256', secretKey)
       .update(dataCheckString)
       .digest('hex');
     
     if (calculatedHash !== hash) {
-      console.error('[AUTH] Hash mismatch:', {
-        received: hash,
-        calculated: calculatedHash
-      });
+      console.error('[AUTH] Hash mismatch');
       return { valid: false, error: 'Data verification failed' };
     }
     
-    // Parse user data
     const userJson = urlParams.get('user');
     if (!userJson) {
       return { valid: false, error: 'Missing user data' };
@@ -82,7 +71,6 @@ function verifyTelegramWebAppData(initData) {
     const user = JSON.parse(userJson);
     const authDate = parseInt(urlParams.get('auth_date') || '0');
     
-    // Check if auth data is not too old (24 hours)
     const currentTime = Math.floor(Date.now() / 1000);
     if (currentTime - authDate > 86400) {
       return { valid: false, error: 'Auth data is outdated (>24h)' };
@@ -108,8 +96,7 @@ function verifyTelegramWebAppData(initData) {
 }
 
 /**
- * Verify Telegram Login Widget data (legacy fallback)
- * https://core.telegram.org/widgets/login#checking-authorization
+ * Verify Telegram Login Widget data (legacy)
  */
 function verifyTelegramAuth(data) {
   const { hash, ...authData } = data;
@@ -118,28 +105,23 @@ function verifyTelegramAuth(data) {
     return { valid: false, error: 'Missing required fields' };
   }
   
-  // Create data-check-string
   const checkArray = Object.keys(authData)
     .sort()
     .map(key => `${key}=${authData[key]}`);
   const dataCheckString = checkArray.join('\n');
   
-  // Create secret key from bot token
   const secretKey = crypto.createHash('sha256')
     .update(BOT_TOKEN)
     .digest();
   
-  // Calculate hash
   const calculatedHash = crypto.createHmac('sha256', secretKey)
     .update(dataCheckString)
     .digest('hex');
   
-  // Verify hash matches
   if (calculatedHash !== hash) {
     return { valid: false, error: 'Data is NOT from Telegram' };
   }
   
-  // Check auth date (must be within 24 hours)
   const authDate = parseInt(authData.auth_date);
   const currentTime = Math.floor(Date.now() / 1000);
   
@@ -160,34 +142,21 @@ function verifyTelegramAuth(data) {
   };
 }
 
-module.exports = async (req, res) => {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-  
+/**
+ * Handle authentication
+ */
+async function handleAuth(req, res) {
   try {
     let verification;
     
-    // Check if initData string is provided (Telegram Web App)
     if (req.body.initData && typeof req.body.initData === 'string') {
       console.log('[AUTH] Using Telegram Web App initData validation');
       verification = verifyTelegramWebAppData(req.body.initData);
     }
-    // Fallback to legacy widget auth or direct user data
     else if (req.body.id || req.body.hash) {
       console.log('[AUTH] Using legacy Telegram auth validation');
       verification = verifyTelegramAuth(req.body);
     }
-    // No valid auth data
     else {
       console.error('[AUTH] No valid authentication data provided');
       return res.status(400).json({ 
@@ -206,12 +175,9 @@ module.exports = async (req, res) => {
     
     console.log('[AUTH] Authentication successful for user:', verification.user.id);
     
-    // Create session token
     const sessionToken = crypto.randomBytes(32).toString('hex');
     const user = verification.user;
     
-    // In production, store session in database/Redis
-    // For now, return user data and token
     return res.status(200).json({
       success: true,
       token: sessionToken,
@@ -226,10 +192,108 @@ module.exports = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('[API/AUTH] Error:', error);
+    console.error('[AUTH] Error:', error);
     return res.status(500).json({ 
       error: 'Server error',
       message: error.message 
     });
+  }
+}
+
+/**
+ * Handle profile update
+ */
+async function handleProfileUpdate(req, res) {
+  try {
+    const { tgId, displayName, photoUrl } = req.body;
+    
+    // Валидация
+    if (!tgId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'tgId обязателен' 
+      });
+    }
+    
+    if (!displayName || displayName.trim().length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Имя не может быть пустым' 
+      });
+    }
+    
+    if (displayName.length > 50) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Имя слишком длинное (максимум 50 символов)' 
+      });
+    }
+    
+    // Проверка URL аватарки
+    if (photoUrl && !isValidUrl(photoUrl)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Некорректный URL аватарки' 
+      });
+    }
+    
+    const updatedUser = {
+      tgId,
+      displayName: displayName.trim(),
+      photoUrl: photoUrl || null,
+      updatedAt: new Date().toISOString()
+    };
+    
+    console.log('[PROFILE] Updated user:', updatedUser);
+    
+    return res.status(200).json({
+      success: true,
+      user: updatedUser,
+      message: 'Профиль успешно обновлен'
+    });
+    
+  } catch (error) {
+    console.error('[PROFILE] Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Ошибка обновления профиля',
+      error: error.message
+    });
+  }
+}
+
+function isValidUrl(string) {
+  try {
+    const url = new URL(string);
+    return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol === 'data:';
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
+ * Main handler - routes based on query parameter
+ */
+module.exports = async (req, res) => {
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  
+  // Route based on action parameter
+  const action = req.query.action || (req.body.tgId && req.body.displayName ? 'updateProfile' : 'auth');
+  
+  if (action === 'updateProfile') {
+    return handleProfileUpdate(req, res);
+  } else {
+    return handleAuth(req, res);
   }
 };
