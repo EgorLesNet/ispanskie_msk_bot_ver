@@ -19,7 +19,6 @@ if (!process.env.VERCEL) {
   app.use('/api/summary', require('./api/summary'));
   app.use('/api/auth', require('./api/auth'));
   app.use('/api/reviews', require('./api/reviews'));
-  app.use('/api/profile', require('./api/profile'));
   
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
