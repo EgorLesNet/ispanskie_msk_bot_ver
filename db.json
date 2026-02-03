@@ -14,11 +14,16 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAIC0mmCFnW3mxsywQOqSNQhxjI6nVMGAAJWD2sbTkwRSFyXEBOfZj9UAQADAgADeAADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC02mCFnXyJ5MBEAtxVGbOplOJ-qMtAAJXD2sbTkwRSFfhUs5zOlHuAQADAgADeAADOAQ"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAIC0mmCFnW3mxsywQOqSNQhxjI6nVMGAAJWD2sbTkwRSFyXEBOfZj9UAQADAgADeAADOAQ",
       "photoFileIds": [
-        "AgACAgIAAxkBAAIC0mmCFnW3mxsywQOqSNQhxjI6nVMGAAJWD2sbTkwRSFyXEBOfZj9UAQADAgADeAADOAQ"
+        "AgACAgIAAxkBAAIC0mmCFnW3mxsywQOqSNQhxjI6nVMGAAJWD2sbTkwRSFyXEBOfZj9UAQADAgADeAADOAQ",
+        "AgACAgIAAxkBAAIC02mCFnXyJ5MBEAtxVGbOplOJ-qMtAAJXD2sbTkwRSFfhUs5zOlHuAQADAgADeAADOAQ"
       ],
       "source": {
         "title": "ЖК Прокшино | Новости",
