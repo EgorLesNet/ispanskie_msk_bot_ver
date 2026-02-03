@@ -1,3 +1,3 @@
 // Перемещено из api/summary.js
-const summaryHandler = require('../summary');
+const summaryHandler = require('../_summary');
 module.exports = summaryHandler;

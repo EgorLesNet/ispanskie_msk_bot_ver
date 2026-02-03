@@ -1,3 +1,3 @@
 // Перемещено из api/news.js
-const newsHandler = require('../news');
+const newsHandler = require('../_news');
 module.exports = newsHandler;

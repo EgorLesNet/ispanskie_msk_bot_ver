@@ -1,3 +1,3 @@
 // Перемещено из api/businesses.js
-const businessesHandler = require('../businesses');
+const businessesHandler = require('../_businesses');
 module.exports = businessesHandler;

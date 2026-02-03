@@ -1,3 +1,3 @@
 // Перемещено из api/profile.js
-const profileHandler = require('../profile');
+const profileHandler = require('../_profile');
 module.exports = profileHandler;
