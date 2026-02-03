@@ -1,19 +1,21 @@
 {
   "name": "ispanskie_msk_bot_ver",
   "version": "1.0.0",
-  "description": "Telegram Mini App для новостей района",
+  "description": "Телеграм Mini App для новостей района",
   "main": "server.js",
   "engines": {
     "node": "20.x"
   },
   "scripts": {
     "start": "node server.js",
-    "build": "echo 'Static files ready'"
+    "build": "echo 'Static files ready'",
+    "generate-vapid": "npx web-push generate-vapid-keys"
   },
   "dependencies": {
     "dotenv": "^16.0.0",
     "express": "^4.18.0",
     "node-fetch": "^2.6.7",
-    "telegraf": "^4.12.0"
+    "telegraf": "^4.12.0",
+    "web-push": "^3.6.7"
   }
 }
