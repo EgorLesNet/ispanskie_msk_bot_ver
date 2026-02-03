@@ -1,17 +1,17 @@
 // api/router.js - Единый роутер для всех API endpoints
 // Решает проблему лимита 12 serverless functions на Vercel Hobby
 
-const authHandler = require('./_modules/auth');
-const businessesHandler = require('./_modules/businesses');
-const mediaHandler = require('./_modules/media');
-const newsHandler = require('./_modules/news');
-const reactionsHandler = require('./_modules/reactions');
-const reviewsHandler = require('./_modules/reviews');
-const summaryHandler = require('./_modules/summary');
-const telegramHandler = require('./_modules/telegram');
-const profileHandler = require('./_modules/profile');
-const mediaFileHandler = require('./_modules/media-file');
-const photoFileHandler = require('./_modules/photo-file');
+// Импорт существующих обработчиков
+const authHandler = require('./_auth');
+const businessesHandler = require('./_businesses');
+const mediaHandler = require('./_media');
+const newsHandler = require('./_news');
+const reactionsHandler = require('./_reactions');
+const reviewsHandler = require('./_reviews');
+const summaryHandler = require('./_summary');
+const profileHandler = require('./_profile');
+const mediaFileHandler = require('./_media/[fileId]');
+const photoFileHandler = require('./_photo/[fileId]');
 
 module.exports = async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
@@ -54,10 +54,6 @@ module.exports = async (req, res) => {
     
     if (path === '/api/summary' || path.startsWith('/api/summary/')) {
       return await summaryHandler(req, res);
-    }
-    
-    if (path === '/api/telegram' || path.startsWith('/api/telegram/')) {
-      return await telegramHandler(req, res);
     }
     
     if (path === '/api/profile' || path.startsWith('/api/profile/')) {
