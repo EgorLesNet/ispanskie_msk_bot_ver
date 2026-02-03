@@ -43,6 +43,14 @@
       "destination": "/api/router"
     },
     {
+      "source": "/api/push",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/push/:action",
+      "destination": "/api/router"
+    },
+    {
       "source": "/api/reactions",
       "destination": "/api/router"
     },
