@@ -11,7 +11,7 @@
         html, body { overscroll-behavior-y: contain; touch-action: pan-y; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #1a1a1a; transition: background 0.3s ease, color 0.3s ease; }
         body[data-theme="dark"] { background: #0e0e0e; color: #fff; }
-        .header { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 24px; }
+        .header { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 50px; }
         .logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
         .logo-img { width: 40px; height: 40px; border-radius: 10px; transition: transform 0.3s; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
         .logo-img:hover { transform: scale(1.1) rotate(5deg); }
@@ -82,11 +82,11 @@
         .star.active { color: #f39c12; }
         .star.inactive { color: #ddd; }
         .nav { position: fixed; bottom: calc(12px + env(safe-area-inset-bottom)); left: calc(12px + env(safe-area-inset-left)); right: calc(12px + env(safe-area-inset-right)); z-index: 1000; display: flex; justify-content: space-between; gap: 8px; padding: 8px; }
-        .nav-block { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 24px; padding: 6px; display: flex; gap: 6px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
-        body[data-theme="dark"] .nav-block { background: rgba(30, 30, 30, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
+        .nav-block { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0, 0, 0, 0.05); border-radius: 50px; padding: 6px; display: flex; gap: 6px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
+        body[data-theme="dark"] .nav-block { background: rgba(30, 30, 30, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
         .nav-block.left { flex: 1; max-width: 420px; }
         .nav-block.right { flex-shrink: 0; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 16px; border-radius: 18px; cursor: pointer; text-decoration: none; color: #666; transition: all 0.2s ease; background: transparent; border: none; min-width: 0; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 16px; border-radius: 36px; cursor: pointer; text-decoration: none; color: #666; transition: all 0.2s ease; background: transparent; border: none; min-width: 0; }
         body[data-theme="dark"] .nav-btn { color: #aaa; }
         .nav-btn:hover { background: rgba(0, 0, 0, 0.06); transform: scale(1.05); }
         body[data-theme="dark"] .nav-btn:hover { background: rgba(255, 255, 255, 0.08); }
@@ -229,62 +229,288 @@
         if (currentUser && currentUser.photoUrl) { const avatar = document.getElementById('userAvatar'); avatar.src = currentUser.photoUrl; avatar.style.display = 'block'; }
         function toggleTheme() { const body = document.body; const icon = document.getElementById('theme-icon'); const isDark = body.getAttribute('data-theme') === 'dark'; body.setAttribute('data-theme', isDark ? '' : 'dark'); icon.textContent = isDark ? '🌙' : '☀️'; localStorage.setItem('theme', isDark ? 'light' : 'dark'); if (tg) { tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e'); tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e'); } }
         function initTheme() { const saved = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; const useDark = saved === 'dark' || (!saved && prefersDark); if (useDark) { document.body.setAttribute('data-theme', 'dark'); document.getElementById('theme-icon').textContent = '☀️'; if (tg) { tg.setHeaderColor('#0e0e0e'); tg.setBackgroundColor('#0e0e0e'); } } }
-        const map = L.map('map').setView([55.592312, 37.458014], 15); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap contributors'}).addTo(map);
-        let selectedCoords = null; let tempMarker = null; let allBusinesses = []; let markers = []; let currentBusinessId = null; let currentRating = 0;
-        map.on('click', function(e) { selectedCoords = e.latlng; document.getElementById('coordinates').value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`; if (tempMarker) map.removeLayer(tempMarker); tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41]})}).addTo(map); if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); });
-        async function loadBusinesses() { try { const res = await fetch('/api/businesses'); const data = await res.json(); allBusinesses = data.businesses || []; displayBusinesses(allBusinesses); } catch (err) { console.error('Ошибка загрузки бизнесов:', err); } }
         
-        // FIX: Create button element for review modal opener
-        function createReviewButton(bizId, bizName) {
-            const btn = document.createElement('button');
-            btn.className = 'view-reviews-btn';
-            btn.textContent = '📝 Отзывы';
-            btn.style.cssText = 'display: inline-block; margin-top: 8px; padding: 6px 12px; background: #007aff; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer;';
-            btn.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                openReviewsModal(bizId, bizName);
-            };
-            return btn;
+        let map, businesses = [], markers = [], currentBusinessId = null, selectedCoords = null, currentRating = 0;
+        
+        async function initMap() {
+            const defaultCenter = [55.612522, 37.536318];
+            map = L.map('map', { zoomControl: false }).setView(defaultCenter, 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+            
+            map.on('click', function(e) {
+                selectedCoords = e.latlng;
+                document.getElementById('coordinates').value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+            });
+            
+            await loadBusinesses();
         }
         
-        function displayBusinesses(businesses) { 
-            markers.forEach(m => map.removeLayer(m)); 
-            markers = []; 
-            businesses.forEach(biz => { 
-                const marker = L.marker([biz.lat, biz.lng]).addTo(map); 
-                const popupDiv = document.createElement('div');
-                popupDiv.className = 'business-popup';
-                popupDiv.innerHTML = `
-                    <h3>${escapeHtml(biz.name)}</h3>
-                    <div class="category">${escapeHtml(biz.category)}</div>
-                    ${biz.avgRating ? `<div class="rating">⭐ ${biz.avgRating} (${biz.reviewCount} отзывов)</div>` : ''}
-                    ${biz.description ? `<div class="description">${escapeHtml(biz.description)}</div>` : ''}
-                    ${biz.address ? `<div class="address">📍 ${escapeHtml(biz.address)}</div>` : ''}
-                    ${biz.url ? `<div><a href="${escapeHtml(biz.url)}" target="_blank">Перейти →</a></div>` : ''}
+        async function loadBusinesses() {
+            try {
+                const res = await fetch('/api/businesses');
+                const data = await res.json();
+                businesses = data.businesses || [];
+                displayBusinesses();
+            } catch (err) {
+                console.error('Failed to load businesses:', err);
+            }
+        }
+        
+        function displayBusinesses() {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            const filtered = businesses.filter(b => {
+                if (categoryFilter && b.category !== categoryFilter) return false;
+                if (searchQuery && !b.name.toLowerCase().includes(searchQuery) && !(b.description || '').toLowerCase().includes(searchQuery)) return false;
+                return true;
+            });
+            
+            filtered.forEach(business => {
+                if (!business.coordinates || !business.coordinates.lat || !business.coordinates.lng) return;
+                
+                const iconHtml = getCategoryIcon(business.category);
+                const icon = L.divIcon({ html: iconHtml, className: 'custom-marker', iconSize: [32, 32] });
+                
+                const marker = L.marker([business.coordinates.lat, business.coordinates.lng], { icon });
+                
+                const avgRating = calculateAverageRating(business);
+                const stars = avgRating > 0 ? '⭐'.repeat(Math.round(avgRating)) : 'Нет отзывов';
+                
+                const popupContent = `
+                    <div class="business-popup">
+                        <h3>${escapeHtml(business.name)}</h3>
+                        <div class="category">${business.category || 'Без категории'}</div>
+                        <div class="rating">${stars} ${avgRating > 0 ? `(${avgRating.toFixed(1)})` : ''}</div>
+                        ${business.description ? `<div class="description">${escapeHtml(business.description)}</div>` : ''}
+                        ${business.address ? `<div class="address">📍 ${escapeHtml(business.address)}</div>` : ''}
+                        ${business.url ? `<div><a href="${escapeHtml(business.url)}" target="_blank" rel="noopener">🔗 Сайт</a></div>` : ''}
+                        <a class="view-reviews-btn" onclick="openReviewsModal(${business.id}); return false;">💬 Отзывы (${(business.reviews || []).length})</a>
+                    </div>
                 `;
-                popupDiv.appendChild(createReviewButton(biz.id, biz.name));
-                marker.bindPopup(popupDiv);
-                markers.push(marker); 
-            }); 
+                
+                marker.bindPopup(popupContent);
+                marker.addTo(map);
+                markers.push(marker);
+            });
         }
         
-        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
-        const searchInput = document.getElementById('searchInput'); const categoryFilter = document.getElementById('categoryFilter');
-        function filterBusinesses() { const searchTerm = searchInput.value.toLowerCase(); const selectedCategory = categoryFilter.value; const filtered = allBusinesses.filter(biz => { const matchesSearch = !searchTerm || biz.name.toLowerCase().includes(searchTerm) || (biz.description && biz.description.toLowerCase().includes(searchTerm)) || (biz.address && biz.address.toLowerCase().includes(searchTerm)); const matchesCategory = !selectedCategory || biz.category === selectedCategory; return matchesSearch && matchesCategory; }); displayBusinesses(filtered); }
-        searchInput.addEventListener('input', filterBusinesses); categoryFilter.addEventListener('change', filterBusinesses);
-        function openModal() { document.getElementById('addBusinessModal').classList.add('active'); const savedSecret = localStorage.getItem('businessAdminKey'); if (savedSecret) { document.getElementById('secret').value = savedSecret; } if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); }
-        function closeModal() { document.getElementById('addBusinessModal').classList.remove('active'); document.getElementById('addBusinessForm').reset(); if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } selectedCoords = null; }
-        document.getElementById('addBusinessForm').addEventListener('submit', async (e) => { e.preventDefault(); if (!selectedCoords) { alert('Пожалуйста, выберите место на карте'); return; } const secretKey = document.getElementById('secret').value; const data = {secret: secretKey, name: document.getElementById('name').value, category: document.getElementById('category').value, description: document.getElementById('description').value, address: document.getElementById('address').value, url: document.getElementById('url').value, lat: selectedCoords.lat, lng: selectedCoords.lng}; try { const res = await fetch('/api/businesses', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)}); const result = await res.json(); if (res.ok) { localStorage.setItem('businessAdminKey', secretKey); alert('Бизнес успешно добавлен!'); closeModal(); window.location.reload(); } else { alert('Ошибка: ' + (result.error || 'Неизвестная ошибка')); } } catch (err) { alert('Ошибка сети: ' + err.message); } });
-        async function openReviewsModal(businessId, businessName) { currentBusinessId = businessId; document.getElementById('reviewsBusinessName').textContent = businessName; document.getElementById('reviewsModal').classList.add('active'); document.getElementById('addReviewForm').style.display = 'none'; document.getElementById('authPrompt').style.display = 'none'; await loadReviews(); if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); }
-        function closeReviewsModal() { document.getElementById('reviewsModal').classList.remove('active'); currentBusinessId = null; currentRating = 0; }
-        async function loadReviews() { if (!currentBusinessId) return; try { const userTgId = currentUser ? currentUser.tgId : null; const res = await fetch(`/api/reviews?businessId=${currentBusinessId}${userTgId ? '&userTgId=' + userTgId : ''}`); const data = await res.json(); const reviewsList = document.getElementById('reviewsList'); document.getElementById('reviewCount').textContent = `(${data.reviewCount})`; if (data.reviews.length === 0) { reviewsList.innerHTML = '<div class="no-reviews">Пока нет отзывов. Будьте первым!</div>'; return; } reviewsList.innerHTML = data.reviews.map(review => { const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating); const date = new Date(review.createdAt).toLocaleDateString('ru-RU'); const ownClass = review.isOwn ? ' own-review' : ''; return `<div class="review-item${ownClass}"><div class="review-header"><span class="review-author">${review.photoUrl ? `<img src="${escapeHtml(review.photoUrl)}" alt="">` : ''}${escapeHtml(review.userName)}${review.isOwn ? ' (вы)' : ''}</span><span class="review-rating">${stars}</span></div>${review.comment ? `<div class="review-comment">${escapeHtml(review.comment)}</div>` : ''}<div class="review-date">${date}</div></div>`; }).join(''); } catch (err) { console.error('Ошибка загрузки отзывов:', err); document.getElementById('reviewsList').innerHTML = '<div class="no-reviews">Ошибка загрузки отзывов</div>'; } }
-        function showAddReviewForm() { if (!currentUser) { document.getElementById('authPrompt').style.display = 'block'; return; } document.getElementById('addReviewForm').style.display = 'block'; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
-        function hideAddReviewForm() { document.getElementById('addReviewForm').style.display = 'none'; document.getElementById('reviewComment').value = ''; currentRating = 0; updateStars(); }
-        document.querySelectorAll('#starRating .star').forEach(star => { star.addEventListener('click', function() { currentRating = parseInt(this.getAttribute('data-rating')); updateStars(); if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }); });
-        function updateStars() { document.querySelectorAll('#starRating .star').forEach(star => { const rating = parseInt(star.getAttribute('data-rating')); if (rating <= currentRating) { star.classList.add('active'); star.classList.remove('inactive'); } else { star.classList.add('inactive'); star.classList.remove('active'); } }); }
-        async function submitReview() { if (!currentUser) { alert('Войдите через Telegram для добавления отзыва'); window.location.href = 'profile.html'; return; } const comment = document.getElementById('reviewComment').value.trim(); if (currentRating === 0) { alert('Пожалуйста, поставьте оценку'); return; } const data = {businessId: currentBusinessId, tgId: currentUser.tgId, userName: currentUser.displayName, photoUrl: currentUser.photoUrl || null, rating: currentRating, comment}; try { const res = await fetch('/api/reviews', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)}); const result = await res.json(); if (res.ok) { alert('Спасибо за отзыв!'); hideAddReviewForm(); await loadReviews(); await loadBusinesses(); if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); } else { alert('Ошибка: ' + (result.error || 'Неизвестная ошибка')); } } catch (err) { alert('Ошибка сети: ' + err.message); } }
-        initTheme(); loadBusinesses();
+        function getCategoryIcon(category) {
+            const icons = {
+                'Кафе/Рестораны': '🍽️', 'Магазины продуктов': '🛒', 'Аптеки': '💊',
+                'Салоны красоты': '💅', 'Фитнес/Спорт': '🏋️', 'Медицина': '🏥',
+                'Детские центры': '👶', 'Образование': '📚', 'Ремонт': '🔧',
+                'Автосервисы': '🚗', 'Химчистка/Прачечная': '🧺', 'Доставка еды': '🍕',
+                'Парикмахерские': '💇', 'Банки/Банкоматы': '🏦'
+            };
+            const emoji = icons[category] || '📦';
+            return `<div style="font-size: 28px; line-height: 1;">${emoji}</div>`;
+        }
+        
+        function calculateAverageRating(business) {
+            const reviews = business.reviews || [];
+            if (reviews.length === 0) return 0;
+            const sum = reviews.reduce((acc, r) => acc + (r.rating || 0), 0);
+            return sum / reviews.length;
+        }
+        
+        function openReviewsModal(businessId) {
+            currentBusinessId = businessId;
+            const business = businesses.find(b => b.id === businessId);
+            if (!business) return;
+            
+            document.getElementById('reviewsBusinessName').textContent = business.name;
+            document.getElementById('reviewCount').textContent = `(${(business.reviews || []).length})`;
+            
+            displayReviews(business);
+            document.getElementById('reviewsModal').classList.add('active');
+        }
+        
+        function closeReviewsModal() {
+            document.getElementById('reviewsModal').classList.remove('active');
+            hideAddReviewForm();
+        }
+        
+        function displayReviews(business) {
+            const reviews = business.reviews || [];
+            const reviewsList = document.getElementById('reviewsList');
+            
+            if (reviews.length === 0) {
+                reviewsList.innerHTML = '<div class="no-reviews">Пока нет отзывов. Будьте первым!</div>';
+                return;
+            }
+            
+            reviewsList.innerHTML = reviews.map(review => {
+                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                const date = new Date(review.createdAt).toLocaleDateString('ru-RU');
+                const isOwnReview = currentUser && String(review.tgId) === String(currentUser.tgId);
+                
+                return `
+                    <div class="review-item ${isOwnReview ? 'own-review' : ''}">
+                        <div class="review-header">
+                            <div class="review-author">
+                                ${review.authorPhoto ? `<img src="${escapeHtml(review.authorPhoto)}" alt="" />` : ''}
+                                ${escapeHtml(review.authorName)}
+                            </div>
+                            <div class="review-rating">${stars}</div>
+                        </div>
+                        ${review.comment ? `<div class="review-comment">${escapeHtml(review.comment)}</div>` : ''}
+                        <div class="review-date">${date}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function showAddReviewForm() {
+            if (!currentUser) {
+                document.getElementById('authPrompt').style.display = 'block';
+                return;
+            }
+            
+            const business = businesses.find(b => b.id === currentBusinessId);
+            const userReview = (business.reviews || []).find(r => String(r.tgId) === String(currentUser.tgId));
+            
+            if (userReview) {
+                alert('Вы уже оставили отзыв на этот бизнес!');
+                return;
+            }
+            
+            document.getElementById('addReviewForm').style.display = 'block';
+            currentRating = 0;
+            updateStars();
+            document.getElementById('reviewComment').value = '';
+        }
+        
+        function hideAddReviewForm() {
+            document.getElementById('addReviewForm').style.display = 'none';
+            document.getElementById('authPrompt').style.display = 'none';
+        }
+        
+        document.getElementById('starRating').addEventListener('click', function(e) {
+            if (e.target.classList.contains('star')) {
+                currentRating = parseInt(e.target.getAttribute('data-rating'));
+                updateStars();
+            }
+        });
+        
+        function updateStars() {
+            document.querySelectorAll('.star').forEach(star => {
+                const rating = parseInt(star.getAttribute('data-rating'));
+                star.classList.toggle('active', rating <= currentRating);
+                star.classList.toggle('inactive', rating > currentRating);
+            });
+        }
+        
+        async function submitReview() {
+            if (!currentUser) {
+                alert('Необходимо войти через Telegram');
+                return;
+            }
+            
+            if (currentRating === 0) {
+                alert('Пожалуйста, выберите оценку');
+                return;
+            }
+            
+            const comment = document.getElementById('reviewComment').value.trim();
+            
+            try {
+                const res = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        businessId: currentBusinessId,
+                        tgId: currentUser.tgId,
+                        authorName: currentUser.displayName,
+                        authorPhoto: currentUser.photoUrl || null,
+                        rating: currentRating,
+                        comment: comment || null
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert('Отзыв успешно добавлен!');
+                    await loadBusinesses();
+                    const business = businesses.find(b => b.id === currentBusinessId);
+                    displayReviews(business);
+                    hideAddReviewForm();
+                } else {
+                    alert(data.message || 'Ошибка добавления отзыва');
+                }
+            } catch (err) {
+                console.error('Review submission error:', err);
+                alert('Ошибка связи с сервером');
+            }
+        }
+        
+        function openModal() {
+            document.getElementById('addBusinessModal').classList.add('active');
+            selectedCoords = null;
+            document.getElementById('coordinates').value = '';
+        }
+        
+        function closeModal() {
+            document.getElementById('addBusinessModal').classList.remove('active');
+            document.getElementById('addBusinessForm').reset();
+        }
+        
+        document.getElementById('addBusinessForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!selectedCoords) {
+                alert('Пожалуйста, выберите координаты на карте');
+                return;
+            }
+            
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value.trim() || null,
+                address: document.getElementById('address').value.trim() || null,
+                url: document.getElementById('url').value.trim() || null,
+                coordinates: { lat: selectedCoords.lat, lng: selectedCoords.lng },
+                secret: document.getElementById('secret').value
+            };
+            
+            try {
+                const res = await fetch('/api/businesses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert('Бизнес успешно добавлен!');
+                    closeModal();
+                    await loadBusinesses();
+                } else {
+                    alert(data.message || 'Ошибка добавления бизнеса');
+                }
+            } catch (err) {
+                console.error('Add business error:', err);
+                alert('Ошибка связи с сервером');
+            }
+        });
+        
+        document.getElementById('searchInput').addEventListener('input', displayBusinesses);
+        document.getElementById('categoryFilter').addEventListener('change', displayBusinesses);
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        initTheme();
+        initMap();
     </script>
 </body>
 </html>
