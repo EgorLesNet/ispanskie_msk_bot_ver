@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#007aff" />
     <title>Профиль - Агрегатор для района</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- App Adapter -->
+    <script src="/app-adapter.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { overscroll-behavior-y: contain; touch-action: pan-y; }
@@ -38,8 +48,6 @@
         body[data-theme="dark"] .review-comment { color: #ccc; }
         .review-date { font-size: 12px; color: #999; }
         .no-reviews { text-align: center; color: #999; padding: 40px; }
-        
-        /* Edit Modal */
         .edit-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.3s ease-out; }
         .edit-modal.active { display: flex; }
         .edit-modal-content { background: white; border-radius: 50px; padding: 40px 30px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease-out; }
@@ -71,7 +79,6 @@
         .modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .error-message { color: #ff3b30; font-size: 13px; margin-top: 8px; }
         .success-message { color: #34c759; font-size: 13px; margin-top: 8px; text-align: center; }
-        
         .auth-card { background: white; border-radius: 50px; padding: 50px 40px; text-align: center; box-shadow: 0 12px 48px rgba(0,0,0,0.15); animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         body[data-theme="dark"] .auth-card { background: #1e1e1e; box-shadow: 0 12px 48px rgba(0,0,0,0.5); }
         .auth-card h2 { margin-bottom: 16px; font-size: 34px; font-weight: 700; }
@@ -136,8 +143,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Edit Profile Modal -->
     <div class="edit-modal" id="editModal">
         <div class="edit-modal-content">
             <h2>✏️ Редактировать профиль</h2>
@@ -167,7 +172,6 @@
             </form>
         </div>
     </div>
-    
     <nav class="nav">
         <div class="nav-block left">
             <a href="news.html" class="nav-btn">
@@ -190,16 +194,14 @@
             </a>
         </div>
     </nav>
+    
+    <!-- Yandex Metrika -->
+    <script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    
     <script>
-        const tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-            tg.disableVerticalSwipes();
-            tg.setHeaderColor('#f0f2f5');
-            tg.setBackgroundColor('#f0f2f5');
-        }
-
+        console.log('[PROFILE] Waiting for appAdapter...');
+        
         let user = JSON.parse(localStorage.getItem('tgUser') || 'null');
         if (user) {
             showProfile();
@@ -216,18 +218,21 @@
             loadingText.style.display = 'block';
             errorText.style.display = 'none';
 
-            if (!tg) {
-                showError('Telegram Web App не инициализирован');
+            const userId = window.appAdapter?.getUserId();
+            if (!userId) {
+                showError('Откройте эту страницу через Telegram бота');
+                setTimeout(() => {
+                    window.location.href = 'https://t.me/ispanskie_msk_bot/app';
+                }, 2000);
                 return;
             }
 
-            if (tg.initData) {
+            if (window.Telegram?.WebApp?.initData) {
                 console.log('Using initData for authentication');
-                authenticateWithInitData(tg.initData);
-            } 
-            else if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                authenticateWithInitData(window.Telegram.WebApp.initData);
+            } else if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
                 console.log('Using initDataUnsafe fallback');
-                const tgUser = tg.initDataUnsafe.user;
+                const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
                 authenticateWithUserData({
                     id: tgUser.id,
                     first_name: tgUser.first_name,
@@ -237,9 +242,6 @@
                 });
             } else {
                 showError('Откройте эту страницу через Telegram бота');
-                setTimeout(() => {
-                    window.location.href = 'https://t.me/ispanskie_msk_bot/app';
-                }, 2000);
             }
         }
 
@@ -301,7 +303,7 @@
             errorText.textContent = message;
             errorText.style.display = 'block';
             
-            if (tg) tg.HapticFeedback?.notificationOccurred('error');
+            window.appAdapter?.vibrate('error');
         }
 
         function toggleTheme() {
@@ -313,7 +315,8 @@
             icon.textContent = isDark ? '🌙' : '☀️';
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
             
-            if (tg) {
+            if (window.appAdapter?.mode === 'telegram-mini-app' && window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
                 tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e');
                 tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e');
             }
@@ -327,10 +330,6 @@
             if (useDark) {
                 document.body.setAttribute('data-theme', 'dark');
                 document.getElementById('theme-icon').textContent = '☀️';
-                if (tg) {
-                    tg.setHeaderColor('#0e0e0e');
-                    tg.setBackgroundColor('#0e0e0e');
-                }
             }
         }
 
@@ -391,7 +390,6 @@
             }
         }
         
-        // Edit Profile Functions
         function openEditModal() {
             const modal = document.getElementById('editModal');
             const nameInput = document.getElementById('displayNameInput');
@@ -403,7 +401,7 @@
             photoPreview.src = user.photoUrl || `https://via.placeholder.com/120/007aff/ffffff?text=${user.displayName.charAt(0)}`;
             
             modal.classList.add('active');
-            if (tg) tg.HapticFeedback?.impactOccurred('medium');
+            window.appAdapter?.vibrate('medium');
         }
         
         function closeEditModal() {
@@ -411,7 +409,7 @@
             document.getElementById('nameError').style.display = 'none';
             document.getElementById('photoError').style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
-            if (tg) tg.HapticFeedback?.impactOccurred('light');
+            window.appAdapter?.vibrate('light');
         }
         
         function handleFileUpload(event) {
@@ -433,12 +431,11 @@
                 const dataUrl = e.target.result;
                 document.getElementById('photoUrlInput').value = dataUrl;
                 document.getElementById('photoPreview').src = dataUrl;
-                if (tg) tg.HapticFeedback?.notificationOccurred('success');
+                window.appAdapter?.vibrate('success');
             };
             reader.readAsDataURL(file);
         }
         
-        // Update preview when URL changes
         document.getElementById('photoUrlInput').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
@@ -456,7 +453,6 @@
             const photoError = document.getElementById('photoError');
             const successMessage = document.getElementById('successMessage');
             
-            // Clear errors
             nameError.style.display = 'none';
             photoError.style.display = 'none';
             successMessage.style.display = 'none';
@@ -464,7 +460,6 @@
             const displayName = nameInput.value.trim();
             const photoUrl = photoInput.value.trim();
             
-            // Validate
             if (!displayName) {
                 nameError.textContent = 'Имя не может быть пустым';
                 nameError.style.display = 'block';
@@ -494,19 +489,17 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Update local user data
                     user.displayName = displayName;
                     user.photoUrl = photoUrl || null;
                     localStorage.setItem('tgUser', JSON.stringify(user));
                     
-                    // Update UI
                     document.getElementById('profileName').textContent = displayName;
                     document.getElementById('profilePhoto').src = photoUrl || `https://via.placeholder.com/80/007aff/ffffff?text=${displayName.charAt(0)}`;
                     
                     successMessage.textContent = '✅ Профиль успешно обновлен!';
                     successMessage.style.display = 'block';
                     
-                    if (tg) tg.HapticFeedback?.notificationOccurred('success');
+                    window.appAdapter?.vibrate('success');
                     
                     setTimeout(() => {
                         closeEditModal();
@@ -518,7 +511,7 @@
                 console.error('Save error:', error);
                 nameError.textContent = error.message || 'Ошибка сохранения профиля';
                 nameError.style.display = 'block';
-                if (tg) tg.HapticFeedback?.notificationOccurred('error');
+                window.appAdapter?.vibrate('error');
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.textContent = '💾 Сохранить';

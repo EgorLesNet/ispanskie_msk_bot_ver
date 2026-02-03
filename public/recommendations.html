@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#007aff" />
     <title>Рекомендации - Агрегатор для района</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- App Adapter -->
+    <script src="/app-adapter.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { overscroll-behavior-y: contain; touch-action: pan-y; }
@@ -59,13 +69,41 @@
 </head>
 <body>
     <header class="header liquid-glass"><a class="logo-wrap" href="https://t.me/ispanskie_msk" target="_blank" rel="noopener"><img class="logo-img" src="logo.png" alt="Лого" /><div><h3>Агрегатор для района</h3><div class="subtitle">Рекомендации</div></div></a><button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"><span id="theme-icon">🌙</span></button></header>
-    <main class="content"><div class="construction-box"><div class="construction-icon">🚀</div><h1 class="construction-title">Раздел в разработке</h1><p class="construction-text">Мы работаем над созданием уникального раздела с рекомендациями от жителей района. Скоро здесь появится что-то особенное!</p><div class="construction-features"><h4>🌟 Что вас ждёт:</h4><ul class="feature-list"><li>Лучшие заведения от жителей</li><li>Проверенные мастера и услуги</li><li>Полезные советы для жизни в районе</li><li>Отзывы и рейтинги от соседей</li></ul></div><p class="construction-text">Есть идеи или предложения? Напишите нам!</p><a href="https://t.me/ispanskie_msk" target="_blank" rel="noopener" class="contact-link">💬 Связаться с нами</a></div></main>
+    <main class="content"><div class="construction-box"><div class="construction-icon" onclick="window.appAdapter?.vibrate('light')">🚀</div><h1 class="construction-title">Раздел в разработке</h1><p class="construction-text">Мы работаем над созданием уникального раздела с рекомендациями от жителей района. Скоро здесь появится что-то особенное!</p><div class="construction-features"><h4>🌟 Что вас ждёт:</h4><ul class="feature-list"><li>Лучшие заведения от жителей</li><li>Проверенные мастера и услуги</li><li>Полезные советы для жизни в районе</li><li>Отзывы и рейтинги от соседей</li></ul></div><p class="construction-text">Есть идеи или предложения? Напишите нам!</p><a href="https://t.me/ispanskie_msk" target="_blank" rel="noopener" class="contact-link">💬 Связаться с нами</a></div></main>
     <nav class="nav"><div class="nav-block left"><a href="news.html" class="nav-btn"><span class="nav-emoji">📰</span><span class="nav-label">Новости</span></a><a href="business.html" class="nav-btn"><span class="nav-emoji">💼</span><span class="nav-label">Бизнес</span></a><a href="recommendations.html" class="nav-btn active"><span class="nav-emoji">⭐</span><span class="nav-label">Рекоменд.</span></a></div><div class="nav-block right"><a href="profile.html" class="nav-btn"><span class="nav-emoji">👤</span><span class="nav-label">Профиль</span></a></div></nav>
+    
+    <!-- Yandex Metrika -->
+    <script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    
     <script>
-        const tg = window.Telegram?.WebApp;
-        if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes(); tg.setHeaderColor('#f0f2f5'); tg.setBackgroundColor('#f0f2f5'); }
-        function toggleTheme() { const body = document.body; const icon = document.getElementById('theme-icon'); const isDark = body.getAttribute('data-theme') === 'dark'; body.setAttribute('data-theme', isDark ? '' : 'dark'); icon.textContent = isDark ? '🌙' : '☀️'; localStorage.setItem('theme', isDark ? 'light' : 'dark'); if (tg) { tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e'); tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e'); } }
-        function initTheme() { const saved = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; const useDark = saved === 'dark' || (!saved && prefersDark); if (useDark) { document.body.setAttribute('data-theme', 'dark'); document.getElementById('theme-icon').textContent = '☀️'; if (tg) { tg.setHeaderColor('#0e0e0e'); tg.setBackgroundColor('#0e0e0e'); } } }
+        console.log('[RECOMMENDATIONS] Waiting for appAdapter...');
+        
+        function toggleTheme() { 
+            const body = document.body; 
+            const icon = document.getElementById('theme-icon'); 
+            const isDark = body.getAttribute('data-theme') === 'dark'; 
+            body.setAttribute('data-theme', isDark ? '' : 'dark'); 
+            icon.textContent = isDark ? '🌙' : '☀️'; 
+            localStorage.setItem('theme', isDark ? 'light' : 'dark'); 
+            
+            if (window.appAdapter?.mode === 'telegram-mini-app' && window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e'); 
+                tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e'); 
+            }
+        }
+        
+        function initTheme() { 
+            const saved = localStorage.getItem('theme'); 
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; 
+            const useDark = saved === 'dark' || (!saved && prefersDark); 
+            if (useDark) { 
+                document.body.setAttribute('data-theme', 'dark'); 
+                document.getElementById('theme-icon').textContent = '☀️'; 
+            } 
+        }
+        
         initTheme();
     </script>
 </body>
