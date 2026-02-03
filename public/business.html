@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#007aff" />
     <title>Бизнес - Агрегатор для района</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- App Adapter -->
+    <script src="/app-adapter.js"></script>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -110,28 +120,8 @@
         .business-popup a:hover { text-decoration: underline; }
         .business-popup .view-reviews-btn { display: inline-block; margin-top: 10px; padding: 8px 14px; background: #007aff; color: white; border-radius: 10px; font-size: 13px; text-decoration: none; cursor: pointer; font-weight: 500; }
         .business-popup .view-reviews-btn:hover { background: #0051d5; text-decoration: none; }
-        
-        /* Стили для цветных пинов */
-        .custom-pin { 
-            width: 30px; 
-            height: 30px; 
-            border-radius: 50% 50% 50% 0; 
-            transform: rotate(-45deg); 
-            border: 3px solid white;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-            position: relative;
-        }
-        .custom-pin::after {
-            content: '';
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: white;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
+        .custom-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.3); position: relative; }
+        .custom-pin::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     </style>
 </head>
 <body>
@@ -140,7 +130,7 @@
         <input type="text" class="search-input liquid-glass" id="searchInput" placeholder="🔍 Поиск бизнеса...">
         <select class="category-select liquid-glass" id="categoryFilter">
             <option value="">Все категории</option>
-            <option value="Продуктовые магазины">🛒 Продуктовые магазины</option>
+            <option value="Продуктовые магазины">🛍️ Продуктовые магазины</option>
             <option value="Кафе и рестораны">🍽️ Кафе и рестораны</option>
             <option value="Аптеки">💊 Аптеки</option>
             <option value="Салоны красоты">💅 Салоны красоты</option>
@@ -150,7 +140,7 @@
             <option value="Образование">📚 Образование</option>
             <option value="Ремонт и услуги">🔧 Ремонт и услуги</option>
             <option value="Автосервисы">🚗 Автосервисы</option>
-            <option value="Химчистка">🧺 Химчистка</option>
+            <option value="Химчистка">🧳 Химчистка</option>
             <option value="Доставка еды">🍕 Доставка еды</option>
             <option value="Банки и финансы">🏦 Банки и финансы</option>
             <option value="Зоомагазины">🐾 Зоомагазины</option>
@@ -171,7 +161,7 @@
                     <label>Категория *</label>
                     <select id="category" required>
                         <option value="">Выберите категорию</option>
-                        <option value="Продуктовые магазины">🛒 Продуктовые магазины</option>
+                        <option value="Продуктовые магазины">🛍️ Продуктовые магазины</option>
                         <option value="Кафе и рестораны">🍽️ Кафе и рестораны</option>
                         <option value="Аптеки">💊 Аптеки</option>
                         <option value="Салоны красоты">💅 Салоны красоты</option>
@@ -181,7 +171,7 @@
                         <option value="Образование">📚 Образование</option>
                         <option value="Ремонт и услуги">🔧 Ремонт и услуги</option>
                         <option value="Автосервисы">🚗 Автосервисы</option>
-                        <option value="Химчистка">🧺 Химчистка</option>
+                        <option value="Химчистка">🧳 Химчистка</option>
                         <option value="Доставка еды">🍕 Доставка еды</option>
                         <option value="Банки и финансы">🏦 Банки и финансы</option>
                         <option value="Зоомагазины">🐾 Зоомагазины</option>
@@ -241,20 +231,49 @@
         </div>
     </div>
     <nav class="nav"><div class="nav-block left"><a href="news.html" class="nav-btn"><span class="nav-emoji">📰</span><span class="nav-label">Новости</span></a><a href="business.html" class="nav-btn active"><span class="nav-emoji">💼</span><span class="nav-label">Бизнес</span></a><a href="recommendations.html" class="nav-btn"><span class="nav-emoji">⭐</span><span class="nav-label">Рекоменд.</span></a></div><div class="nav-block right"><a href="profile.html" class="nav-btn"><span class="nav-emoji">👤</span><span class="nav-label">Профиль</span></a></div></nav>
+    
+    <!-- Yandex Metrika -->
     <script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
     <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const tg = window.Telegram?.WebApp;
-        if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes(); tg.setHeaderColor('#f0f2f5'); tg.setBackgroundColor('#f0f2f5'); }
+        console.log('[BUSINESS] Waiting for appAdapter...');
+        
         const currentUser = JSON.parse(localStorage.getItem('tgUser') || 'null');
-        if (currentUser && currentUser.photoUrl) { const avatar = document.getElementById('userAvatar'); avatar.src = currentUser.photoUrl; avatar.style.display = 'block'; }
-        function toggleTheme() { const body = document.body; const icon = document.getElementById('theme-icon'); const isDark = body.getAttribute('data-theme') === 'dark'; body.setAttribute('data-theme', isDark ? '' : 'dark'); icon.textContent = isDark ? '🌙' : '☀️'; localStorage.setItem('theme', isDark ? 'light' : 'dark'); if (tg) { tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e'); tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e'); } }
-        function initTheme() { const saved = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; const useDark = saved === 'dark' || (!saved && prefersDark); if (useDark) { document.body.setAttribute('data-theme', 'dark'); document.getElementById('theme-icon').textContent = '☀️'; if (tg) { tg.setHeaderColor('#0e0e0e'); tg.setBackgroundColor('#0e0e0e'); } } }
+        if (currentUser && currentUser.photoUrl) { 
+            const avatar = document.getElementById('userAvatar'); 
+            avatar.src = currentUser.photoUrl; 
+            avatar.style.display = 'block'; 
+        }
+        
+        function toggleTheme() { 
+            const body = document.body; 
+            const icon = document.getElementById('theme-icon'); 
+            const isDark = body.getAttribute('data-theme') === 'dark'; 
+            body.setAttribute('data-theme', isDark ? '' : 'dark'); 
+            icon.textContent = isDark ? '🌙' : '☀️'; 
+            localStorage.setItem('theme', isDark ? 'light' : 'dark'); 
+            
+            if (window.appAdapter?.mode === 'telegram-mini-app' && window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e'); 
+                tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e'); 
+            }
+        }
+        
+        function initTheme() { 
+            const saved = localStorage.getItem('theme'); 
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; 
+            const useDark = saved === 'dark' || (!saved && prefersDark); 
+            if (useDark) { 
+                document.body.setAttribute('data-theme', 'dark'); 
+                document.getElementById('theme-icon').textContent = '☀️'; 
+            } 
+        }
         
         let map, businesses = [], markers = [], currentBusinessId = null, selectedCoords = null, currentRating = 0;
         
-        // Цвета для категорий
         const categoryColors = {
             'Продуктовые магазины': '#4CAF50',
             'Кафе и рестораны': '#FF9800',
@@ -274,7 +293,6 @@
         };
         
         async function initMap() {
-            // Координаты центра Испанских Кварталов (Коммунарка, Москва)
             const defaultCenter = [55.592, 37.457];
             map = L.map('map', { zoomControl: false }).setView(defaultCenter, 16);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
@@ -322,8 +340,6 @@
                 }
                 
                 const color = categoryColors[business.category] || '#999999';
-                
-                // Создаем кастомную иконку - цветной пин
                 const pinHtml = `<div class="custom-pin" style="background-color: ${color};"></div>`;
                 const icon = L.divIcon({ 
                     html: pinHtml, 
@@ -437,6 +453,7 @@
             if (e.target.classList.contains('star')) {
                 currentRating = parseInt(e.target.getAttribute('data-rating'));
                 updateStars();
+                window.appAdapter?.vibrate('light');
             }
         });
         
@@ -482,6 +499,7 @@
                     await loadBusinesses();
                     await loadReviews(currentBusinessId);
                     hideAddReviewForm();
+                    window.appAdapter?.vibrate('success');
                 } else {
                     alert(data.error || 'Ошибка добавления отзыва');
                 }
@@ -534,6 +552,7 @@
                     alert('Бизнес успешно добавлен!');
                     closeModal();
                     await loadBusinesses();
+                    window.appAdapter?.vibrate('success');
                 } else {
                     alert(data.error || 'Ошибка добавления бизнеса');
                 }
