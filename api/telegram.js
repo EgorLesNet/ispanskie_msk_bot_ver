@@ -2,6 +2,7 @@
 require('dotenv/config');
 const { Telegraf } = require('telegraf');
 const { readDB, updateDB } = require('./_db');
+const { getUser, toggleDigestSubscription } = require('../lib/users');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const WEBAPP_URL = process.env.WEBAPP_URL;
@@ -508,25 +509,75 @@ async function handleMedia(ctx, item) {
 bot.command('start', async (ctx) => {
   userStates.delete(ctx.from.id);
   
-  if (!WEBAPP_URL) {
-    return ctx.reply('Добро пожаловать! Отправьте новость текстом (можно с фото/видео):');
-  }
+  const keyboard = {
+    inline_keyboard: [
+      [{ text: '📰 Включить дайджест', callback_data: 'digest_on' }],
+      [{ text: '📱 Открыть приложение', web_app: { url: WEBAPP_URL || 'https://ispanskie-msk-bot-ver.vercel.app' } }]
+    ]
+  };
   
   await ctx.reply(
-    'Добро пожаловать! 👋\n\nИспользуйте кнопку ниже, чтобы открыть приложение:',
-    {
-      reply_markup: {
-        keyboard: [[
-          { text: '📱 Открыть приложение', web_app: { url: WEBAPP_URL } }
-        ]],
-        resize_keyboard: true
-      }
-    }
+    '🏠 Добро пожаловать в бот Испанских Кварталов!\n\n' +
+    'Здесь вы можете:\n' +
+    '• Отправлять новости района\n' +
+    '• Подписаться на ежедневный дайджест (21:00)\n' +
+    '• Просматривать карту бизнеса\n\n' +
+    'Выберите действие:',
+    { reply_markup: keyboard }
   );
-  
-  await ctx.reply('Или отправьте новость текстом (можно с фото/видео):', {
-    reply_markup: { remove_keyboard: true }
-  });
+});
+
+bot.command('digest_on', async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    await toggleDigestSubscription(tgId, true);
+    
+    await ctx.reply(
+      '✅ Вы подписались на ежедневный дайджест!\n\n' +
+      '📬 Каждый день в 21:00 вы будете получать краткую сводку новостей района.\n\n' +
+      'Чтобы отписаться, используйте команду /digest_off'
+    );
+  } catch (error) {
+    console.error('digest_on error:', error);
+    await ctx.reply('Ошибка при подписке. Попробуйте позже.');
+  }
+});
+
+bot.command('digest_off', async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    await toggleDigestSubscription(tgId, false);
+    
+    await ctx.reply(
+      '❌ Вы отписались от ежедневного дайджеста.\n\n' +
+      'Чтобы снова подписаться, используйте команду /digest_on'
+    );
+  } catch (error) {
+    console.error('digest_off error:', error);
+    await ctx.reply('Ошибка при отписке. Попробуйте позже.');
+  }
+});
+
+bot.command('digest_status', async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const user = await getUser(tgId);
+    
+    const subscribed = user?.digestSubscription || false;
+    const status = subscribed 
+      ? '✅ Вы подписаны на ежедневный дайджест' 
+      : '❌ Вы не подписаны на дайджест';
+    
+    await ctx.reply(
+      `${status}\n\n` +
+      'Команды:\n' +
+      '/digest_on - Подписаться\n' +
+      '/digest_off - Отписаться'
+    );
+  } catch (error) {
+    console.error('digest_status error:', error);
+    await ctx.reply('Ошибка при проверке статуса. Попробуйте позже.');
+  }
 });
 
 bot.command('delete', async (ctx) => {
@@ -646,12 +697,28 @@ bot.on('text', async (ctx, next) => {
 
 bot.on('callback_query', async (ctx) => {
   try {
+    const data = String(ctx.callbackQuery.data || '');
+    
+    // Обработка подписки на дайджест
+    if (data === 'digest_on') {
+      const tgId = ctx.from.id;
+      await toggleDigestSubscription(tgId, true);
+      
+      await ctx.answerCbQuery('Подписка оформлена!');
+      await ctx.reply(
+        '✅ Вы подписались на ежедневный дайджест!\n\n' +
+        '📬 Каждый день в 21:00 вы будете получать краткую сводку новостей района.\n\n' +
+        'Чтобы отписаться, используйте команду /digest_off'
+      );
+      return;
+    }
+    
+    // Обработка модерации (только для админов)
     if (!isAdmin(ctx)) {
       await ctx.answerCbQuery('Нет доступа!', { show_alert: true });
       return;
     }
 
-    const data = String(ctx.callbackQuery.data || '');
     const [action, idStr] = data.split(':');
     const postId = Number(idStr);
 
