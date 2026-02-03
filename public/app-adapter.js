@@ -8,6 +8,7 @@ class AppAdapter {
     this.mode = this.detectMode();
     this.user = null;
     this.features = this.getFeatures();
+    this.pushSubscription = null;
     
     console.log('[AppAdapter] Mode detected:', this.mode);
     console.log('[AppAdapter] Features:', this.features);
@@ -18,18 +19,15 @@ class AppAdapter {
    * @returns {'telegram-mini-app' | 'pwa-installed' | 'web-browser'}
    */
   detectMode() {
-    // Проверка 1: Telegram Mini App
     if (window.Telegram?.WebApp?.initData) {
       return 'telegram-mini-app';
     }
     
-    // Проверка 2: Установленное PWA
     if (window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true) {
       return 'pwa-installed';
     }
     
-    // Проверка 3: Обычный браузер
     return 'web-browser';
   }
   
@@ -40,33 +38,21 @@ class AppAdapter {
     const isWebMode = this.mode !== 'telegram-mini-app';
     
     return {
-      // UI Features
       showBackButton: this.mode === 'telegram-mini-app',
       showInstallPrompt: this.mode === 'web-browser',
       showTelegramLogin: isWebMode,
       showNavigation: true,
-      
-      // Auth Features
       useTelegramAuth: this.mode === 'telegram-mini-app',
       useWebAuth: isWebMode,
-      
-      // Notification Features
       canUseTelegramNotifications: this.mode === 'telegram-mini-app',
       canUseWebPush: isWebMode && 'Notification' in window && 'serviceWorker' in navigator,
-      
-      // Offline Features
       enableOffline: isWebMode && 'serviceWorker' in navigator,
       enableCache: true,
-      
-      // API Features
       useTelegramHaptics: this.mode === 'telegram-mini-app',
       useWebVibration: isWebMode && 'vibrate' in navigator
     };
   }
   
-  /**
-   * Инициализация адаптера
-   */
   async init() {
     console.log('[AppAdapter] Initializing...');
     
@@ -74,25 +60,18 @@ class AppAdapter {
       case 'telegram-mini-app':
         await this.initTelegramMode();
         break;
-      
       case 'pwa-installed':
         await this.initPWAMode();
         break;
-      
       case 'web-browser':
         await this.initWebMode();
         break;
     }
     
-    // Регистрируем обработчики
     this.setupEventListeners();
-    
     console.log('[AppAdapter] Initialized successfully');
   }
   
-  /**
-   * Инициализация для Telegram Mini App
-   */
   async initTelegramMode() {
     const tg = window.Telegram.WebApp;
     
@@ -100,21 +79,16 @@ class AppAdapter {
     tg.expand();
     tg.disableVerticalSwipes();
     
-    // Применяем тему Telegram
     const isDark = tg.colorScheme === 'dark';
     document.body.setAttribute('data-theme', isDark ? 'dark' : '');
     tg.setHeaderColor(isDark ? '#0e0e0e' : '#f0f2f5');
     tg.setBackgroundColor(isDark ? '#0e0e0e' : '#f0f2f5');
     
-    // Показываем кнопку "Назад" если нужно
     if (window.location.pathname !== '/news.html') {
       tg.BackButton.show();
-      tg.BackButton.onClick(() => {
-        window.history.back();
-      });
+      tg.BackButton.onClick(() => window.history.back());
     }
     
-    // Получаем данные пользователя
     if (tg.initDataUnsafe?.user) {
       this.user = {
         id: tg.initDataUnsafe.user.id,
@@ -124,25 +98,18 @@ class AppAdapter {
         photoUrl: tg.initDataUnsafe.user.photo_url,
         authMethod: 'telegram'
       };
-      
-      // Сохраняем в localStorage для совместимости
       localStorage.setItem('tgUser', JSON.stringify(this.user));
     }
     
     console.log('[AppAdapter] Telegram mode initialized');
   }
   
-  /**
-   * Инициализация для установленного PWA
-   */
   async initPWAMode() {
-    // Регистрируем Service Worker
     if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.register('/service-worker.js');
         console.log('[AppAdapter] Service Worker registered:', registration);
         
-        // Проверяем обновления
         registration.addEventListener('updatefound', () => {
           console.log('[AppAdapter] Service Worker update found');
         });
@@ -151,7 +118,6 @@ class AppAdapter {
       }
     }
     
-    // Проверяем авторизацию
     const savedUser = localStorage.getItem('tgUser');
     if (savedUser) {
       try {
@@ -161,7 +127,6 @@ class AppAdapter {
       }
     }
     
-    // Инициализируем Web Push если пользователь авторизован
     if (this.user && this.features.canUseWebPush) {
       await this.initWebPush();
     }
@@ -169,14 +134,9 @@ class AppAdapter {
     console.log('[AppAdapter] PWA mode initialized');
   }
   
-  /**
-   * Инициализация для веб-браузера
-   */
   async initWebMode() {
-    // Показываем кнопку установки PWA
     this.setupInstallPrompt();
     
-    // Проверяем авторизацию
     const savedUser = localStorage.getItem('tgUser');
     if (savedUser) {
       try {
@@ -189,19 +149,13 @@ class AppAdapter {
     console.log('[AppAdapter] Web mode initialized');
   }
   
-  /**
-   * Настройка промпта установки PWA
-   */
   setupInstallPrompt() {
     let deferredPrompt = null;
     
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      
       console.log('[AppAdapter] Install prompt available');
-      
-      // Показываем кнопку установки
       this.showInstallButton(deferredPrompt);
     });
     
@@ -211,11 +165,7 @@ class AppAdapter {
     });
   }
   
-  /**
-   * Показывает кнопку установки приложения
-   */
   showInstallButton(deferredPrompt) {
-    // Создаем кнопку если её нет
     let installBtn = document.getElementById('pwa-install-btn');
     
     if (!installBtn) {
@@ -275,29 +225,97 @@ class AppAdapter {
       await this.subscribeToWebPush();
     } else if (permission === 'default') {
       console.log('[AppAdapter] Web Push permission not determined');
-      // Будем запрашивать позже при необходимости
     } else {
       console.log('[AppAdapter] Web Push permission denied');
     }
   }
   
   /**
-   * Подписка на Web Push
+   * Запрос разрешения на уведомления
+   */
+  async requestNotificationPermission() {
+    if (!this.features.canUseWebPush) {
+      console.log('[AppAdapter] Web Push not supported');
+      return false;
+    }
+    
+    if (Notification.permission === 'granted') {
+      return true;
+    }
+    
+    try {
+      const permission = await Notification.requestPermission();
+      console.log('[AppAdapter] Notification permission:', permission);
+      
+      if (permission === 'granted') {
+        await this.subscribeToWebPush();
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('[AppAdapter] Error requesting notification permission:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Подписка на Web Push с регистрацией на сервере
    */
   async subscribeToWebPush() {
+    if (!this.features.canUseWebPush) {
+      console.log('[AppAdapter] Web Push not available');
+      return null;
+    }
+    
     try {
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
+      let subscription = await registration.pushManager.getSubscription();
       
       if (subscription) {
         console.log('[AppAdapter] Already subscribed to Web Push');
+        this.pushSubscription = subscription;
         return subscription;
       }
       
-      // Здесь будет логика подписки с сервером
-      console.log('[AppAdapter] Need to subscribe to Web Push');
+      // Получаем VAPID ключ с сервера
+      const vapidResponse = await fetch('/api/push/vapid-key');
+      const vapidData = await vapidResponse.json();
       
-      return null;
+      if (!vapidData.success || !vapidData.publicKey) {
+        throw new Error('Failed to get VAPID public key');
+      }
+      
+      console.log('[AppAdapter] Got VAPID public key');
+      
+      // Создаем подписку
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: this.urlBase64ToUint8Array(vapidData.publicKey)
+      });
+      
+      console.log('[AppAdapter] Created push subscription');
+      
+      // Регистрируем подписку на сервере
+      const registerResponse = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscription: subscription.toJSON(),
+          userId: this.getUserId()
+        })
+      });
+      
+      const registerData = await registerResponse.json();
+      
+      if (registerData.success) {
+        console.log('[AppAdapter] Push subscription registered on server');
+        this.pushSubscription = subscription;
+        return subscription;
+      } else {
+        throw new Error(registerData.error || 'Failed to register subscription');
+      }
+      
     } catch (error) {
       console.error('[AppAdapter] Web Push subscription failed:', error);
       return null;
@@ -305,17 +323,76 @@ class AppAdapter {
   }
   
   /**
-   * Настройка обработчиков событий
+   * Отписка от Web Push
    */
+  async unsubscribeFromWebPush() {
+    try {
+      if (this.pushSubscription) {
+        await this.pushSubscription.unsubscribe();
+        console.log('[AppAdapter] Unsubscribed from Web Push');
+      }
+      
+      // Уведомляем сервер
+      await fetch('/api/push/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: this.getUserId()
+        })
+      });
+      
+      this.pushSubscription = null;
+      return true;
+    } catch (error) {
+      console.error('[AppAdapter] Failed to unsubscribe from Web Push:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Проверка статуса подписки на уведомления
+   */
+  async isPushSubscribed() {
+    if (!this.features.canUseWebPush) {
+      return false;
+    }
+    
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      return subscription !== null;
+    } catch (error) {
+      console.error('[AppAdapter] Error checking push subscription:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Конвертация VAPID ключа из base64 в Uint8Array
+   */
+  urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+    
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    
+    return outputArray;
+  }
+  
   setupEventListeners() {
-    // Обработка изменения видимости
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         console.log('[AppAdapter] App became visible');
       }
     });
     
-    // Обработка изменения онлайн/офлайн статуса
     window.addEventListener('online', () => {
       console.log('[AppAdapter] App is online');
     });
@@ -325,22 +402,15 @@ class AppAdapter {
     });
   }
   
-  /**
-   * Проверка авторизации
-   */
   isAuthenticated() {
     return this.user !== null;
   }
   
-  /**
-   * Получение ID пользователя
-   */
   getUserId() {
     if (this.user) {
       return this.user.id;
     }
     
-    // Fallback для неавторизованных пользователей
     let userId = localStorage.getItem('newsUserId');
     if (!userId) {
       userId = 'web_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
@@ -349,9 +419,6 @@ class AppAdapter {
     return userId;
   }
   
-  /**
-   * Вибрация / Haptic Feedback
-   */
   vibrate(type = 'light') {
     if (this.features.useTelegramHaptics && window.Telegram?.WebApp?.HapticFeedback) {
       const tg = window.Telegram.WebApp;
@@ -390,12 +457,8 @@ class AppAdapter {
     }
   }
   
-  /**
-   * Показ уведомления
-   */
   async showNotification(title, body, options = {}) {
     if (this.mode === 'telegram-mini-app') {
-      // В Telegram уведомления показываются через бота
       console.log('[AppAdapter] Telegram notification (handled by bot):', title, body);
       return;
     }
