@@ -213,7 +213,9 @@
     <script>
         console.log('[PROFILE] Waiting for appAdapter...');
         
-        let user = JSON.parse(localStorage.getItem('tgUser') || 'null');
+        // PWA/SPА-навигация: этот скрипт может выполняться повторно при переходах,
+        // поэтому используем var (не падает с "Identifier already declared").
+        var user = JSON.parse(localStorage.getItem('tgUser') || 'null');
         if (user) {
             showProfile();
         } else {
@@ -229,19 +231,22 @@
             loadingText.style.display = 'block';
             errorText.style.display = 'none';
 
-            const userId = window.appAdapter?.getUserId();
-            if (!userId) {
-                showError('Откройте эту страницу через Telegram бота');
+            // В вебе/PWA мы не получаем initData, поэтому по кнопке сразу ведём в бота.
+            const hasTelegramInitData = !!window.Telegram?.WebApp?.initData;
+            const hasTelegramUser = !!window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+            if (!hasTelegramInitData && !hasTelegramUser) {
+                showError('Откройте через Telegram — перенаправляю…');
                 setTimeout(() => {
                     window.location.href = 'https://t.me/ispanskie_msk_bot/app';
-                }, 2000);
+                }, 300);
                 return;
             }
 
-            if (window.Telegram?.WebApp?.initData) {
+            if (hasTelegramInitData) {
                 console.log('Using initData for authentication');
                 authenticateWithInitData(window.Telegram.WebApp.initData);
-            } else if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+            } else if (hasTelegramUser) {
                 console.log('Using initDataUnsafe fallback');
                 const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
                 authenticateWithUserData({
