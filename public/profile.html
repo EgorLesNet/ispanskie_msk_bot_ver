@@ -231,7 +231,8 @@
             }
         }
 
-        function getReturnPath() {
+        // Вернёт returnPath только если он явно передан (через start_param или ?return=...)
+        function getExplicitReturnPath() {
             const params = new URLSearchParams(location.search);
             const qp = params.get('return');
             if (qp) return qp;
@@ -242,7 +243,7 @@
                 if (decoded) return decoded;
             }
 
-            return '/profile.html';
+            return null;
         }
 
         function normalizeReturnPath(p) {
@@ -333,8 +334,8 @@
 
             // В web/PWA initData нет → ведём в Telegram Mini App с return.
             if (!hasTelegramInitData && !hasTelegramUser) {
-                const returnPath = getReturnPath();
-                redirectToTelegram(returnPath);
+                const defaultReturn = location.pathname || '/profile.html';
+                redirectToTelegram(defaultReturn);
                 return;
             }
 
@@ -356,8 +357,11 @@
             }
         }
 
-        function openBackToSite(authCode) {
-            const returnPath = normalizeReturnPath(getReturnPath());
+        function openBackToSiteIfNeeded(authCode) {
+            const explicitReturn = getExplicitReturnPath();
+            if (!explicitReturn) return false;
+
+            const returnPath = normalizeReturnPath(explicitReturn);
             const backUrl = new URL(location.origin + returnPath);
             backUrl.searchParams.set('tg_code', authCode);
 
@@ -367,6 +371,8 @@
             } else {
                 window.location.href = backUrl.toString();
             }
+
+            return true;
         }
 
         function authenticateWithInitData(initData) {
@@ -381,13 +387,12 @@
             })
             .then(data => {
                 if (data.success && data.user) {
-                    // В Telegram Mini App: получаем authCode и уходим обратно на сайт/PWA
-                    if (data.authCode) {
-                        openBackToSite(data.authCode);
+                    // Если мы пришли из web/PWA (есть return) — уходим обратно на сайт/PWA
+                    if (data.authCode && openBackToSiteIfNeeded(data.authCode)) {
                         return;
                     }
 
-                    // fallback (старое поведение)
+                    // иначе остаёмся в текущем контексте (Mini App)
                     localStorage.setItem('tgUser', JSON.stringify(data.user));
                     location.reload();
                 } else {
@@ -412,8 +417,7 @@
             })
             .then(data => {
                 if (data.success && data.user) {
-                    if (data.authCode) {
-                        openBackToSite(data.authCode);
+                    if (data.authCode && openBackToSiteIfNeeded(data.authCode)) {
                         return;
                     }
 
