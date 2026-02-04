@@ -235,17 +235,20 @@
     
     <!-- Yandex Metrika -->
     <script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px; alt="" /></div></noscript>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         console.log('[BUSINESS] Waiting for appAdapter...');
         
-        const currentUser = JSON.parse(localStorage.getItem('tgUser') || 'null');
+        // PWA Fix: Use var to prevent "Identifier already declared" on SPA navigation
+        var currentUser = JSON.parse(localStorage.getItem('tgUser') || 'null');
         if (currentUser && currentUser.photoUrl) { 
-            const avatar = document.getElementById('userAvatar'); 
-            avatar.src = currentUser.photoUrl; 
-            avatar.style.display = 'block'; 
+            var avatar = document.getElementById('userAvatar'); 
+            if (avatar) {
+                avatar.src = currentUser.photoUrl; 
+                avatar.style.display = 'block'; 
+            }
         }
         
         function toggleTheme() { 
@@ -273,9 +276,10 @@
             } 
         }
         
-        let map, businesses = [], markers = [], currentBusinessId = null, selectedCoords = null, currentRating = 0;
+        // PWA Fix: global var to persist and cleanup map instance
+        var map, businesses = [], markers = [], currentBusinessId = null, selectedCoords = null, currentRating = 0;
         
-        const categoryColors = {
+        var categoryColors = {
             'Продуктовые магазины': '#4CAF50',
             'Кафе и рестораны': '#FF9800',
             'Аптеки': '#E91E63',
@@ -294,15 +298,33 @@
         };
         
         async function initMap() {
+            // PWA Fix: Cleanup existing map instance before creating new one
+            if (map && typeof map.remove === 'function') {
+                map.remove();
+                map = null;
+            }
+
             const defaultCenter = [55.592, 37.457];
+            
+            // Check if map container exists
+            if (!document.getElementById('map')) return;
+
             map = L.map('map', { zoomControl: false }).setView(defaultCenter, 16);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
             L.control.zoom({ position: 'topright' }).addTo(map);
             
             map.on('click', function(e) {
                 selectedCoords = e.latlng;
-                document.getElementById('coordinates').value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+                const coordInput = document.getElementById('coordinates');
+                if (coordInput) {
+                    coordInput.value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+                }
             });
+            
+            // PWA Fix: Invalidate size to ensure map renders correctly after SPA transition
+            setTimeout(() => {
+                if (map) map.invalidateSize();
+            }, 200);
             
             await loadBusinesses();
         }
@@ -320,11 +342,15 @@
         }
         
         function displayBusinesses() {
+            if (!map) return;
             markers.forEach(m => map.removeLayer(m));
             markers = [];
             
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-            const categoryFilter = document.getElementById('categoryFilter').value;
+            const searchInput = document.getElementById('searchInput');
+            const categoryInput = document.getElementById('categoryFilter');
+            
+            const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+            const categoryFilter = categoryInput ? categoryInput.value : '';
             
             const filtered = businesses.filter(b => {
                 if (categoryFilter && b.category !== categoryFilter) return false;
@@ -450,13 +476,16 @@
             document.getElementById('authPrompt').style.display = 'none';
         }
         
-        document.getElementById('starRating').addEventListener('click', function(e) {
-            if (e.target.classList.contains('star')) {
-                currentRating = parseInt(e.target.getAttribute('data-rating'));
-                updateStars();
-                window.appAdapter?.vibrate('light');
-            }
-        });
+        const starRating = document.getElementById('starRating');
+        if (starRating) {
+            starRating.addEventListener('click', function(e) {
+                if (e.target.classList.contains('star')) {
+                    currentRating = parseInt(e.target.getAttribute('data-rating'));
+                    updateStars();
+                    window.appAdapter?.vibrate('light');
+                }
+            });
+        }
         
         function updateStars() {
             document.querySelectorAll('.star').forEach(star => {
@@ -521,50 +550,56 @@
             document.getElementById('addBusinessForm').reset();
         }
         
-        document.getElementById('addBusinessForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!selectedCoords) {
-                alert('Пожалуйста, выберите координаты на карте');
-                return;
-            }
-            
-            const formData = {
-                name: document.getElementById('name').value.trim(),
-                category: document.getElementById('category').value,
-                description: document.getElementById('description').value.trim() || null,
-                address: document.getElementById('address').value.trim() || null,
-                url: document.getElementById('url').value.trim() || null,
-                lat: selectedCoords.lat,
-                lng: selectedCoords.lng,
-                secret: document.getElementById('secret').value
-            };
-            
-            try {
-                const res = await fetch('/api/businesses', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
+        const businessForm = document.getElementById('addBusinessForm');
+        if (businessForm) {
+            businessForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
                 
-                const data = await res.json();
-                
-                if (data.success) {
-                    alert('Бизнес успешно добавлен!');
-                    closeModal();
-                    await loadBusinesses();
-                    window.appAdapter?.vibrate('success');
-                } else {
-                    alert(data.error || 'Ошибка добавления бизнеса');
+                if (!selectedCoords) {
+                    alert('Пожалуйста, выберите координаты на карте');
+                    return;
                 }
-            } catch (err) {
-                console.error('Add business error:', err);
-                alert('Ошибка связи с сервером');
-            }
-        });
+                
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    category: document.getElementById('category').value,
+                    description: document.getElementById('description').value.trim() || null,
+                    address: document.getElementById('address').value.trim() || null,
+                    url: document.getElementById('url').value.trim() || null,
+                    lat: selectedCoords.lat,
+                    lng: selectedCoords.lng,
+                    secret: document.getElementById('secret').value
+                };
+                
+                try {
+                    const res = await fetch('/api/businesses', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        alert('Бизнес успешно добавлен!');
+                        closeModal();
+                        await loadBusinesses();
+                        window.appAdapter?.vibrate('success');
+                    } else {
+                        alert(data.error || 'Ошибка добавления бизнеса');
+                    }
+                } catch (err) {
+                    console.error('Add business error:', err);
+                    alert('Ошибка связи с сервером');
+                }
+            });
+        }
         
-        document.getElementById('searchInput').addEventListener('input', displayBusinesses);
-        document.getElementById('categoryFilter').addEventListener('change', displayBusinesses);
+        const searchInputEl = document.getElementById('searchInput');
+        if (searchInputEl) searchInputEl.addEventListener('input', displayBusinesses);
+        
+        const categoryFilterEl = document.getElementById('categoryFilter');
+        if (categoryFilterEl) categoryFilterEl.addEventListener('change', displayBusinesses);
         
         function escapeHtml(text) {
             if (!text) return '';
