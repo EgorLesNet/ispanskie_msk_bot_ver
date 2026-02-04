@@ -5,19 +5,40 @@ const webpush = require('web-push');
 // VAPID ключи для Web Push (должны быть в .env)
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'https://ispanskie-msk.vercel.app';
 
-// Временное хранилище подписок (в продакшене использовать БД)
-const subscriptions = new Map();
+function normalizeVapidSubject(input) {
+  if (!input) return null;
+  const s = String(input).trim();
+  if (!s) return null;
 
-// Настройка VAPID
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    VAPID_SUBJECT,
-    VAPID_PUBLIC_KEY,
-    VAPID_PRIVATE_KEY
-  );
-  console.log('[PUSH] VAPID configured successfully');
+  // По спецификации: только https: или mailto:
+  if (s.startsWith('mailto:')) return s;
+  if (s.startsWith('https://') || s.startsWith('http://')) return s;
+
+  // Частая ошибка — домен без протокола
+  return `https://${s.replace(/^\/+/, '')}`;
+}
+
+const RAW_VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'https://ispanskie-msk.vercel.app';
+const VAPID_SUBJECT = normalizeVapidSubject(RAW_VAPID_SUBJECT);
+
+let PUSH_ENABLED = false;
+
+// Настройка VAPID (никогда не должна валить весь API)
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_SUBJECT) {
+  try {
+    webpush.setVapidDetails(
+      VAPID_SUBJECT,
+      VAPID_PUBLIC_KEY,
+      VAPID_PRIVATE_KEY
+    );
+    PUSH_ENABLED = true;
+    console.log('[PUSH] VAPID configured successfully:', VAPID_SUBJECT);
+  } catch (e) {
+    PUSH_ENABLED = false;
+    console.warn('[PUSH] VAPID subject invalid, push disabled:', RAW_VAPID_SUBJECT);
+    console.warn('[PUSH] Error:', e.message);
+  }
 } else {
   console.warn('[PUSH] VAPID keys not configured. Push notifications will not work.');
   console.warn('[PUSH] Generate keys with: npx web-push generate-vapid-keys');
@@ -106,6 +127,12 @@ async function handleSend(req, res) {
         error: 'title and body are required'
       });
     }
+    if (!PUSH_ENABLED) {
+  return res.status(500).json({
+    success: false,
+    error: 'Push is not configured (VAPID invalid or missing)'
+  });
+}
     
     const payload = JSON.stringify({
       title,
