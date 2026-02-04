@@ -3,7 +3,7 @@ require('dotenv/config');
 const https = require('https');
 
 const GITHUB_REPO = process.env.GITHUB_REPO || 'EgorLesNet/ispanskie_msk_bot_ver';
-const DB_FILE_PATH = process.env.DB_FILE_PATH || 'db.json';
+const DB_FILE_PATH = process.env.DB_FILE_PATH || 'public/db.json';
 const DB_BRANCH = process.env.DB_BRANCH || 'main';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
