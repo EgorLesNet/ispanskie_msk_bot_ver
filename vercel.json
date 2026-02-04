@@ -19,6 +19,10 @@
       "destination": "/api/router"
     },
     {
+      "source": "/api/auth/:action",
+      "destination": "/api/router"
+    },
+    {
       "source": "/api/businesses",
       "destination": "/api/router"
     },
