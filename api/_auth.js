@@ -4,6 +4,7 @@ const crypto = require('crypto');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const AUTH_CODE_SECRET = process.env.AUTH_CODE_SECRET || BOT_TOKEN; // fallback, но лучше задать отдельный секрет
+const AUTH_CODE_TTL_SECONDS = 300; // 5 минут для ручного handoff (копировать код → вставить на сайте/PWA)
 
 if (!BOT_TOKEN) {
   console.error('[AUTH] BOT_TOKEN is not set!');
@@ -161,7 +162,7 @@ function signAuthCode(payloadB64) {
   return sig;
 }
 
-function generateAuthCode(userPayload, ttlSeconds = 180) {
+function generateAuthCode(userPayload, ttlSeconds = AUTH_CODE_TTL_SECONDS) {
   if (!AUTH_CODE_SECRET) return null;
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -309,7 +310,7 @@ async function handleProfileUpdate(req, res) {
     if (displayName.length > 50) {
       return res.status(400).json({
         success: false,
-        message: 'Имя слишком длинное (максимум 50 символов)'
+       message: 'Имя слишком длинное (максимум 50 символов)'
       });
     }
 
