@@ -122,7 +122,7 @@
   <div class="summary-container">
     <button class="summary-btn" id="summaryBtn" onclick="loadSummary()">
       <span>🤖</span>
-      <span>Что случилось сегодня?</span>
+      <span>AI: Что случилось сегодня?</span>
     </button>
     <div id="summaryCard" style="display: none;"></div>
   </div>
@@ -216,14 +216,14 @@
       
       if (card.style.display === 'block') {
         card.style.display = 'none';
-        btn.innerHTML = '<span>🤖</span><span>Что случилось сегодня?</span>';
+        btn.innerHTML = '<span>🤖</span><span>AI: Что случилось сегодня?</span>';
         window.appAdapter?.vibrate('light');
         return;
       }
       
       summaryLoading = true;
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span><span>Генерирую сводку...</span>';
+      btn.innerHTML = '<span>⏳</span><span>Генерирую AI сводку...</span>';
       window.appAdapter?.vibrate('medium');
       
       try {
@@ -236,14 +236,14 @@
           displaySummary(data);
           window.appAdapter?.vibrate('success');
         } else {
-          throw new Error(data.message || 'Ошибка генерации');
+          throw new Error(data.message || 'Ошибка AI генерации');
         }
       } catch (error) {
         console.error('Summary error:', error);
         card.innerHTML = `
           <div class="summary-card">
             <div class="summary-header"><span>⚠️</span><span>Ошибка</span><button class="summary-close" onclick="closeSummary()">&times;</button></div>
-            <div class="summary-text">Не удалось сгенерировать сводку. Попробуйте позже.</div>
+            <div class="summary-text">Не удалось сгенерировать AI сводку. Попробуйте позже.</div>
           </div>
         `;
         card.style.display = 'block';
@@ -251,7 +251,7 @@
       } finally {
         summaryLoading = false;
         btn.disabled = false;
-        btn.innerHTML = '<span>🤖</span><span>Скрыть сводку</span>';
+        btn.innerHTML = '<span>🤖</span><span>Скрыть AI сводку</span>';
       }
     }
     
@@ -260,7 +260,7 @@
       var today = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
       card.innerHTML = `
         <div class="summary-card">
-          <div class="summary-header"><span>🤖</span><span>Сводка за сегодня</span><button class="summary-close" onclick="closeSummary()">&times;</button></div>
+          <div class="summary-header"><span>🤖</span><span>AI сводка за сегодня</span><button class="summary-close" onclick="closeSummary()">&times;</button></div>
           <div class="summary-text">${escapeHtml(data.summary)}</div>
           <div class="summary-footer"><span>📅 ${today}</span><span>📰 ${data.count} новост${data.count === 1 ? 'ь' : data.count < 5 ? 'и' : 'ей'}</span></div>
         </div>
