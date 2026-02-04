@@ -22,13 +22,18 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAIC3mmC-fXZCStNpx5OZqKWeYpu-iH9AALrC2sbYSgZSGGArcyYPdWFAQADAgADeAADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC32mC-fVdcVjweRZFDwo8b-k1mPjwAALsC2sbYSgZSLft2owb3XBjAQADAgADeAADOAQ"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAIC3GmC-fWi15WqyXK2zmXQQpOcS5CLAALpC2sbYSgZSJg6m5kCze5dAQADAgADeAADOAQ",
       "photoFileIds": [
         "AgACAgIAAxkBAAIC3GmC-fWi15WqyXK2zmXQQpOcS5CLAALpC2sbYSgZSJg6m5kCze5dAQADAgADeAADOAQ",
         "AgACAgIAAxkBAAIC3WmC-fWtuSGKGB7qAAEq36z57g894gAC6gtrG2EoGUgqb8cKHpUhewEAAwIAA3gAAzgE",
-        "AgACAgIAAxkBAAIC3mmC-fXZCStNpx5OZqKWeYpu-iH9AALrC2sbYSgZSGGArcyYPdWFAQADAgADeAADOAQ"
+        "AgACAgIAAxkBAAIC3mmC-fXZCStNpx5OZqKWeYpu-iH9AALrC2sbYSgZSGGArcyYPdWFAQADAgADeAADOAQ",
+        "AgACAgIAAxkBAAIC32mC-fVdcVjweRZFDwo8b-k1mPjwAALsC2sbYSgZSLft2owb3XBjAQADAgADeAADOAQ"
       ],
       "source": {
         "title": "ИСПАНСКИЕ КВАРТАЛЫ",
