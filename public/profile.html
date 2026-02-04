@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <meta name="theme-color" content="#007aff" />
     <title>Профиль - Агрегатор для района</title>
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    
+
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
+
     <!-- App Adapter - автоматическое определение режима -->
     <script src="/app-adapter.js"></script>
     <script src="/navigation.js"></script>
-    
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { overscroll-behavior-y: contain; touch-action: pan-y; }
@@ -92,6 +92,21 @@
         .loading-text { color: #666; margin-top: 24px; font-size: 14px; }
         body[data-theme="dark"] .loading-text { color: #999; }
         .error-text { color: #ff3b30; margin-top: 16px; font-size: 14px; font-weight: 500; }
+        .code-box { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 14px; line-height: 1.4; background: rgba(0,0,0,0.04); padding: 14px 16px; border-radius: 24px; word-break: break-all; user-select: text; }
+        body[data-theme="dark"] .code-box { background: rgba(255,255,255,0.08); }
+        .code-actions { display: flex; gap: 10px; margin-top: 14px; }
+        .code-btn { flex: 1; padding: 14px 18px; border: none; border-radius: 36px; cursor: pointer; font-size: 15px; font-weight: 700; }
+        .code-btn.copy { background: linear-gradient(135deg, #34c759 0%, #248a3d 100%); color: #fff; }
+        .code-btn.close { background: #f0f2f5; color: #333; }
+        body[data-theme="dark"] .code-btn.close { background: #2a2a2a; color: #ccc; }
+        .code-input { width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: 32px; font-size: 15px; transition: all 0.3s; background: white; color: #1a1a1a; }
+        body[data-theme="dark"] .code-input { background: #2a2a2a; border-color: #444; color: #fff; }
+        .code-input:focus { outline: none; border-color: #34c759; box-shadow: 0 0 0 4px rgba(52,199,89,0.12); }
+        .code-login-btn { width: 100%; margin-top: 10px; background: linear-gradient(135deg, #34c759 0%, #248a3d 100%); color: white; border: none; padding: 16px 18px; border-radius: 40px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 28px rgba(52,199,89,0.35); }
+        .code-login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .divider { height: 1px; background: rgba(0,0,0,0.08); margin: 18px 0; }
+        body[data-theme="dark"] .divider { background: rgba(255,255,255,0.12); }
+
         .theme-toggle-btn { position: fixed; top: calc(20px + env(safe-area-inset-top)); right: 20px; background: rgba(255,255,255,0.65); backdrop-filter: blur(20px) saturate(180%) brightness(1.1); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1); border: 1px solid rgba(255, 255, 255, 0.4); width: 48px; height: 48px; border-radius: 40px; cursor: pointer; font-size: 22px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
         body[data-theme="dark"] .theme-toggle-btn { background: rgba(30,30,30,0.65); border: 1px solid rgba(255, 255, 255, 0.18); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
         .theme-toggle-btn:hover { transform: scale(1.15) rotate(20deg); }
@@ -113,19 +128,39 @@
 </head>
 <body>
     <button class="theme-toggle-btn" onclick="toggleTheme()"><span id="theme-icon">🌙</span></button>
+
     <div class="container">
         <div id="authView" class="auth-card" style="display: none;">
-            <h2>👋 Привет!</h2>
-            <p>Войдите, чтобы оставлять отзывы на бизнесы и сохранять свою историю. Это быстро и безопасно!</p>
+            <h2 id="authTitle">👋 Привет!</h2>
+            <p id="authSubtitle">Войдите, чтобы оставлять отзывы на бизнесы и сохранять свою историю. Это быстро и безопасно!</p>
+
             <button class="auth-btn" id="authButton" onclick="loginWithTelegram()">
                 <span class="auth-icon">✈️</span> Войти через Telegram
             </button>
-            <button class="auth-btn" id="returnButton" style="display:none;margin-top:12px;background:linear-gradient(135deg,#34c759 0%,#248a3d 100%);box-shadow:0 12px 32px rgba(52,199,89,0.35);" onclick="returnToSiteClick()">
-                <span class="auth-icon">✅</span> Продолжить на сайте
-            </button>
+
+            <div id="codeLoginBlock" style="display:none;margin-top:18px;text-align:left;">
+                <div class="divider"></div>
+                <div style="font-weight:700;margin-bottom:10px;">Войти по коду</div>
+                <input class="code-input" id="codeInput" placeholder="Вставьте код из Telegram Mini App" autocomplete="one-time-code" />
+                <button class="code-login-btn" id="codeLoginBtn" onclick="loginWithCode()">✅ Войти</button>
+                <div style="margin-top:10px;font-size:12px;color:#777;line-height:1.4;">Откройте Mini App в Telegram → «Профиль» → получите код → вставьте сюда. Код живёт 5 минут.</div>
+            </div>
+
+            <div id="miniAppCodeBlock" style="display:none;margin-top:18px;text-align:left;">
+                <div class="divider"></div>
+                <div style="font-weight:800;margin-bottom:10px;">Код для входа на сайте/PWA</div>
+                <div class="code-box" id="miniAppCode"></div>
+                <div class="code-actions">
+                    <button class="code-btn copy" onclick="copyMiniAppCode()">📋 Скопировать</button>
+                    <button class="code-btn close" onclick="closeMiniAppCode()">Закрыть</button>
+                </div>
+                <div style="margin-top:10px;font-size:12px;color:#777;line-height:1.4;">Перейдите на сайт или откройте PWA и вставьте код на странице «Профиль». Код живёт 5 минут.</div>
+            </div>
+
             <p class="loading-text" id="loadingText" style="display: none;">Подключение...</p>
             <p class="error-text" id="errorText" style="display: none;"></p>
         </div>
+
         <div id="profileView" style="display: none;">
             <div class="profile-card">
                 <div class="profile-header">
@@ -141,22 +176,23 @@
                 </div>
                 <button class="logout-btn" onclick="logout()">Выйти</button>
                 <div style="margin-top:12px;">
-  <button id="pushBtn"
-    style="width:100%;border:none;padding:14px 28px;border-radius:40px;cursor:pointer;font-size:15px;font-weight:600;color:#fff;
-           background:linear-gradient(135deg,#34c759 0%,#248a3d 100%);
-           box-shadow:0 8px 24px rgba(52,199,89,0.35);">
-    <span>🔔</span> <span>Включить уведомления</span>
-  </button>
-  <div id="pushStatus" style="margin-top:8px;font-size:12px;color:#666;text-align:center;"></div>
-</div>
-
+                    <button id="pushBtn"
+                      style="width:100%;border:none;padding:14px 28px;border-radius:40px;cursor:pointer;font-size:15px;font-weight:600;color:#fff;
+                             background:linear-gradient(135deg,#34c759 0%,#248a3d 100%);
+                             box-shadow:0 8px 24px rgba(52,199,89,0.35);">
+                      <span>🔔</span> <span>Включить уведомления</span>
+                    </button>
+                    <div id="pushStatus" style="margin-top:8px;font-size:12px;color:#666;text-align:center;"></div>
+                </div>
             </div>
+
             <div class="profile-card">
                 <div class="section-title">Мои отзывы</div>
                 <div id="reviewsList"></div>
             </div>
         </div>
     </div>
+
     <div class="edit-modal" id="editModal">
         <div class="edit-modal-content">
             <h2>✏️ Редактировать профиль</h2>
@@ -186,6 +222,7 @@
             </form>
         </div>
     </div>
+
     <nav class="nav">
         <div class="nav-block left">
             <a href="news.html" class="nav-btn">
@@ -208,109 +245,90 @@
             </a>
         </div>
     </nav>
-    
+
     <!-- Yandex Metrika -->
     <script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106461013', 'ym');ym(106461013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
     <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    
+
     <script>
-        console.log('[PROFILE] Waiting for appAdapter...');
+        const MINI_APP_CODE_KEY = 'miniAppLastAuthCode';
 
-        const PENDING_RETURN_KEY = 'tgPendingReturnPath';
-        let __pendingBackUrl = null;
+        // PWA/SPA-навигация: этот скрипт может выполняться повторно при переходах,
+        // поэтому используем var (не падает с "Identifier already declared").
+        var user = JSON.parse(localStorage.getItem('tgUser') || 'null');
 
-        function setPendingReturnPath(path) {
-            try { localStorage.setItem(PENDING_RETURN_KEY, path); } catch (e) {}
+        function isTelegramMiniApp() {
+            return !!window.Telegram?.WebApp?.initData;
         }
 
-        function getPendingReturnPath() {
-            try { return localStorage.getItem(PENDING_RETURN_KEY); } catch (e) { return null; }
-        }
-
-        function clearPendingReturnPath() {
-            try { localStorage.removeItem(PENDING_RETURN_KEY); } catch (e) {}
-        }
-
-        function base64UrlEncode(str) {
-            try {
-                return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-            } catch (e) {
-                return '';
-            }
-        }
-
-        function base64UrlDecode(str) {
-            try {
-                let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
-                while (b64.length % 4) b64 += '=';
-                return atob(b64);
-            } catch (e) {
-                return '';
-            }
-        }
-
-        // Вернёт returnPath только если он явно передан (через start_param или ?return=...) или сохранён перед уходом в Telegram
-        function getExplicitReturnPath() {
-            const params = new URLSearchParams(location.search);
-            const qp = params.get('return');
-            if (qp) return qp;
-
-            const sp = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
-            if (sp && typeof sp === 'string' && sp.startsWith('r=')) {
-                const decoded = base64UrlDecode(sp.slice(2));
-                if (decoded) return decoded;
-            }
-
-            const pending = getPendingReturnPath();
-            if (pending) return pending;
-
-            return null;
-        }
-
-        function normalizeReturnPath(p) {
-            if (!p || typeof p !== 'string') return '/profile.html';
-            if (p.startsWith('http://') || p.startsWith('https://')) return '/profile.html';
-            if (!p.startsWith('/')) return '/' + p;
-            return p;
-        }
-
-        function showReturnButton(backUrl) {
-            __pendingBackUrl = backUrl;
-
+        function showAuthView() {
+            document.getElementById('profileView').style.display = 'none';
             document.getElementById('authView').style.display = 'block';
-            document.getElementById('loadingText').style.display = 'block';
-            document.getElementById('loadingText').textContent = 'Готово! Если не вернуло автоматически — нажмите кнопку ниже.';
+        }
+
+        function showMiniAppCodeUI(code) {
+            try { localStorage.setItem(MINI_APP_CODE_KEY, code); } catch (e) {}
+
+            document.getElementById('authTitle').textContent = '✅ Готово!';
+            document.getElementById('authSubtitle').textContent = 'Скопируйте код и вставьте его на сайте или в PWA, чтобы войти в профиль.';
+
+            document.getElementById('authButton').style.display = 'none';
+            document.getElementById('codeLoginBlock').style.display = 'none';
+
+            document.getElementById('miniAppCode').textContent = code;
+            document.getElementById('miniAppCodeBlock').style.display = 'block';
+
+            document.getElementById('loadingText').style.display = 'none';
             document.getElementById('errorText').style.display = 'none';
-
-            const btn = document.getElementById('returnButton');
-            btn.style.display = 'inline-flex';
         }
 
-        function openExternalLink(url) {
+        async function copyMiniAppCode() {
+            const code = document.getElementById('miniAppCode').textContent || '';
+            if (!code) return;
+
             try {
-                if (window.Telegram?.WebApp?.openLink) {
-                    window.Telegram.WebApp.openLink(url);
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(code);
                 } else {
-                    window.location.href = url;
+                    // fallback
+                    const ta = document.createElement('textarea');
+                    ta.value = code;
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.focus();
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
                 }
+
+                window.appAdapter?.vibrate('success');
+                document.getElementById('loadingText').style.display = 'block';
+                document.getElementById('loadingText').textContent = 'Скопировано! Теперь вставьте код на сайте/PWA.';
             } catch (e) {
-                window.location.href = url;
+                window.appAdapter?.vibrate('warning');
             }
         }
 
-        function returnToSiteClick() {
-            if (!__pendingBackUrl) return;
-            openExternalLink(__pendingBackUrl);
+        function closeMiniAppCode() {
+            // Просто оставляем пользователя в Mini App. Код остаётся в localStorage, чтобы можно было открыть снова.
+            document.getElementById('loadingText').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Код можно скопировать снова в любой момент: Профиль → Войти → получите код.';
         }
 
-        async function exchangeAuthCodeIfPresent() {
-            const params = new URLSearchParams(location.search);
-            const code = params.get('tg_code');
-            if (!code) return false;
+        async function loginWithCode() {
+            const input = document.getElementById('codeInput');
+            const btn = document.getElementById('codeLoginBtn');
+            const code = (input.value || '').trim();
 
-            document.getElementById('authView').style.display = 'block';
-            document.getElementById('loadingText').textContent = 'Входим…';
+            if (!code) {
+                showError('Вставьте код из Telegram');
+                return;
+            }
+
+            btn.disabled = true;
             document.getElementById('loadingText').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Проверяем код…';
             document.getElementById('errorText').style.display = 'none';
 
             try {
@@ -325,85 +343,25 @@
 
                 if (data.success && data.user) {
                     localStorage.setItem('tgUser', JSON.stringify(data.user));
-                    clearPendingReturnPath();
-
-                    const returnTo = params.get('return');
-
-                    // чистим url
-                    const clean = new URL(location.href);
-                    clean.searchParams.delete('tg_code');
-                    clean.searchParams.delete('return');
-                    history.replaceState({}, '', clean.pathname + clean.search);
-
                     user = data.user;
-
-                    const target = normalizeReturnPath(returnTo);
-                    if (returnTo && target !== normalizeReturnPath(location.pathname)) {
-                        window.location.replace(target);
-                        return true;
-                    }
-
                     showProfile();
-                    return true;
+                    return;
                 }
 
-                throw new Error(data.message || 'Ошибка обмена кода');
-
-            } catch (err) {
-                console.error('Auth exchange error:', err);
-                showError(err.message || 'Ошибка входа');
-                return true;
+                throw new Error(data?.message || 'Не удалось войти по коду');
+            } catch (e) {
+                showError(e.message || 'Ошибка входа');
+            } finally {
+                btn.disabled = false;
             }
-        }
-
-        // PWA/SPА-навигация: этот скрипт может выполняться повторно при переходах,
-        // поэтому используем var (не падает с "Identifier already declared").
-        var user = JSON.parse(localStorage.getItem('tgUser') || 'null');
-
-        exchangeAuthCodeIfPresent().then((handled) => {
-            if (handled) return;
-
-            const hasTelegramInitData = !!window.Telegram?.WebApp?.initData;
-            const hasTelegramUser = !!window.Telegram?.WebApp?.initDataUnsafe?.user;
-            const explicitReturn = getExplicitReturnPath();
-
-            // Если мы в Telegram и пришли по start_param/локальному return — запускаем логин автоматически
-            if (!user && (hasTelegramInitData || hasTelegramUser) && explicitReturn) {
-                setTimeout(() => loginWithTelegram(), 50);
-                return;
-            }
-
-            if (user) {
-                showProfile();
-            } else {
-                document.getElementById('authView').style.display = 'block';
-            }
-        });
-
-        function redirectToTelegram(returnPath) {
-            const rp = normalizeReturnPath(returnPath);
-            const payload = 'r=' + base64UrlEncode(rp);
-
-            // 1) Прямой вызов приложения через tg:// (часто надёжнее из браузера)
-            const tgUrl = 'tg://resolve?domain=ispanskie_msk_bot&appname=app&startapp=' + encodeURIComponent(payload);
-            // 2) HTTPS deep link
-            const httpsUrl = 'https://t.me/ispanskie_msk_bot/app?startapp=' + encodeURIComponent(payload);
-            // 3) Последний fallback: открыть Mini App без параметров, но return уже лежит в localStorage
-            const httpsNoParam = 'https://t.me/ispanskie_msk_bot/app';
-
-            window.location.href = tgUrl;
-            setTimeout(() => { window.location.href = httpsUrl; }, 700);
-            setTimeout(() => { window.location.href = httpsNoParam; }, 1500);
         }
 
         function loginWithTelegram() {
             const authButton = document.getElementById('authButton');
-            const returnButton = document.getElementById('returnButton');
             const loadingText = document.getElementById('loadingText');
             const errorText = document.getElementById('errorText');
 
             authButton.disabled = true;
-            returnButton.style.display = 'none';
             loadingText.textContent = 'Подключение…';
             loadingText.style.display = 'block';
             errorText.style.display = 'none';
@@ -411,12 +369,10 @@
             const hasTelegramInitData = !!window.Telegram?.WebApp?.initData;
             const hasTelegramUser = !!window.Telegram?.WebApp?.initDataUnsafe?.user;
 
-            // В web/PWA initData нет → сохраняем return и ведём в Telegram Mini App
+            // В web/PWA initData нет → просто открываем Mini App, чтобы получить код.
             if (!hasTelegramInitData && !hasTelegramUser) {
-                const returnPath = (location.pathname || '/profile.html') + (location.search || '');
-                const normalized = normalizeReturnPath(returnPath);
-                setPendingReturnPath(normalized);
-                redirectToTelegram(normalized);
+                const httpsUrl = 'https://t.me/ispanskie_msk_bot/app';
+                window.location.href = httpsUrl;
                 return;
             }
 
@@ -436,26 +392,6 @@
             }
         }
 
-        function openBackToSiteIfNeeded(authCode) {
-            const explicitReturn = getExplicitReturnPath();
-            if (!explicitReturn) return false;
-
-            const returnPath = normalizeReturnPath(explicitReturn);
-
-            // Всегда возвращаемся на profile.html (там есть обмен кода), а потом редиректим на return
-            const backUrl = new URL(location.origin + '/profile.html');
-            backUrl.searchParams.set('tg_code', authCode);
-            backUrl.searchParams.set('return', returnPath);
-
-            const url = backUrl.toString();
-
-            // На некоторых платформах auto-редирект из промиса может быть заблокирован.
-            // Поэтому показываем кнопку "Продолжить" и параллельно пытаемся открыть ссылку автоматически.
-            showReturnButton(url);
-            openExternalLink(url);
-            return true;
-        }
-
         function authenticateWithInitData(initData) {
             fetch('/api/auth', {
                 method: 'POST',
@@ -468,7 +404,9 @@
             })
             .then(data => {
                 if (data.success && data.user) {
-                    if (data.authCode && openBackToSiteIfNeeded(data.authCode)) {
+                    // В Mini App показываем код и не даём логиниться по коду.
+                    if (isTelegramMiniApp() && data.authCode) {
+                        showMiniAppCodeUI(data.authCode);
                         return;
                     }
 
@@ -496,7 +434,8 @@
             })
             .then(data => {
                 if (data.success && data.user) {
-                    if (data.authCode && openBackToSiteIfNeeded(data.authCode)) {
+                    if (isTelegramMiniApp() && data.authCode) {
+                        showMiniAppCodeUI(data.authCode);
                         return;
                     }
 
@@ -750,9 +689,56 @@
             return div.innerHTML;
         }
 
+        // Init
         initTheme();
-    </script>
-    <script src="/push-client.js"></script>
 
+        (function initAuthMode() {
+            const mini = isTelegramMiniApp();
+            showAuthView();
+
+            // 1) Если уже залогинен — показать профиль
+            if (user && user.tgId) {
+                showProfile();
+                return;
+            }
+
+            // 2) В Telegram Mini App: автоматически авторизуемся и показываем код
+            if (mini) {
+                document.getElementById('codeLoginBlock').style.display = 'none';
+                document.getElementById('authButton').style.display = 'inline-flex';
+                document.getElementById('authButton').disabled = true;
+                document.getElementById('loadingText').style.display = 'block';
+                document.getElementById('loadingText').textContent = 'Готовим код…';
+
+                setTimeout(() => {
+                    if (window.Telegram?.WebApp?.initData) {
+                        authenticateWithInitData(window.Telegram.WebApp.initData);
+                    } else {
+                        // на всякий случай
+                        document.getElementById('authButton').disabled = false;
+                        document.getElementById('loadingText').style.display = 'none';
+                    }
+                }, 80);
+
+                return;
+            }
+
+            // 3) В web/PWA: показываем вход по коду
+            document.getElementById('codeLoginBlock').style.display = 'block';
+            document.getElementById('authButton').innerHTML = '<span class="auth-icon">✈️</span> Открыть Telegram и получить код';
+        })();
+
+        // Enter-to-submit for code input
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const el = document.activeElement;
+                if (el && el.id === 'codeInput') {
+                    loginWithCode();
+                }
+            }
+        });
+    </script>
+
+    <script src="/push-client.js"></script>
 </body>
 </html>
