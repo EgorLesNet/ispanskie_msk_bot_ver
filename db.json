@@ -70,9 +70,8 @@
       "status": "approved",
       "sourceType": "admin",
       "likes": 1,
-      "dislikes": 1,
+      "dislikes": 0,
       "userReactions": {
-        "273473755": "dislike",
         "unknown": "like"
       }
     },
