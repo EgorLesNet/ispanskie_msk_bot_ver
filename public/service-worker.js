@@ -1,6 +1,8 @@
-// Service Worker для PWA - версия 1.0.0
-const CACHE_NAME = 'ispanskie-v2';
-const API_CACHE_NAME = 'ispanskie-api-v2';
+// Service Worker для PWA - версия 1.1.0
+// Цель: консистентный UI bundle (PWA должна выглядеть как Telegram Mini App)
+
+const CACHE_NAME = 'ispanskie-v3';
+const API_CACHE_NAME = 'ispanskie-api-v3';
 
 // Статические файлы для кэширования
 const STATIC_ASSETS = [
@@ -8,22 +10,23 @@ const STATIC_ASSETS = [
   '/business.html',
   '/profile.html',
   '/recommendations.html',
+  '/stats.html',
   '/logo.png',
-  '/app-adapter.js'
+  '/manifest.json',
+  '/app-adapter.js',
+  '/navigation.js',
+  '/styles.css'
 ];
 
 // Установка Service Worker
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing...');
-  
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[SW] Caching static assets');
-        return cache.addAll(STATIC_ASSETS.filter(url => {
-          // Пропускаем несуществующие файлы
-          return true;
-        }));
+        return cache.addAll(STATIC_ASSETS);
       })
       .then(() => self.skipWaiting())
       .catch((error) => {
@@ -35,7 +38,7 @@ self.addEventListener('install', (event) => {
 // Активация Service Worker
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating...');
-  
+
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -59,30 +62,28 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
-  // Пропускаем запросы к Telegram API и внешним ресурсам
-  if (!url.origin.includes(self.location.origin) && 
-      !url.pathname.startsWith('/api/')) {
+
+  // Пропускаем запросы к внешним ресурсам (например Telegram SDK), но разрешаем /api
+  if (url.origin !== self.location.origin && !url.pathname.startsWith('/api/')) {
     return;
   }
 
   // HTML навигация (страницы) — Network First, чтобы PWA не залипала на старом HTML
-if (request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html')) {
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(request).then(r => r || caches.match('/news.html')))
-  );
-  return;
-}
+  if (request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then(r => r || caches.match('/news.html')))
+    );
+    return;
+  }
 
-  
   // API запросы - Network First стратегия
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
@@ -104,7 +105,7 @@ if (request.mode === 'navigate' || (request.headers.get('accept') || '').include
     );
     return;
   }
-  
+
   // Статические файлы - Cache First стратегия
   event.respondWith(
     caches.match(request)
@@ -112,21 +113,21 @@ if (request.mode === 'navigate' || (request.headers.get('accept') || '').include
         if (cachedResponse) {
           // Обновляем кэш в фоне
           fetch(request).then((response) => {
-            if (response.status === 200) {
+            if (response && response.status === 200) {
               caches.open(CACHE_NAME).then((cache) => {
-                cache.put(request, response);
+                cache.put(request, response.clone());
               });
             }
           }).catch(() => {});
-          
+
           return cachedResponse;
         }
-        
+
         // Если нет в кэше - запрашиваем из сети
         return fetch(request)
           .then((response) => {
             // Кэшируем успешный ответ
-            if (response.status === 200) {
+            if (response && response.status === 200) {
               const responseClone = response.clone();
               caches.open(CACHE_NAME).then((cache) => {
                 cache.put(request, responseClone);
@@ -141,14 +142,14 @@ if (request.mode === 'navigate' || (request.headers.get('accept') || '').include
 // Обработка Push уведомлений
 self.addEventListener('push', (event) => {
   console.log('[SW] Push received:', event);
-  
+
   let data = {
     title: 'Испанские кварталы',
     body: 'Новое уведомление',
     icon: '/logo.png',
     badge: '/logo.png'
   };
-  
+
   if (event.data) {
     try {
       data = { ...data, ...event.data.json() };
@@ -156,7 +157,7 @@ self.addEventListener('push', (event) => {
       data.body = event.data.text();
     }
   }
-  
+
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
@@ -172,11 +173,11 @@ self.addEventListener('push', (event) => {
 // Обработка клика по уведомлению
 self.addEventListener('notificationclick', (event) => {
   console.log('[SW] Notification clicked:', event);
-  
+
   event.notification.close();
-  
+
   const urlToOpen = event.notification.data || '/news.html';
-  
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
@@ -197,11 +198,11 @@ self.addEventListener('notificationclick', (event) => {
 // Обработка сообщений от клиента
 self.addEventListener('message', (event) => {
   console.log('[SW] Message received:', event.data);
-  
+
   if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
+
   if (event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
       caches.keys().then((cacheNames) => {
