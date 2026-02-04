@@ -1,6 +1,38 @@
 {
   "posts": [
     {
+      "id": 45,
+      "text": "📸 Александра\n📸 Анна\n📸 @marysher2021\n📸 @lunaverth\n📸 @AlexnderTSUMSaintLaurent\n\nСпасибо вам за ваши фотки! Надеюсь, никого не забыл упомянуть :)))\n\nПрисылайте почаще фото, всегда интересно посмотреть вашими глазами на наш район. Люди часто привыкают к виду из своего окна, а фотография может показать соседями, как у вас красиво.",
+      "textHTML": "📸 Александра\n📸 Анна\n📸 @marysher2021\n📸 @lunaverth\n📸 @AlexnderTSUMSaintLaurent\n\nСпасибо вам за ваши фотки! Надеюсь, никого не забыл упомянуть :)))\n\nПрисылайте почаще фото, всегда интересно посмотреть вашими глазами на наш район. Люди часто привыкают к виду из своего окна, а фотография может показать соседями, как у вас красиво.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-02-04T07:49:10.909Z",
+      "timestamp": "2026-02-04T07:49:10.909Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC3GmC-fWi15WqyXK2zmXQQpOcS5CLAALpC2sbYSgZSJg6m5kCze5dAQADAgADeAADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIC3GmC-fWi15WqyXK2zmXQQpOcS5CLAALpC2sbYSgZSJg6m5kCze5dAQADAgADeAADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIC3GmC-fWi15WqyXK2zmXQQpOcS5CLAALpC2sbYSgZSJg6m5kCze5dAQADAgADeAADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 9093,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/9093"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 44,
       "text": "На Прокшинском проспекте отлично почищены дорожки! Думаю, многие жители соседних районов могут позавидовать!\n\n@Ksenia_ksenia_kseniaa ❤️\n\n 📣 Поделиться новостью.\n\nЧат | Telegram\nНовости | Telegram\nВКонтакте\nInstagram",
       "textHTML": "На Прокшинском проспекте отлично почищены дорожки! Думаю, многие жители соседних районов могут позавидовать!\n\n@Ksenia_ksenia_kseniaa ❤️\n\n <a href=\"https://t.me/pro_prokshino_admin_bot\">📣 Поделиться новостью.</a>\n\n<a href=\"https://t.me/pro_prokshino_chat\">Чат | Telegram</a>\n<a href=\"https://t.me/pro_prokshino\">Новости | Telegram</a>\n<a href=\"https://vk.com/pro__prokshino\">ВКонтакте</a>\n<a href=\"https://instagram.com/pro_prokshino2\">Instagram</a>",
