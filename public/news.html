@@ -136,30 +136,6 @@
   <noscript><div><img src="https://mc.yandex.ru/watch/106461013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
   
   <script>
-    // Локальный кэш (50 новостей) для PWA/сайта.
-    var NEWS_CACHE_KEY = 'newsCache_v1';
-    var NEWS_CACHE_LIMIT = 50;
-
-    function readNewsCache() {
-      try {
-        var raw = localStorage.getItem(NEWS_CACHE_KEY);
-        if (!raw) return null;
-        var parsed = JSON.parse(raw);
-        var posts = Array.isArray(parsed) ? parsed : parsed.posts;
-        if (!Array.isArray(posts)) return null;
-        return posts;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function writeNewsCache(posts) {
-      try {
-        var limited = (posts || []).slice(0, NEWS_CACHE_LIMIT);
-        localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), posts: limited }));
-      } catch (e) {}
-    }
-
     // Дадим навигации возможность почистить интервалы перед сменой страницы.
     window.__pwaCleanup = function () {
       try {
@@ -423,17 +399,6 @@
       
       feed.innerHTML = cardsHtml + loadMoreHtml;
     }
-
-    function restoreFromCacheIfNeeded() {
-      if (allNews && allNews.length) return;
-      var cached = readNewsCache();
-      if (cached && cached.length) {
-        allNews = cached;
-        currentOffset = allNews.length;
-        hasMore = true;
-        renderNews();
-      }
-    }
     
     async function loadNews({ append = false } = {}) {
       if (isLoading) return;
@@ -451,9 +416,6 @@
         
         if (append) allNews = [...allNews, ...newPosts];
         else allNews = newPosts;
-
-        // Храним локально до 50 новостей (то, что реально открывалось в ленте)
-        writeNewsCache(allNews);
         
         hasMore = data.hasMore || false;
         currentOffset = allNews.length;
@@ -461,9 +423,6 @@
         renderNews();
       } catch (e) {
         console.error('Failed to load news:', e);
-
-        // fallback: локальный кэш
-        restoreFromCacheIfNeeded();
 
         if (!allNews.length) {
           var feed = document.getElementById('feed');
@@ -513,18 +472,7 @@
     // Инициализация
     initTheme();
 
-    // 0) Сначала рисуем из локального кэша, чтобы при возвращении в PWA контент не пропадал.
-    try {
-      var cached = readNewsCache();
-      if (cached && cached.length) {
-        allNews = cached;
-        currentOffset = allNews.length;
-        hasMore = true;
-        renderNews();
-      }
-    } catch (e) {}
-
-    // 1) Затем загружаем из сети
+    // Затем загружаем из сети
     if (window.appAdapter) {
       console.log('[NEWS] Adapter ready, mode:', window.appAdapter.mode);
       loadNews();
@@ -534,15 +482,6 @@
         loadNews();
       });
     }
-
-    // 2) На возврате (bfcache / popstate) — если DOM пустой, восстановить из кэша
-    window.addEventListener('pageshow', () => {
-      restoreFromCacheIfNeeded();
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') restoreFromCacheIfNeeded();
-    });
   </script>
 </body>
 </html>
