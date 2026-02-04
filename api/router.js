@@ -15,22 +15,64 @@ const photoFileHandler = require('./_photo_fileId');
 const pushHandler = require('./_push');
 const digestHandler = require('./_digest');
 
+async function tryParseJsonBody(req) {
+  try {
+    if (typeof req.body !== 'undefined') return;
+    const ct = (req.headers['content-type'] || '').toLowerCase();
+    if (!ct.includes('application/json')) return;
+
+    const chunks = [];
+    let size = 0;
+    await new Promise((resolve, reject) => {
+      req.on('data', (c) => {
+        size += c.length;
+        if (size > 1_000_000) {
+          reject(new Error('Request body too large'));
+          return;
+        }
+        chunks.push(c);
+      });
+      req.on('end', resolve);
+      req.on('error', reject);
+    });
+
+    const raw = Buffer.concat(chunks).toString('utf8');
+    if (!raw) {
+      req.body = {};
+      return;
+    }
+
+    req.body = JSON.parse(raw);
+  } catch (e) {
+    console.error('[ROUTER] Body parse error:', e.message);
+    req.body = req.body || {};
+  }
+}
+
 module.exports = async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const path = url.pathname;
-  
+
+  // Заполним query (в Vercel/Node он не всегда есть)
+  req.query = req.query || Object.fromEntries(url.searchParams.entries());
+
+  // Попробуем распарсить JSON body один раз на входе (на случай, если runtime не заполнил req.body)
+  if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+    await tryParseJsonBody(req);
+  }
+
   console.log(`[ROUTER] ${req.method} ${path}`);
-  
+
   try {
     // Роутинг по путям
     if (path === '/api/auth' || path.startsWith('/api/auth/')) {
       return await authHandler(req, res);
     }
-    
+
     if (path === '/api/businesses' || path.startsWith('/api/businesses/')) {
       return await businessesHandler(req, res);
     }
-    
+
     if (path === '/api/media' || path.startsWith('/api/media/')) {
       // Проверка на конкретный файл: /api/media/123
       const fileIdMatch = path.match(/^\/api\/media\/([^/]+)$/);
@@ -41,35 +83,35 @@ module.exports = async (req, res) => {
       }
       return await mediaHandler(req, res);
     }
-    
+
     if (path === '/api/news' || path.startsWith('/api/news/')) {
       return await newsHandler(req, res);
     }
-    
+
     if (path === '/api/reactions' || path.startsWith('/api/reactions/')) {
       return await reactionsHandler(req, res);
     }
-    
+
     if (path === '/api/reviews' || path.startsWith('/api/reviews/')) {
       return await reviewsHandler(req, res);
     }
-    
+
     if (path === '/api/summary' || path.startsWith('/api/summary/')) {
       return await summaryHandler(req, res);
     }
-    
+
     if (path === '/api/profile' || path.startsWith('/api/profile/')) {
       return await profileHandler(req, res);
     }
-    
+
     if (path === '/api/push' || path.startsWith('/api/push/')) {
       return await pushHandler(req, res);
     }
-    
+
     if (path === '/api/digest' || path.startsWith('/api/digest/')) {
       return await digestHandler(req, res);
     }
-    
+
     // Роутинг для /api/photo/[fileId]
     const photoMatch = path.match(/^\/api\/photo\/([^/]+)$/);
     if (photoMatch) {
@@ -77,10 +119,10 @@ module.exports = async (req, res) => {
       req.query.fileId = photoMatch[1];
       return await photoFileHandler(req, res);
     }
-    
+
     // 404 для неизвестных путей
     return res.status(404).json({ error: 'API endpoint not found', path });
-    
+
   } catch (error) {
     console.error('[ROUTER] Error:', error);
     return res.status(500).json({ error: 'Internal server error', message: error.message });

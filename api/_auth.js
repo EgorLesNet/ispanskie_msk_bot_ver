@@ -3,7 +3,7 @@ require('dotenv/config');
 const crypto = require('crypto');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const AUTH_CODE_SECRET = process.env.AUTH_CODE_SECRET || BOT_TOKEN; // fallback, but лучше задать отдельный секрет
+const AUTH_CODE_SECRET = process.env.AUTH_CODE_SECRET || BOT_TOKEN; // fallback, но лучше задать отдельный секрет
 
 if (!BOT_TOKEN) {
   console.error('[AUTH] BOT_TOKEN is not set!');
@@ -370,8 +370,14 @@ module.exports = async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const path = url.pathname;
 
-  // Под-роуты под /api/auth/* приходят сюда через router.js
+  // 1) Явный exchange по пути
   if (path === '/api/auth/exchange' || path === '/api/auth/exchange/') {
+    return handleAuthExchange(req, res);
+  }
+
+  // 2) Надёжный exchange по телу запроса (важно для случаев, когда req.url теряется из-за rewrites/router)
+  const hasExchangeCode = !!(req.body && (req.body.code || req.body.authCode || req.body.auth_code));
+  if (hasExchangeCode && !req.body.initData && !req.body.hash && !req.body.id) {
     return handleAuthExchange(req, res);
   }
 
