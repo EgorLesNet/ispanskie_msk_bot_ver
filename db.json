@@ -1,6 +1,38 @@
 {
   "posts": [
     {
+      "id": 47,
+      "text": "На Веласкеса 5 в ходе уборки снега пострадали домофоны 🫣",
+      "textHTML": "На Веласкеса 5 в ходе уборки снега пострадали домофоны 🫣",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-02-04T16:05:14.831Z",
+      "timestamp": "2026-02-04T16:05:14.831Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC5GmDbjnygj3frK_X1u6isnT8oVTDAAKGEGsbYSgZSN_IJIXTtHb4AQADAgADeAADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIC5GmDbjnygj3frK_X1u6isnT8oVTDAAKGEGsbYSgZSN_IJIXTtHb4AQADAgADeAADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIC5GmDbjnygj3frK_X1u6isnT8oVTDAAKGEGsbYSgZSN_IJIXTtHb4AQADAgADeAADOAQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 9117,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/9117"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 46,
       "text": "🦩Цапля в нашей деревне Николо-Хованское\n\nОна разве не должна улетать? Что она зимой ест?\n\nЗа видео спасибо красотке - @lizun9l",
       "textHTML": "🦩<b>Цапля в нашей деревне Николо-Хованское\n</b>\nОна разве не должна улетать? Что она зимой ест?\n\nЗа видео спасибо красотке - @lizun9l",
