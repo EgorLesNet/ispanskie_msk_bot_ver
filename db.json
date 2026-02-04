@@ -1,6 +1,38 @@
 {
   "posts": [
     {
+      "id": 48,
+      "text": "🌎 🚍\n\nНа Николо-Хованской меняют старые павильоны на современные московские.",
+      "textHTML": "🌎 🚍\n\nНа Николо-Хованской меняют старые павильоны на современные московские.",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-02-04T17:11:08.521Z",
+      "timestamp": "2026-02-04T17:11:08.521Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC7GmDfaumJVZTqTHxgqepD3EUxlzwAAKBEmsbW7kZSDoO2n8Pn3DuAQADAgADeAADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIC7GmDfaumJVZTqTHxgqepD3EUxlzwAAKBEmsbW7kZSDoO2n8Pn3DuAQADAgADeAADOAQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIC7GmDfaumJVZTqTHxgqepD3EUxlzwAAKBEmsbW7kZSDoO2n8Pn3DuAQADAgADeAADOAQ"
+      ],
+      "source": {
+        "title": "Испанские Кварталы | Прокшино ❄️☃️",
+        "username": "ispanskie_msk",
+        "chatId": -1001907008907,
+        "messageId": 555,
+        "chatUrl": "https://t.me/ispanskie_msk",
+        "postUrl": "https://t.me/ispanskie_msk/555"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 47,
       "text": "На Веласкеса 5 в ходе уборки снега пострадали домофоны 🫣",
       "textHTML": "На Веласкеса 5 в ходе уборки снега пострадали домофоны 🫣",
