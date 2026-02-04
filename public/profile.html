@@ -276,6 +276,8 @@
                 if (data.success && data.user) {
                     localStorage.setItem('tgUser', JSON.stringify(data.user));
 
+                    const returnTo = params.get('return');
+
                     // чистим url
                     const clean = new URL(location.href);
                     clean.searchParams.delete('tg_code');
@@ -283,6 +285,13 @@
                     history.replaceState({}, '', clean.pathname + clean.search);
 
                     user = data.user;
+
+                    const target = normalizeReturnPath(returnTo);
+                    if (returnTo && target !== normalizeReturnPath(location.pathname)) {
+                        window.location.replace(target);
+                        return true;
+                    }
+
                     showProfile();
                     return true;
                 }
@@ -300,11 +309,19 @@
         // поэтому используем var (не падает с "Identifier already declared").
         var user = JSON.parse(localStorage.getItem('tgUser') || 'null');
 
-        // 1) Если пришли с tg_code — сначала обмен кода (залогинит сайт/PWA)
         exchangeAuthCodeIfPresent().then((handled) => {
             if (handled) return;
 
-            // 2) Обычный режим
+            const hasTelegramInitData = !!window.Telegram?.WebApp?.initData;
+            const hasTelegramUser = !!window.Telegram?.WebApp?.initDataUnsafe?.user;
+            const explicitReturn = getExplicitReturnPath();
+
+            // Если мы в Telegram и пришли по start_param с return — запускаем логин автоматически
+            if (!user && (hasTelegramInitData || hasTelegramUser) && explicitReturn) {
+                setTimeout(() => loginWithTelegram(), 50);
+                return;
+            }
+
             if (user) {
                 showProfile();
             } else {
@@ -334,16 +351,14 @@
 
             // В web/PWA initData нет → ведём в Telegram Mini App с return.
             if (!hasTelegramInitData && !hasTelegramUser) {
-                const defaultReturn = location.pathname || '/profile.html';
-                redirectToTelegram(defaultReturn);
+                const returnPath = (location.pathname || '/profile.html') + (location.search || '');
+                redirectToTelegram(returnPath);
                 return;
             }
 
             if (hasTelegramInitData) {
-                console.log('Using initData for authentication');
                 authenticateWithInitData(window.Telegram.WebApp.initData);
             } else if (hasTelegramUser) {
-                console.log('Using initDataUnsafe fallback');
                 const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
                 authenticateWithUserData({
                     id: tgUser.id,
@@ -362,10 +377,12 @@
             if (!explicitReturn) return false;
 
             const returnPath = normalizeReturnPath(explicitReturn);
-            const backUrl = new URL(location.origin + returnPath);
-            backUrl.searchParams.set('tg_code', authCode);
 
-            // важно: открываем во внешнем браузере, чтобы вернуться на сайт/PWA
+            // Всегда возвращаемся на profile.html (там есть обмен кода), а потом редиректим на return
+            const backUrl = new URL(location.origin + '/profile.html');
+            backUrl.searchParams.set('tg_code', authCode);
+            backUrl.searchParams.set('return', returnPath);
+
             if (window.Telegram?.WebApp?.openLink) {
                 window.Telegram.WebApp.openLink(backUrl.toString());
             } else {
@@ -387,12 +404,10 @@
             })
             .then(data => {
                 if (data.success && data.user) {
-                    // Если мы пришли из web/PWA (есть return) — уходим обратно на сайт/PWA
                     if (data.authCode && openBackToSiteIfNeeded(data.authCode)) {
                         return;
                     }
 
-                    // иначе остаёмся в текущем контексте (Mini App)
                     localStorage.setItem('tgUser', JSON.stringify(data.user));
                     location.reload();
                 } else {
