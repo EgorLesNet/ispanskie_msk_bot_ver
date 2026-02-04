@@ -179,6 +179,18 @@ class PWANavigation {
     try {
       this.showLoading(true);
 
+      // Дадим текущей странице шанс очистить интервалы/карты/ресурсы,
+      // иначе при SPA-навигации в PWA будут копиться таймеры и ломаться состояние.
+      try {
+        if (typeof window.__pwaCleanup === 'function') {
+          window.__pwaCleanup();
+        }
+      } catch (e) {
+        console.warn('[Navigation] page cleanup failed:', e);
+      } finally {
+        window.__pwaCleanup = null;
+      }
+
       const response = await fetch(url, { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
