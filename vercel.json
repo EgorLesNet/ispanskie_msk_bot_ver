@@ -23,6 +23,14 @@
       "destination": "/api/router"
     },
     {
+      "source": "/api/digest",
+      "destination": "/api/router"
+    },
+    {
+      "source": "/api/digest/:action",
+      "destination": "/api/router"
+    },
+    {
       "source": "/api/media",
       "destination": "/api/router"
     },

@@ -13,6 +13,7 @@ const profileHandler = require('./_profile');
 const mediaFileHandler = require('./_media_fileId');
 const photoFileHandler = require('./_photo_fileId');
 const pushHandler = require('./_push');
+const digestHandler = require('./_digest');
 
 module.exports = async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
@@ -63,6 +64,10 @@ module.exports = async (req, res) => {
     
     if (path === '/api/push' || path.startsWith('/api/push/')) {
       return await pushHandler(req, res);
+    }
+    
+    if (path === '/api/digest' || path.startsWith('/api/digest/')) {
+      return await digestHandler(req, res);
     }
     
     // Роутинг для /api/photo/[fileId]
