@@ -213,6 +213,20 @@
     <script>
         console.log('[PROFILE] Waiting for appAdapter...');
 
+        const PENDING_RETURN_KEY = 'tgPendingReturnPath';
+
+        function setPendingReturnPath(path) {
+            try { localStorage.setItem(PENDING_RETURN_KEY, path); } catch (e) {}
+        }
+
+        function getPendingReturnPath() {
+            try { return localStorage.getItem(PENDING_RETURN_KEY); } catch (e) { return null; }
+        }
+
+        function clearPendingReturnPath() {
+            try { localStorage.removeItem(PENDING_RETURN_KEY); } catch (e) {}
+        }
+
         function base64UrlEncode(str) {
             try {
                 return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
@@ -231,7 +245,7 @@
             }
         }
 
-        // Вернёт returnPath только если он явно передан (через start_param или ?return=...)
+        // Вернёт returnPath только если он явно передан (через start_param или ?return=...) или сохранён перед уходом в Telegram
         function getExplicitReturnPath() {
             const params = new URLSearchParams(location.search);
             const qp = params.get('return');
@@ -242,6 +256,9 @@
                 const decoded = base64UrlDecode(sp.slice(2));
                 if (decoded) return decoded;
             }
+
+            const pending = getPendingReturnPath();
+            if (pending) return pending;
 
             return null;
         }
@@ -275,6 +292,7 @@
 
                 if (data.success && data.user) {
                     localStorage.setItem('tgUser', JSON.stringify(data.user));
+                    clearPendingReturnPath();
 
                     const returnTo = params.get('return');
 
@@ -316,7 +334,7 @@
             const hasTelegramUser = !!window.Telegram?.WebApp?.initDataUnsafe?.user;
             const explicitReturn = getExplicitReturnPath();
 
-            // Если мы в Telegram и пришли по start_param с return — запускаем логин автоматически
+            // Если мы в Telegram и пришли по start_param/локальному return — запускаем логин автоматически
             if (!user && (hasTelegramInitData || hasTelegramUser) && explicitReturn) {
                 setTimeout(() => loginWithTelegram(), 50);
                 return;
@@ -332,8 +350,17 @@
         function redirectToTelegram(returnPath) {
             const rp = normalizeReturnPath(returnPath);
             const payload = 'r=' + base64UrlEncode(rp);
-            const url = 'https://t.me/ispanskie_msk_bot/app?startapp=' + encodeURIComponent(payload);
-            window.location.href = url;
+
+            // 1) Прямой вызов приложения через tg:// (часто надёжнее из браузера)
+            const tgUrl = 'tg://resolve?domain=ispanskie_msk_bot&appname=app&startapp=' + encodeURIComponent(payload);
+            // 2) HTTPS deep link
+            const httpsUrl = 'https://t.me/ispanskie_msk_bot/app?startapp=' + encodeURIComponent(payload);
+            // 3) Последний fallback: открыть Mini App без параметров, но return уже лежит в localStorage
+            const httpsNoParam = 'https://t.me/ispanskie_msk_bot/app';
+
+            window.location.href = tgUrl;
+            setTimeout(() => { window.location.href = httpsUrl; }, 700);
+            setTimeout(() => { window.location.href = httpsNoParam; }, 1500);
         }
 
         function loginWithTelegram() {
@@ -349,10 +376,12 @@
             const hasTelegramInitData = !!window.Telegram?.WebApp?.initData;
             const hasTelegramUser = !!window.Telegram?.WebApp?.initDataUnsafe?.user;
 
-            // В web/PWA initData нет → ведём в Telegram Mini App с return.
+            // В web/PWA initData нет → сохраняем return и ведём в Telegram Mini App
             if (!hasTelegramInitData && !hasTelegramUser) {
                 const returnPath = (location.pathname || '/profile.html') + (location.search || '');
-                redirectToTelegram(returnPath);
+                const normalized = normalizeReturnPath(returnPath);
+                setPendingReturnPath(normalized);
+                redirectToTelegram(normalized);
                 return;
             }
 
@@ -377,6 +406,9 @@
             if (!explicitReturn) return false;
 
             const returnPath = normalizeReturnPath(explicitReturn);
+
+            // важно: чтобы не зациклиться при будущих входах
+            clearPendingReturnPath();
 
             // Всегда возвращаемся на profile.html (там есть обмен кода), а потом редиректим на return
             const backUrl = new URL(location.origin + '/profile.html');
