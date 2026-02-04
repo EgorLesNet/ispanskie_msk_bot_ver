@@ -120,6 +120,9 @@
             <button class="auth-btn" id="authButton" onclick="loginWithTelegram()">
                 <span class="auth-icon">✈️</span> Войти через Telegram
             </button>
+            <button class="auth-btn" id="returnButton" style="display:none;margin-top:12px;background:linear-gradient(135deg,#34c759 0%,#248a3d 100%);box-shadow:0 12px 32px rgba(52,199,89,0.35);" onclick="returnToSiteClick()">
+                <span class="auth-icon">✅</span> Продолжить на сайте
+            </button>
             <p class="loading-text" id="loadingText" style="display: none;">Подключение...</p>
             <p class="error-text" id="errorText" style="display: none;"></p>
         </div>
@@ -214,6 +217,7 @@
         console.log('[PROFILE] Waiting for appAdapter...');
 
         const PENDING_RETURN_KEY = 'tgPendingReturnPath';
+        let __pendingBackUrl = null;
 
         function setPendingReturnPath(path) {
             try { localStorage.setItem(PENDING_RETURN_KEY, path); } catch (e) {}
@@ -268,6 +272,35 @@
             if (p.startsWith('http://') || p.startsWith('https://')) return '/profile.html';
             if (!p.startsWith('/')) return '/' + p;
             return p;
+        }
+
+        function showReturnButton(backUrl) {
+            __pendingBackUrl = backUrl;
+
+            document.getElementById('authView').style.display = 'block';
+            document.getElementById('loadingText').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Готово! Если не вернуло автоматически — нажмите кнопку ниже.';
+            document.getElementById('errorText').style.display = 'none';
+
+            const btn = document.getElementById('returnButton');
+            btn.style.display = 'inline-flex';
+        }
+
+        function openExternalLink(url) {
+            try {
+                if (window.Telegram?.WebApp?.openLink) {
+                    window.Telegram.WebApp.openLink(url);
+                } else {
+                    window.location.href = url;
+                }
+            } catch (e) {
+                window.location.href = url;
+            }
+        }
+
+        function returnToSiteClick() {
+            if (!__pendingBackUrl) return;
+            openExternalLink(__pendingBackUrl);
         }
 
         async function exchangeAuthCodeIfPresent() {
@@ -365,10 +398,12 @@
 
         function loginWithTelegram() {
             const authButton = document.getElementById('authButton');
+            const returnButton = document.getElementById('returnButton');
             const loadingText = document.getElementById('loadingText');
             const errorText = document.getElementById('errorText');
 
             authButton.disabled = true;
+            returnButton.style.display = 'none';
             loadingText.textContent = 'Подключение…';
             loadingText.style.display = 'block';
             errorText.style.display = 'none';
@@ -407,20 +442,17 @@
 
             const returnPath = normalizeReturnPath(explicitReturn);
 
-            // важно: чтобы не зациклиться при будущих входах
-            clearPendingReturnPath();
-
             // Всегда возвращаемся на profile.html (там есть обмен кода), а потом редиректим на return
             const backUrl = new URL(location.origin + '/profile.html');
             backUrl.searchParams.set('tg_code', authCode);
             backUrl.searchParams.set('return', returnPath);
 
-            if (window.Telegram?.WebApp?.openLink) {
-                window.Telegram.WebApp.openLink(backUrl.toString());
-            } else {
-                window.location.href = backUrl.toString();
-            }
+            const url = backUrl.toString();
 
+            // На некоторых платформах auto-редирект из промиса может быть заблокирован.
+            // Поэтому показываем кнопку "Продолжить" и параллельно пытаемся открыть ссылку автоматически.
+            showReturnButton(url);
+            openExternalLink(url);
             return true;
         }
 
