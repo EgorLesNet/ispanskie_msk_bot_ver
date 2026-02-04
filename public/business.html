@@ -239,6 +239,37 @@
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Локальный кэш бизнеса (для возврата в PWA и офлайна)
+        var BIZ_CACHE_KEY = 'businessesCache_v1';
+
+        function readBizCache() {
+            try {
+                var raw = localStorage.getItem(BIZ_CACHE_KEY);
+                if (!raw) return null;
+                var parsed = JSON.parse(raw);
+                var list = Array.isArray(parsed) ? parsed : parsed.businesses;
+                return Array.isArray(list) ? list : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function writeBizCache(list) {
+            try {
+                localStorage.setItem(BIZ_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), businesses: list || [] }));
+            } catch (e) {}
+        }
+
+        // Cleanup hook for PWA SPA navigation
+        window.__pwaCleanup = function () {
+            try {
+                if (map && typeof map.remove === 'function') {
+                    map.remove();
+                }
+            } catch (e) {}
+            map = null;
+        };
+
         console.log('[BUSINESS] Waiting for appAdapter...');
         
         // PWA Fix: Use var to prevent "Identifier already declared" on SPA navigation
@@ -252,24 +283,24 @@
         }
         
         function toggleTheme() { 
-            const body = document.body; 
-            const icon = document.getElementById('theme-icon'); 
-            const isDark = body.getAttribute('data-theme') === 'dark'; 
+            var body = document.body; 
+            var icon = document.getElementById('theme-icon'); 
+            var isDark = body.getAttribute('data-theme') === 'dark'; 
             body.setAttribute('data-theme', isDark ? '' : 'dark'); 
             icon.textContent = isDark ? '🌙' : '☀️'; 
             localStorage.setItem('theme', isDark ? 'light' : 'dark'); 
             
             if (window.appAdapter?.mode === 'telegram-mini-app' && window.Telegram?.WebApp) {
-                const tg = window.Telegram.WebApp;
+                var tg = window.Telegram.WebApp;
                 tg.setHeaderColor(isDark ? '#f0f2f5' : '#0e0e0e'); 
                 tg.setBackgroundColor(isDark ? '#f0f2f5' : '#0e0e0e'); 
             }
         }
         
         function initTheme() { 
-            const saved = localStorage.getItem('theme'); 
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; 
-            const useDark = saved === 'dark' || (!saved && prefersDark); 
+            var saved = localStorage.getItem('theme'); 
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; 
+            var useDark = saved === 'dark' || (!saved && prefersDark); 
             if (useDark) { 
                 document.body.setAttribute('data-theme', 'dark'); 
                 document.getElementById('theme-icon').textContent = '☀️'; 
@@ -304,7 +335,7 @@
                 map = null;
             }
 
-            const defaultCenter = [55.592, 37.457];
+            var defaultCenter = [55.592, 37.457];
             
             // Check if map container exists
             if (!document.getElementById('map')) return;
@@ -315,7 +346,7 @@
             
             map.on('click', function(e) {
                 selectedCoords = e.latlng;
-                const coordInput = document.getElementById('coordinates');
+                var coordInput = document.getElementById('coordinates');
                 if (coordInput) {
                     coordInput.value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
                 }
@@ -325,19 +356,38 @@
             setTimeout(() => {
                 if (map) map.invalidateSize();
             }, 200);
+
+            // Сначала пробуем показать бизнесы из локального кэша
+            try {
+                var cached = readBizCache();
+                if (cached && cached.length) {
+                    businesses = cached;
+                    displayBusinesses();
+                }
+            } catch (e) {}
             
             await loadBusinesses();
         }
         
         async function loadBusinesses() {
             try {
-                const res = await fetch('/api/businesses');
-                const data = await res.json();
+                var res = await fetch('/api/businesses');
+                var data = await res.json();
                 businesses = data.businesses || [];
+                writeBizCache(businesses);
                 console.log('Loaded businesses:', businesses);
                 displayBusinesses();
             } catch (err) {
                 console.error('Failed to load businesses:', err);
+
+                // fallback: кэш
+                try {
+                    var cached = readBizCache();
+                    if (cached && cached.length) {
+                        businesses = cached;
+                        displayBusinesses();
+                    }
+                } catch (e) {}
             }
         }
         
@@ -346,13 +396,13 @@
             markers.forEach(m => map.removeLayer(m));
             markers = [];
             
-            const searchInput = document.getElementById('searchInput');
-            const categoryInput = document.getElementById('categoryFilter');
+            var searchInput = document.getElementById('searchInput');
+            var categoryInput = document.getElementById('categoryFilter');
             
-            const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
-            const categoryFilter = categoryInput ? categoryInput.value : '';
+            var searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+            var categoryFilter = categoryInput ? categoryInput.value : '';
             
-            const filtered = businesses.filter(b => {
+            var filtered = businesses.filter(b => {
                 if (categoryFilter && b.category !== categoryFilter) return false;
                 if (searchQuery && !b.name.toLowerCase().includes(searchQuery) && !(b.description || '').toLowerCase().includes(searchQuery)) return false;
                 return true;
@@ -366,9 +416,9 @@
                     return;
                 }
                 
-                const color = categoryColors[business.category] || '#999999';
-                const pinHtml = `<div class="custom-pin" style="background-color: ${color};"></div>`;
-                const icon = L.divIcon({ 
+                var color = categoryColors[business.category] || '#999999';
+                var pinHtml = `<div class="custom-pin" style="background-color: ${color};"></div>`;
+                var icon = L.divIcon({ 
                     html: pinHtml, 
                     className: 'custom-marker', 
                     iconSize: [30, 42],
@@ -376,13 +426,13 @@
                     popupAnchor: [0, -42]
                 });
                 
-                const marker = L.marker([business.lat, business.lng], { icon });
+                var marker = L.marker([business.lat, business.lng], { icon });
                 
-                const avgRating = business.avgRating || 0;
-                const reviewCount = business.reviewCount || 0;
-                const stars = avgRating > 0 ? '⭐'.repeat(Math.round(avgRating)) : 'Нет отзывов';
+                var avgRating = business.avgRating || 0;
+                var reviewCount = business.reviewCount || 0;
+                var stars = avgRating > 0 ? '⭐'.repeat(Math.round(avgRating)) : 'Нет отзывов';
                 
-                const popupContent = `
+                var popupContent = `
                     <div class="business-popup">
                         <h3>${escapeHtml(business.name)}</h3>
                         <div class="category">${escapeHtml(business.category || 'Без категории')}</div>
@@ -404,7 +454,7 @@
         
         function openReviewsModal(businessId) {
             currentBusinessId = businessId;
-            const business = businesses.find(b => b.id === businessId);
+            var business = businesses.find(b => b.id === businessId);
             if (!business) return;
             
             document.getElementById('reviewsBusinessName').textContent = business.name;
@@ -421,9 +471,9 @@
         
         async function loadReviews(businessId) {
             try {
-                const userTgId = currentUser ? currentUser.tgId : null;
-                const res = await fetch(`/api/reviews?businessId=${businessId}${userTgId ? '&userTgId=' + userTgId : ''}`);
-                const data = await res.json();
+                var userTgId = currentUser ? currentUser.tgId : null;
+                var res = await fetch(`/api/reviews?businessId=${businessId}${userTgId ? '&userTgId=' + userTgId : ''}`);
+                var data = await res.json();
                 displayReviews(data.reviews || []);
             } catch (err) {
                 console.error('Failed to load reviews:', err);
@@ -431,7 +481,7 @@
         }
         
         function displayReviews(reviews) {
-            const reviewsList = document.getElementById('reviewsList');
+            var reviewsList = document.getElementById('reviewsList');
             
             if (reviews.length === 0) {
                 reviewsList.innerHTML = '<div class="no-reviews">Пока нет отзывов. Будьте первым!</div>';
@@ -439,9 +489,9 @@
             }
             
             reviewsList.innerHTML = reviews.map(review => {
-                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
-                const date = new Date(review.createdAt).toLocaleDateString('ru-RU');
-                const isOwnReview = review.isOwn || false;
+                var stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                var date = new Date(review.createdAt).toLocaleDateString('ru-RU');
+                var isOwnReview = review.isOwn || false;
                 
                 return `
                     <div class="review-item ${isOwnReview ? 'own-review' : ''}">
@@ -476,7 +526,7 @@
             document.getElementById('authPrompt').style.display = 'none';
         }
         
-        const starRating = document.getElementById('starRating');
+        var starRating = document.getElementById('starRating');
         if (starRating) {
             starRating.addEventListener('click', function(e) {
                 if (e.target.classList.contains('star')) {
@@ -489,7 +539,7 @@
         
         function updateStars() {
             document.querySelectorAll('.star').forEach(star => {
-                const rating = parseInt(star.getAttribute('data-rating'));
+                var rating = parseInt(star.getAttribute('data-rating'));
                 star.classList.toggle('active', rating <= currentRating);
                 star.classList.toggle('inactive', rating > currentRating);
             });
@@ -506,10 +556,10 @@
                 return;
             }
             
-            const comment = document.getElementById('reviewComment').value.trim();
+            var comment = document.getElementById('reviewComment').value.trim();
             
             try {
-                const res = await fetch('/api/reviews', {
+                var res = await fetch('/api/reviews', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -522,7 +572,7 @@
                     })
                 });
                 
-                const data = await res.json();
+                var data = await res.json();
                 
                 if (data.success) {
                     alert('Отзыв успешно добавлен!');
@@ -550,7 +600,7 @@
             document.getElementById('addBusinessForm').reset();
         }
         
-        const businessForm = document.getElementById('addBusinessForm');
+        var businessForm = document.getElementById('addBusinessForm');
         if (businessForm) {
             businessForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -560,7 +610,7 @@
                     return;
                 }
                 
-                const formData = {
+                var formData = {
                     name: document.getElementById('name').value.trim(),
                     category: document.getElementById('category').value,
                     description: document.getElementById('description').value.trim() || null,
@@ -572,13 +622,13 @@
                 };
                 
                 try {
-                    const res = await fetch('/api/businesses', {
+                    var res = await fetch('/api/businesses', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)
                     });
                     
-                    const data = await res.json();
+                    var data = await res.json();
                     
                     if (data.success) {
                         alert('Бизнес успешно добавлен!');
@@ -595,15 +645,15 @@
             });
         }
         
-        const searchInputEl = document.getElementById('searchInput');
+        var searchInputEl = document.getElementById('searchInput');
         if (searchInputEl) searchInputEl.addEventListener('input', displayBusinesses);
         
-        const categoryFilterEl = document.getElementById('categoryFilter');
+        var categoryFilterEl = document.getElementById('categoryFilter');
         if (categoryFilterEl) categoryFilterEl.addEventListener('change', displayBusinesses);
         
         function escapeHtml(text) {
             if (!text) return '';
-            const div = document.createElement('div');
+            var div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
