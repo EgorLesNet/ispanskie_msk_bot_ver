@@ -1,6 +1,6 @@
 // Service Worker для PWA - версия 1.0.0
-const CACHE_NAME = 'ispanskie-v1';
-const API_CACHE_NAME = 'ispanskie-api-v1';
+const CACHE_NAME = 'ispanskie-v2';
+const API_CACHE_NAME = 'ispanskie-api-v2';
 
 // Статические файлы для кэширования
 const STATIC_ASSETS = [
@@ -65,6 +65,23 @@ self.addEventListener('fetch', (event) => {
       !url.pathname.startsWith('/api/')) {
     return;
   }
+
+  // HTML навигация (страницы) — Network First, чтобы PWA не залипала на старом HTML
+if (request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html')) {
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request).then(r => r || caches.match('/news.html')))
+  );
+  return;
+}
+
   
   // API запросы - Network First стратегия
   if (url.pathname.startsWith('/api/')) {
