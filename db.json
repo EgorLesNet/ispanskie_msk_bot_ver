@@ -30,6 +30,10 @@
         {
           "type": "photo",
           "fileId": "AgACAgIAAxkBAAIC-GmEplT5hG3jrNqODPVKzhBNF9tcAAJ7DGsbCRApSCYpcHiwCRchAQADAgADeAADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC-WmEplTnIW4Rc9EHRQ5dtauq_5AMAAJ-DGsbCRApSEIqSQABDIRDbwEAAwIAA3gAAzgE"
         }
       ],
       "photoFileId": "AgACAgIAAxkBAAIC9GmEplSlHBzllCzy4WO4CCNTVcpcAAJHDWsbD_IZSMCzJClcAAHRyQEAAwIAA3kAAzgE",
@@ -38,7 +42,8 @@
         "AgACAgIAAxkBAAIC9WmEplTFzShPB4nb5oHFpCEaTP2jAAJJDWsbD_IZSHQzA-jj5xr7AQADAgADeQADOAQ",
         "AgACAgIAAxkBAAIC9mmEplSzAmWcXsMOGWLiyfe4fY4kAAJKDWsbD_IZSCARg2AJihS7AQADAgADeQADOAQ",
         "AgACAgIAAxkBAAIC92mEplRyLK_6wCWxoJrMElDui_n9AAJLDWsbD_IZSNhhVjE2140VAQADAgADeQADOAQ",
-        "AgACAgIAAxkBAAIC-GmEplT5hG3jrNqODPVKzhBNF9tcAAJ7DGsbCRApSCYpcHiwCRchAQADAgADeAADOAQ"
+        "AgACAgIAAxkBAAIC-GmEplT5hG3jrNqODPVKzhBNF9tcAAJ7DGsbCRApSCYpcHiwCRchAQADAgADeAADOAQ",
+        "AgACAgIAAxkBAAIC-WmEplTnIW4Rc9EHRQ5dtauq_5AMAAJ-DGsbCRApSEIqSQABDIRDbwEAAwIAA3gAAzgE"
       ],
       "source": {
         "title": "ЧЕКЛАП ветклиника",
