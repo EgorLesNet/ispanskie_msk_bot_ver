@@ -1,6 +1,58 @@
 {
   "posts": [
     {
+      "id": 50,
+      "text": "По информации от жителей района, уже второй вечер подряд в районе Лобановского леса разбрасывают куски мяса. 😤\n\nПросим быть особенно внимательными на прогулках и не позволять питомцам подбирать еду с земли. \n\n📱 Телефон: +7 (499) 757 99 03\n🟣 Связь с нами:  @checklapadmin",
+      "textHTML": "По информации от жителей района, уже второй вечер подряд в районе Лобановского леса разбрасывают куски мяса. 😤\n\nПросим быть особенно внимательными на прогулках и не позволять питомцам подбирать еду с земли. \n\n📱 Телефон: +7 (499) 757 99 03\n🟣 Связь с нами:  @checklapadmin",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-02-05T14:16:55.281Z",
+      "timestamp": "2026-02-05T14:16:55.281Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC9GmEplSlHBzllCzy4WO4CCNTVcpcAAJHDWsbD_IZSMCzJClcAAHRyQEAAwIAA3kAAzgE"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC9WmEplTFzShPB4nb5oHFpCEaTP2jAAJJDWsbD_IZSHQzA-jj5xr7AQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC9mmEplSzAmWcXsMOGWLiyfe4fY4kAAJKDWsbD_IZSCARg2AJihS7AQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC92mEplRyLK_6wCWxoJrMElDui_n9AAJLDWsbD_IZSNhhVjE2140VAQADAgADeQADOAQ"
+        },
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIC-GmEplT5hG3jrNqODPVKzhBNF9tcAAJ7DGsbCRApSCYpcHiwCRchAQADAgADeAADOAQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIC9GmEplSlHBzllCzy4WO4CCNTVcpcAAJHDWsbD_IZSMCzJClcAAHRyQEAAwIAA3kAAzgE",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIC9GmEplSlHBzllCzy4WO4CCNTVcpcAAJHDWsbD_IZSMCzJClcAAHRyQEAAwIAA3kAAzgE",
+        "AgACAgIAAxkBAAIC9WmEplTFzShPB4nb5oHFpCEaTP2jAAJJDWsbD_IZSHQzA-jj5xr7AQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAIC9mmEplSzAmWcXsMOGWLiyfe4fY4kAAJKDWsbD_IZSCARg2AJihS7AQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAIC92mEplRyLK_6wCWxoJrMElDui_n9AAJLDWsbD_IZSNhhVjE2140VAQADAgADeQADOAQ",
+        "AgACAgIAAxkBAAIC-GmEplT5hG3jrNqODPVKzhBNF9tcAAJ7DGsbCRApSCYpcHiwCRchAQADAgADeAADOAQ"
+      ],
+      "source": {
+        "title": "ЧЕКЛАП ветклиника",
+        "username": "checklap_channel",
+        "chatId": -1002354493428,
+        "messageId": 275,
+        "chatUrl": "https://t.me/checklap_channel",
+        "postUrl": "https://t.me/checklap_channel/275"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 49,
       "text": "Некоторые уже не выдерживают тяжести этих морозов и хмурых дней. ПП12\n\n 📣 Поделиться новостью.\n\nЧат | Telegram\nНовости | Telegram\nВКонтакте\nInstagram",
       "textHTML": "Некоторые уже не выдерживают тяжести этих морозов и хмурых дней. ПП12\n\n <a href=\"https://t.me/pro_prokshino_admin_bot\">📣 Поделиться новостью.</a>\n\n<a href=\"https://t.me/pro_prokshino_chat\">Чат | Telegram</a>\n<a href=\"https://t.me/pro_prokshino\">Новости | Telegram</a>\n<a href=\"https://vk.com/pro__prokshino\">ВКонтакте</a>\n<a href=\"https://instagram.com/pro_prokshino2\">Instagram</a>",
