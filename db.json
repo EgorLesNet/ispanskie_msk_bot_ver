@@ -1,6 +1,38 @@
 {
   "posts": [
     {
+      "id": 54,
+      "text": "Старые фоточки подьехали из 2018 го))))\n\nСпасибо @ik_ira",
+      "textHTML": "Старые фоточки подьехали из 2018 го))))\n\nСпасибо @ik_ira",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-02-07T18:32:17.553Z",
+      "timestamp": "2026-02-07T18:32:17.553Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIDB2mHhTAkAZLO51XrUCGaKzOVGv-AAAIuDWsbjuNBSGGXuGao4d89AQADAgADeAADOgQ"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIDB2mHhTAkAZLO51XrUCGaKzOVGv-AAAIuDWsbjuNBSGGXuGao4d89AQADAgADeAADOgQ",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIDB2mHhTAkAZLO51XrUCGaKzOVGv-AAAIuDWsbjuNBSGGXuGao4d89AQADAgADeAADOgQ"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 9166,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/9166"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 53,
       "text": "Новая стая из двух бездомных собак появилась в районе.",
       "textHTML": "Новая стая из двух бездомных собак появилась в районе.",
