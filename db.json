@@ -31,10 +31,10 @@
       "moderationMessage": null,
       "status": "approved",
       "sourceType": "admin",
-      "likes": 1,
-      "dislikes": 0,
+      "likes": 0,
+      "dislikes": 1,
       "userReactions": {
-        "273473755": "like"
+        "273473755": "dislike"
       }
     },
     {
