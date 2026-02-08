@@ -1,6 +1,38 @@
 {
   "posts": [
     {
+      "id": 55,
+      "text": "Авария на нашем шоссе. Теряюсь в догадках, как такое возможно…",
+      "textHTML": "Авария на нашем шоссе. Теряюсь в догадках, как такое возможно…",
+      "authorId": 273473755,
+      "authorName": "fusuges",
+      "authorUsername": "fusuges",
+      "createdAt": "2026-02-08T08:15:56.583Z",
+      "timestamp": "2026-02-08T08:15:56.583Z",
+      "category": "all",
+      "media": [
+        {
+          "type": "photo",
+          "fileId": "AgACAgIAAxkBAAIDC2mIRjsAAcrzalKr8vXyTHa2gotMcQACKRVrG0keSEhxz-T58m0G5QEAAwIAA3gAAzoE"
+        }
+      ],
+      "photoFileId": "AgACAgIAAxkBAAIDC2mIRjsAAcrzalKr8vXyTHa2gotMcQACKRVrG0keSEhxz-T58m0G5QEAAwIAA3gAAzoE",
+      "photoFileIds": [
+        "AgACAgIAAxkBAAIDC2mIRjsAAcrzalKr8vXyTHa2gotMcQACKRVrG0keSEhxz-T58m0G5QEAAwIAA3gAAzoE"
+      ],
+      "source": {
+        "title": "ИСПАНСКИЕ КВАРТАЛЫ",
+        "username": "ispanskie_kvartaly_green",
+        "chatId": -1001771059611,
+        "messageId": 9170,
+        "chatUrl": "https://t.me/ispanskie_kvartaly_green",
+        "postUrl": "https://t.me/ispanskie_kvartaly_green/9170"
+      },
+      "moderationMessage": null,
+      "status": "approved",
+      "sourceType": "admin"
+    },
+    {
       "id": 54,
       "text": "Старые фоточки подьехали из 2018 го))))\n\nСпасибо @ik_ira",
       "textHTML": "Старые фоточки подьехали из 2018 го))))\n\nСпасибо @ik_ira",
